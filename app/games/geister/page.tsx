@@ -16,7 +16,7 @@ export default function GeisterModePage() {
           <p className="text-gray-100">プレイモードを選択してください</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* オンライン対戦 */}
           <Card className="hover:shadow-xl transition-shadow duration-200 border-2 border-indigo-500">
             <CardHeader>
@@ -41,8 +41,8 @@ export default function GeisterModePage() {
             </CardContent>
           </Card>
 
-          {/* ローカル対戦（未実装） */}
-          <Card className="hover:shadow-xl transition-shadow duration-200 opacity-50">
+          {/* ローカル対戦 */}
+          <Card className="hover:shadow-xl transition-shadow duration-200">
             <CardHeader>
               <h2 className="text-2xl font-bold text-gray-800">👥 ローカル対戦</h2>
             </CardHeader>
@@ -56,11 +56,35 @@ export default function GeisterModePage() {
                 • オフライン対応
               </p>
               <Button
-                variant="secondary"
+                variant="primary"
                 className="w-full"
-                disabled
+                onClick={() => router.push('/games/geister/local')}
               >
-                近日公開
+                ローカル対戦を開始
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* CPU対戦 */}
+          <Card className="hover:shadow-xl transition-shadow duration-200">
+            <CardHeader>
+              <h2 className="text-2xl font-bold text-gray-800">🤖 CPU対戦</h2>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 mb-4">
+                コンピュータと対戦
+              </p>
+              <p className="text-sm text-gray-500 mb-6">
+                • 一人プレイ<br />
+                • 強いAI<br />
+                • 練習に最適
+              </p>
+              <Button
+                variant="primary"
+                className="w-full"
+                onClick={() => router.push('/games/geister/cpu')}
+              >
+                CPU対戦を開始
               </Button>
             </CardContent>
           </Card>
