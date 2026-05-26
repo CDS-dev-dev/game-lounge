@@ -223,12 +223,11 @@ export default function GeisterCpuPage() {
             </Card>
 
             <GeisterBoard
-              state={clientState}
+              gameState={clientState}
               onPieceClick={handlePieceClick}
-              onSquareClick={handleMove}
+              onCellClick={handleMove}
               selectedPieceId={selectedPiece}
               validMoves={validMoves}
-              disabled={!isPlayerTurn || phase === 'finished'}
             />
 
             {phase === 'finished' && (

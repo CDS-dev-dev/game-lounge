@@ -279,12 +279,11 @@ export default function GeisterLocalPage() {
             </Card>
 
             <GeisterBoard
-              state={clientState}
+              gameState={clientState}
               onPieceClick={handlePieceClick}
-              onSquareClick={handleMove}
+              onCellClick={handleMove}
               selectedPieceId={selectedPiece}
               validMoves={validMoves}
-              disabled={false}
             />
 
             <div className="mt-6 text-center">
