@@ -8,7 +8,7 @@ export default function Home() {
         <h1 className="text-6xl font-bold text-white mb-6">
           ゲームラウンジ
         </h1>
-        <p className="text-xl text-gray-300 mb-12">
+        <p className="text-xl text-gray-100 mb-12">
           大人のためのオンラインボードゲームプラットフォーム
         </p>
         <Link
@@ -17,9 +17,9 @@ export default function Home() {
         >
           ゲームを始める
         </Link>
-        <div className="mt-16 text-gray-400 text-sm">
+        <div className="mt-16 text-gray-200 text-sm">
           <p>リアルタイムオンライン対戦でボードゲームを楽しもう</p>
-          <p className="mt-2 text-xs text-gray-500">v{packageJson.version}</p>
+          <p className="mt-2 text-xs text-gray-300">v{packageJson.version}</p>
         </div>
       </div>
     </div>

@@ -13,7 +13,7 @@ export default function GamesPage() {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">ゲーム選択</h1>
-          <p className="text-gray-300">オンライン対戦を始めましょう</p>
+          <p className="text-gray-100">オンライン対戦を始めましょう</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -57,7 +57,7 @@ export default function GamesPage() {
         </Card>
 
         <div className="mt-12 text-center">
-          <Link href="/" className="text-gray-300 hover:text-white underline">
+          <Link href="/" className="text-gray-200 hover:text-white underline">
             トップページに戻る
           </Link>
         </div>

@@ -13,7 +13,7 @@ export default function GeisterModePage() {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">ガイスター</h1>
-          <p className="text-gray-300">プレイモードを選択してください</p>
+          <p className="text-gray-100">プレイモードを選択してください</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -87,7 +87,7 @@ export default function GeisterModePage() {
         </Card>
 
         <div className="text-center">
-          <Link href="/games" className="text-gray-300 hover:text-white underline">
+          <Link href="/games" className="text-gray-200 hover:text-white underline">
             ゲーム選択に戻る
           </Link>
         </div>

@@ -104,7 +104,7 @@ export default function GeisterOnlinePage() {
                 <div className="flex justify-center">
                   <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-500"></div>
                 </div>
-                <p className="text-lg font-semibold text-gray-700">
+                <p className="text-lg font-semibold text-gray-900">
                   ゲームを検索しています...
                 </p>
                 <p className="text-sm text-gray-500">
@@ -118,7 +118,7 @@ export default function GeisterOnlinePage() {
                 <div className="flex justify-center">
                   <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-500"></div>
                 </div>
-                <p className="text-lg font-semibold text-gray-700">
+                <p className="text-lg font-semibold text-gray-900">
                   対戦相手を待っています...
                 </p>
                 <p className="text-sm text-gray-500">
@@ -136,7 +136,7 @@ export default function GeisterOnlinePage() {
                 <div className="flex justify-center">
                   <div className="text-green-500 text-6xl mb-4">✓</div>
                 </div>
-                <p className="text-lg font-semibold text-gray-700">
+                <p className="text-lg font-semibold text-gray-900">
                   マッチング完了！
                 </p>
                 <p className="text-sm text-gray-500">
@@ -148,7 +148,7 @@ export default function GeisterOnlinePage() {
             <div className="mt-8 pt-6 border-t">
               <Link
                 href="/games/geister"
-                className="text-gray-600 hover:text-gray-800 underline"
+                className="text-gray-700 hover:text-gray-900 underline"
               >
                 モード選択に戻る
               </Link>
