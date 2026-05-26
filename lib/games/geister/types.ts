@@ -18,20 +18,29 @@ export interface GeisterPiece {
   escaped: boolean;
 }
 
+export type GameStatus = 'waiting' | 'setup' | 'playing' | 'finished';
+
 export interface GeisterState {
+  gameId: string;
+  status: GameStatus;
   board: (GeisterPiece | null)[][];
   pieces: {
     player1: GeisterPiece[];
     player2: GeisterPiece[];
   };
-  currentPlayer: PlayerRole;
-  winner: PlayerRole | 'draw' | null;
-  winReason: WinReason | null;
-  isFinished: boolean;
-  setupComplete: {
+  currentTurn: PlayerRole;
+  players: {
+    player1: string | null; // プレイヤーのID
+    player2: string | null;
+  };
+  setupReady: {
     player1: boolean;
     player2: boolean;
   };
+  winner: PlayerRole | null;
+  winReason: WinReason | null;
+  createdAt: number;
+  updatedAt: number;
 }
 
 // クライアント用の駒情報（秘匿情報を隠す）
@@ -45,9 +54,14 @@ export interface GeisterClientPiece {
 }
 
 export interface GeisterClientState {
-  board: (GeisterClientPiece | null)[][];
-  currentPlayer: PlayerRole;
+  gameId: string;
+  status: GameStatus;
+  board: (GeisterClientPiece | null)[][]; // 視点変換済みの盤面
+  currentTurn: PlayerRole;
   myRole: PlayerRole;
+  myPlayerId: string;
+  isMyTurn: boolean;
+  canOperate: boolean; // 操作可能か
   myPieces: GeisterPiece[];
   opponentPiecesCount: {
     total: number;
@@ -59,13 +73,12 @@ export interface GeisterClientState {
     opponentGood: number;
     opponentBad: number;
   };
-  winner: PlayerRole | 'draw' | null;
-  winReason: WinReason | null;
-  isFinished: boolean;
-  setupComplete: {
+  setupReady: {
     player1: boolean;
     player2: boolean;
   };
+  winner: PlayerRole | null;
+  winReason: WinReason | null;
 }
 
 export interface PieceSetup {

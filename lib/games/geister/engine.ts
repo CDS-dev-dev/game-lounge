@@ -1,4 +1,4 @@
-// ガイスターのゲームエンジン（完全作り直し版）
+// ガイスターのゲームエンジン（オンライン対戦版）
 
 import type {
   GeisterState,
@@ -39,31 +39,90 @@ function generateBoard(pieces: GeisterPiece[]): (GeisterPiece | null)[][] {
   return board;
 }
 
+// 視点変換：player2から見た場合、盤面を180度回転
+function rotateBoardForPlayer2(board: (GeisterPiece | null)[][]): (GeisterPiece | null)[][] {
+  const rotated = createEmptyBoard();
+  for (let y = 0; y < BOARD_SIZE; y++) {
+    for (let x = 0; x < BOARD_SIZE; x++) {
+      const piece = board[y][x];
+      if (piece) {
+        // 座標を180度回転
+        const newY = BOARD_SIZE - 1 - y;
+        const newX = BOARD_SIZE - 1 - x;
+        rotated[newY][newX] = {
+          ...piece,
+          position: { x: newX, y: newY },
+        };
+      }
+    }
+  }
+  return rotated;
+}
+
 // 初期状態作成
-export function createInitialState(): GeisterState {
+export function createInitialState(gameId: string, player1Id: string): GeisterState {
   return {
+    gameId,
+    status: 'setup',
     board: createEmptyBoard(),
     pieces: {
       player1: [],
       player2: [],
     },
-    currentPlayer: 'player1',
-    winner: null,
-    winReason: null,
-    isFinished: false,
-    setupComplete: {
+    currentTurn: 'player1',
+    players: {
+      player1: player1Id,
+      player2: null,
+    },
+    setupReady: {
       player1: false,
       player2: false,
     },
+    winner: null,
+    winReason: null,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  };
+}
+
+// プレイヤー2が参加
+export function joinPlayer2(state: GeisterState, player2Id: string): GeisterState {
+  if (state.players.player2) {
+    throw new Error('既に2人揃っています');
+  }
+
+  return {
+    ...state,
+    players: {
+      ...state.players,
+      player2: player2Id,
+    },
+    updatedAt: Date.now(),
   };
 }
 
 // 駒の初期配置を設定
 export function setupPieces(
   state: GeisterState,
-  player: PlayerRole,
+  playerId: string,
   setup: PieceSetup[]
 ): GeisterState {
+  // プレイヤーのロール判定
+  const playerRole: PlayerRole | null =
+    state.players.player1 === playerId
+      ? 'player1'
+      : state.players.player2 === playerId
+      ? 'player2'
+      : null;
+
+  if (!playerRole) {
+    throw new Error('このゲームの参加者ではありません');
+  }
+
+  if (state.setupReady[playerRole]) {
+    throw new Error('既に配置完了しています');
+  }
+
   // セットアップのバリデーション
   if (setup.length !== 8) {
     throw new Error('8個の駒を配置してください');
@@ -77,7 +136,7 @@ export function setupPieces(
   }
 
   // 配置可能範囲の確認
-  const allowedRows = player === 'player1' ? PLAYER1_SETUP_ROWS : PLAYER2_SETUP_ROWS;
+  const allowedRows = playerRole === 'player1' ? PLAYER1_SETUP_ROWS : PLAYER2_SETUP_ROWS;
   for (const s of setup) {
     if (!allowedRows.includes(s.position.y) || !SETUP_COLS.includes(s.position.x)) {
       throw new Error('配置範囲外です（中央4列×2行に配置）');
@@ -95,27 +154,35 @@ export function setupPieces(
     id: s.pieceId,
     type: s.type,
     position: s.position,
-    owner: player,
+    owner: playerRole,
     captured: false,
     escaped: false,
   }));
 
   const newPieces = {
     ...state.pieces,
-    [player]: pieces,
+    [playerRole]: pieces,
   };
 
   const allPieces = [...newPieces.player1, ...newPieces.player2];
   const newBoard = generateBoard(allPieces);
 
+  const newSetupReady = {
+    ...state.setupReady,
+    [playerRole]: true,
+  };
+
+  // 両者が配置完了したらゲーム開始
+  const newStatus =
+    newSetupReady.player1 && newSetupReady.player2 ? 'playing' : 'setup';
+
   return {
     ...state,
     board: newBoard,
     pieces: newPieces,
-    setupComplete: {
-      ...state.setupComplete,
-      [player]: true,
-    },
+    setupReady: newSetupReady,
+    status: newStatus,
+    updatedAt: Date.now(),
   };
 }
 
@@ -134,16 +201,29 @@ function isEscapePosition(pos: Position, player: PlayerRole): boolean {
 // 駒が移動可能かチェック
 export function canMovePiece(
   state: GeisterState,
+  playerId: string,
   pieceId: string,
   to: Position
 ): boolean {
-  // セットアップが完了しているか
-  if (!state.setupComplete.player1 || !state.setupComplete.player2) {
+  // ゲームが進行中か
+  if (state.status !== 'playing') {
     return false;
   }
 
-  // ゲームが終了していないか
-  if (state.isFinished) {
+  // プレイヤーのロール判定
+  const playerRole: PlayerRole | null =
+    state.players.player1 === playerId
+      ? 'player1'
+      : state.players.player2 === playerId
+      ? 'player2'
+      : null;
+
+  if (!playerRole) {
+    return false;
+  }
+
+  // 自分のターンか
+  if (state.currentTurn !== playerRole) {
     return false;
   }
 
@@ -155,7 +235,7 @@ export function canMovePiece(
   }
 
   // 自分の駒か
-  if (piece.owner !== state.currentPlayer) {
+  if (piece.owner !== playerRole) {
     return false;
   }
 
@@ -211,10 +291,11 @@ export function canMovePiece(
 // 駒を移動
 export function movePiece(
   state: GeisterState,
+  playerId: string,
   pieceId: string,
   to: Position
 ): GeisterState {
-  if (!canMovePiece(state, pieceId, to)) {
+  if (!canMovePiece(state, playerId, pieceId, to)) {
     throw new Error('無効な移動です');
   }
 
@@ -243,6 +324,7 @@ export function movePiece(
       ...state,
       board: newBoard,
       pieces: newPieces,
+      updatedAt: Date.now(),
     };
 
     // 勝者判定
@@ -252,7 +334,7 @@ export function movePiece(
         ...newState,
         winner: winResult.winner,
         winReason: winResult.reason,
-        isFinished: true,
+        status: 'finished',
       };
     }
 
@@ -283,6 +365,7 @@ export function movePiece(
     ...state,
     board: newBoard,
     pieces: newPieces,
+    updatedAt: Date.now(),
   };
 
   // 勝者判定
@@ -292,7 +375,7 @@ export function movePiece(
       ...newState,
       winner: winResult.winner,
       winReason: winResult.reason,
-      isFinished: true,
+      status: 'finished',
     };
   }
 
@@ -304,7 +387,7 @@ export function movePiece(
 function switchTurn(state: GeisterState): GeisterState {
   return {
     ...state,
-    currentPlayer: state.currentPlayer === 'player1' ? 'player2' : 'player1',
+    currentTurn: state.currentTurn === 'player1' ? 'player2' : 'player1',
   };
 }
 
@@ -354,36 +437,53 @@ export function checkWinner(state: GeisterState): {
   return { winner: null, reason: null };
 }
 
-// クライアント用状態に変換（秘匿情報を隠す）
+// クライアント用状態に変換（秘匿情報を隠す＋視点変換）
 export function toClientState(
   state: GeisterState,
-  playerId: PlayerRole
+  playerId: string
 ): GeisterClientState {
-  const opponentId = playerId === 'player1' ? 'player2' : 'player1';
+  // プレイヤーのロール判定
+  const myRole: PlayerRole | null =
+    state.players.player1 === playerId
+      ? 'player1'
+      : state.players.player2 === playerId
+      ? 'player2'
+      : null;
+
+  if (!myRole) {
+    throw new Error('このゲームの参加者ではありません');
+  }
+
+  const opponentRole = myRole === 'player1' ? 'player2' : 'player1';
+
+  // 盤面を視点変換
+  let viewBoard = state.board;
+  if (myRole === 'player2') {
+    viewBoard = rotateBoardForPlayer2(state.board);
+  }
 
   // 盤面を変換（相手の駒のtypeを隠す）
-  const clientBoard = state.board.map((row) =>
+  const clientBoard = viewBoard.map((row) =>
     row.map((piece) => {
       if (!piece) return null;
       return {
         id: piece.id,
         owner: piece.owner,
         position: piece.position,
-        type: piece.owner === playerId ? piece.type : undefined, // 自分の駒のみtypeが見える
+        type: piece.owner === myRole ? piece.type : undefined,
         captured: piece.captured,
         escaped: piece.escaped,
       };
     })
   );
 
-  const opponentPieces = state.pieces[opponentId];
+  const opponentPieces = state.pieces[opponentRole];
   const opponentCaptured = opponentPieces.filter((p) => p.captured).length;
 
-  // 捕獲されたgood/badの数を計算
-  const myCapturedGood = state.pieces[playerId].filter(
+  const myCapturedGood = state.pieces[myRole].filter(
     (p) => p.type === 'good' && p.captured
   ).length;
-  const myCapturedBad = state.pieces[playerId].filter((p) => p.type === 'bad' && p.captured)
+  const myCapturedBad = state.pieces[myRole].filter((p) => p.type === 'bad' && p.captured)
     .length;
   const opponentCapturedGood = opponentPieces.filter(
     (p) => p.type === 'good' && p.captured
@@ -391,11 +491,19 @@ export function toClientState(
   const opponentCapturedBad = opponentPieces.filter((p) => p.type === 'bad' && p.captured)
     .length;
 
+  const isMyTurn = state.currentTurn === myRole;
+  const canOperate = state.status === 'playing' && isMyTurn;
+
   return {
+    gameId: state.gameId,
+    status: state.status,
     board: clientBoard,
-    currentPlayer: state.currentPlayer,
-    myRole: playerId,
-    myPieces: state.pieces[playerId],
+    currentTurn: state.currentTurn,
+    myRole,
+    myPlayerId: playerId,
+    isMyTurn,
+    canOperate,
+    myPieces: state.pieces[myRole],
     opponentPiecesCount: {
       total: opponentPieces.length,
       captured: opponentCaptured,
@@ -406,30 +514,51 @@ export function toClientState(
       opponentGood: opponentCapturedGood,
       opponentBad: opponentCapturedBad,
     },
+    setupReady: state.setupReady,
     winner: state.winner,
     winReason: state.winReason,
-    isFinished: state.isFinished,
-    setupComplete: state.setupComplete,
   };
 }
 
-// 移動可能な位置を取得
-export function getValidMoves(state: GeisterState, pieceId: string): Position[] {
+// 移動可能な位置を取得（視点変換考慮）
+export function getValidMoves(
+  state: GeisterState,
+  playerId: string,
+  pieceId: string
+): Position[] {
   const validMoves: Position[] = [];
+
+  // プレイヤーのロール判定
+  const myRole: PlayerRole | null =
+    state.players.player1 === playerId
+      ? 'player1'
+      : state.players.player2 === playerId
+      ? 'player2'
+      : null;
+
+  if (!myRole) return validMoves;
 
   const allPieces = [...state.pieces.player1, ...state.pieces.player2];
   const piece = allPieces.find((p) => p.id === pieceId);
   if (!piece) return validMoves;
 
-  // 通常の上下左右移動
+  // 通常の上下左右移動（内部座標）
   for (const dir of DIRECTIONS) {
     const newPos = {
       x: piece.position.x + dir.x,
       y: piece.position.y + dir.y,
     };
 
-    if (canMovePiece(state, pieceId, newPos)) {
-      validMoves.push(newPos);
+    if (canMovePiece(state, playerId, pieceId, newPos)) {
+      // player2の場合は表示座標に変換
+      if (myRole === 'player2') {
+        validMoves.push({
+          x: BOARD_SIZE - 1 - newPos.x,
+          y: BOARD_SIZE - 1 - newPos.y,
+        });
+      } else {
+        validMoves.push(newPos);
+      }
     }
   }
 
@@ -440,13 +569,22 @@ export function getValidMoves(state: GeisterState, pieceId: string): Position[] 
   ) {
     if (piece.owner === 'player1') {
       const escapePos = { x: piece.position.x, y: BOARD_SIZE };
-      if (canMovePiece(state, pieceId, escapePos)) {
-        validMoves.push(escapePos);
+      if (canMovePiece(state, playerId, pieceId, escapePos)) {
+        // player2の視点では上方向への脱出に見える
+        validMoves.push(
+          myRole === 'player2'
+            ? { x: BOARD_SIZE - 1 - escapePos.x, y: -1 }
+            : escapePos
+        );
       }
     } else {
       const escapePos = { x: piece.position.x, y: -1 };
-      if (canMovePiece(state, pieceId, escapePos)) {
-        validMoves.push(escapePos);
+      if (canMovePiece(state, playerId, pieceId, escapePos)) {
+        validMoves.push(
+          myRole === 'player2'
+            ? { x: BOARD_SIZE - 1 - escapePos.x, y: BOARD_SIZE }
+            : escapePos
+        );
       }
     }
   }
