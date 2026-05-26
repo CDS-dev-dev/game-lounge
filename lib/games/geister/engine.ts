@@ -63,7 +63,7 @@ function rotateBoardForPlayer2(board: (GeisterPiece | null)[][]): (GeisterPiece 
 export function createInitialState(gameId: string, player1Id: string): GeisterState {
   return {
     gameId,
-    status: 'setup',
+    status: 'waiting', // マッチング待ち状態で開始
     board: createEmptyBoard(),
     pieces: {
       player1: [],
@@ -93,6 +93,7 @@ export function joinPlayer2(state: GeisterState, player2Id: string): GeisterStat
 
   return {
     ...state,
+    status: 'setup', // 2人揃ったので配置フェーズに移行
     players: {
       ...state.players,
       player2: player2Id,
@@ -277,6 +278,18 @@ export function canMovePiece(
   const isOneStep = DIRECTIONS.some((dir) => dir.x === dx && dir.y === dy);
   if (!isOneStep) {
     return false;
+  }
+
+  // 端っこ（左右の列）は脱出口以外移動禁止
+  const isLeftEdge = to.x === 0;
+  const isRightEdge = to.x === BOARD_SIZE - 1;
+  if (isLeftEdge || isRightEdge) {
+    const escapePositions =
+      piece.owner === 'player1' ? PLAYER1_ESCAPE_POSITIONS : PLAYER2_ESCAPE_POSITIONS;
+    const isEscapeCell = escapePositions.some((pos) => pos.x === to.x && pos.y === to.y);
+    if (!isEscapeCell) {
+      return false;
+    }
   }
 
   // 移動先に自分の駒がないか
