@@ -1,8 +1,8 @@
 // ガイスターの型定義
 
-export type PieceColor = 'blue' | 'red';
+export type PieceType = 'good' | 'bad';
 export type PlayerRole = 'player1' | 'player2';
-export type WinReason = 'escape' | 'captureBlue' | 'captureRed' | 'surrender';
+export type WinReason = 'escape' | 'captureAllGood' | 'loseAllBad';
 
 export interface Position {
   x: number;
@@ -11,10 +11,11 @@ export interface Position {
 
 export interface GeisterPiece {
   id: string;
-  color: PieceColor;
+  type: PieceType; // good or bad
   position: Position;
   owner: PlayerRole;
   captured: boolean;
+  escaped: boolean;
 }
 
 export interface GeisterState {
@@ -33,13 +34,14 @@ export interface GeisterState {
   };
 }
 
-// クライアント用の状態（秘匿情報を隠す）
+// クライアント用の駒情報（秘匿情報を隠す）
 export interface GeisterClientPiece {
   id: string;
   owner: PlayerRole;
   position: Position;
-  color?: PieceColor; // 自分の駒のみ色が見える
+  type?: PieceType; // 自分の駒のみtypeが見える
   captured: boolean;
+  escaped: boolean;
 }
 
 export interface GeisterClientState {
@@ -50,6 +52,12 @@ export interface GeisterClientState {
   opponentPiecesCount: {
     total: number;
     captured: number;
+  };
+  capturedCounts: {
+    myGood: number;
+    myBad: number;
+    opponentGood: number;
+    opponentBad: number;
   };
   winner: PlayerRole | 'draw' | null;
   winReason: WinReason | null;
@@ -63,7 +71,7 @@ export interface GeisterClientState {
 export interface PieceSetup {
   pieceId: string;
   position: Position;
-  color: PieceColor;
+  type: PieceType;
 }
 
 export interface MoveData {
