@@ -1,0 +1,67 @@
+// Prisma schema for Game Lounge
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ユーザーテーブル
+model User {
+  id        String   @id @default(uuid())
+  nickname  String
+  email     String?  @unique
+  isGuest   Boolean  @default(true) @map("is_guest")
+  createdAt DateTime @default(now()) @map("created_at")
+  lastLogin DateTime? @map("last_login")
+
+  // リレーション
+  player1Sessions GameSession[] @relation("Player1Sessions")
+  player2Sessions GameSession[] @relation("Player2Sessions")
+  wonSessions     GameSession[] @relation("WonSessions")
+  moves           GameMove[]
+
+  @@map("users")
+}
+
+// ゲームセッションテーブル
+model GameSession {
+  id        String   @id @default(uuid())
+  gameType  String   @map("game_type")
+  player1Id String   @map("player1_id")
+  player2Id String   @map("player2_id")
+  gameState Json     @map("game_state")
+  status    String   // waiting, playing, finished
+  winnerId  String?  @map("winner_id")
+  startedAt DateTime @default(now()) @map("started_at")
+  endedAt   DateTime? @map("ended_at")
+
+  // リレーション
+  player1 User       @relation("Player1Sessions", fields: [player1Id], references: [id])
+  player2 User       @relation("Player2Sessions", fields: [player2Id], references: [id])
+  winner  User?      @relation("WonSessions", fields: [winnerId], references: [id])
+  moves   GameMove[]
+
+  @@index([status])
+  @@index([gameType])
+  @@map("game_sessions")
+}
+
+// ゲーム移動テーブル
+model GameMove {
+  id        String   @id @default(uuid())
+  sessionId String   @map("session_id")
+  playerId  String   @map("player_id")
+  moveData  Json     @map("move_data")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // リレーション
+  session GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  player  User        @relation(fields: [playerId], references: [id])
+
+  @@index([sessionId])
+  @@map("game_moves")
+}
