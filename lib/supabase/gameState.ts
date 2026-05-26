@@ -119,3 +119,46 @@ export async function getOrCreatePlayerId(): Promise<string> {
 export function generateGameId(): string {
   return crypto.randomUUID();
 }
+
+/**
+ * 待機中のゲームを探してマッチング、なければ新規作成
+ */
+export async function findOrCreateGame(playerId: string): Promise<string> {
+  // 待機中のゲーム（player2が未参加）を検索
+  const { data: waitingGames, error: searchError } = await supabase
+    .from('game_sessions')
+    .select('id, game_state')
+    .eq('game_type', 'geister')
+    .eq('status', 'waiting')
+    .is('player2_id', null)
+    .neq('player1_id', playerId) // 自分が作ったゲームは除外
+    .order('started_at', { ascending: true })
+    .limit(1);
+
+  if (searchError) {
+    console.error('Failed to search for waiting games:', searchError);
+    throw new Error('ゲーム検索に失敗しました');
+  }
+
+  // 待機中のゲームが見つかった場合、player2として参加
+  if (waitingGames && waitingGames.length > 0) {
+    const gameId = waitingGames[0].id;
+    const gameState = waitingGames[0].game_state as GeisterState;
+
+    // player2として参加
+    const { joinPlayer2 } = await import('../games/geister/engine');
+    const updatedState = joinPlayer2(gameState, playerId);
+
+    await saveGameSession(gameId, updatedState);
+
+    return gameId;
+  }
+
+  // 待機中のゲームがない場合、新規作成
+  const gameId = generateGameId();
+  const { createInitialState } = await import('../games/geister/engine');
+  const initialState = createInitialState(gameId, playerId);
+  await saveGameSession(gameId, initialState);
+
+  return gameId;
+}

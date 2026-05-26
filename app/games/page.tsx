@@ -4,25 +4,23 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { createInitialState } from '@/lib/games/geister/engine';
-import { generateGameId, getOrCreatePlayerId, saveGameSession } from '@/lib/supabase/gameState';
+import { findOrCreateGame, getOrCreatePlayerId } from '@/lib/supabase/gameState';
 
 export default function GamesPage() {
   const router = useRouter();
 
   const handleCreateGame = async () => {
     try {
-      const gameId = generateGameId();
       const playerId = await getOrCreatePlayerId();
 
-      const initialState = createInitialState(gameId, playerId);
-      await saveGameSession(gameId, initialState);
+      // 待機中のゲームを探すか、新規作成
+      const gameId = await findOrCreateGame(playerId);
 
       // 初期配置画面に遷移
       router.push(`/setup/${gameId}`);
     } catch (error) {
-      console.error('ゲーム作成エラー:', error);
-      alert('ゲームの作成に失敗しました');
+      console.error('マッチング エラー:', error);
+      alert('マッチングに失敗しました');
     }
   };
 
@@ -50,7 +48,7 @@ export default function GamesPage() {
                   className="w-full"
                   onClick={handleCreateGame}
                 >
-                  新規対戦を作成
+                  オンライン対戦を開始
                 </Button>
                 <Link
                   href="/games/geister/rules"
