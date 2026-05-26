@@ -4,25 +4,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { findOrCreateGame, getOrCreatePlayerId } from '@/lib/supabase/gameState';
 
 export default function GamesPage() {
   const router = useRouter();
-
-  const handleCreateGame = async () => {
-    try {
-      const playerId = await getOrCreatePlayerId();
-
-      // 待機中のゲームを探すか、新規作成
-      const gameId = await findOrCreateGame(playerId);
-
-      // 初期配置画面に遷移
-      router.push(`/setup/${gameId}`);
-    } catch (error) {
-      console.error('マッチング エラー:', error);
-      alert('マッチングに失敗しました');
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12 px-4">
@@ -46,9 +30,9 @@ export default function GamesPage() {
                 <Button
                   variant="primary"
                   className="w-full"
-                  onClick={handleCreateGame}
+                  onClick={() => router.push('/games/geister')}
                 >
-                  オンライン対戦を開始
+                  遊ぶ
                 </Button>
                 <Link
                   href="/games/geister/rules"
@@ -63,14 +47,12 @@ export default function GamesPage() {
 
         <Card className="mt-12 max-w-2xl mx-auto">
           <CardHeader>
-            <h3 className="text-xl font-bold">オンライン対戦の流れ</h3>
+            <h3 className="text-xl font-bold">遊び方</h3>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <p>1. 「新規対戦を作成」をクリック</p>
-            <p>2. 駒の配置を行う</p>
-            <p>3. 画面に表示されるゲームIDを相手に共有</p>
-            <p>4. 相手が同じゲームIDで参加</p>
-            <p>5. 両プレイヤーが配置完了したらゲーム開始！</p>
+            <p>1. 遊びたいゲームを選択</p>
+            <p>2. プレイモード（オンライン対戦など）を選択</p>
+            <p>3. ゲーム開始！</p>
           </CardContent>
         </Card>
 
