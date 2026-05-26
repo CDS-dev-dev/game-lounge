@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import packageJson from '@/package.json';
 
 export default function Home() {
   return (
@@ -19,7 +18,7 @@ export default function Home() {
         </Link>
         <div className="mt-16 text-gray-200 text-sm">
           <p>リアルタイムオンライン対戦でボードゲームを楽しもう</p>
-          <p className="mt-2 text-xs text-gray-300">v{packageJson.version}</p>
+          <p className="mt-2 text-xs text-gray-300">v0.2.0</p>
         </div>
       </div>
     </div>
