@@ -10,7 +10,12 @@ import {
   toClientState,
   getValidMoves,
 } from '@/lib/games/geister/engine';
-import { loadGameState, saveGameState, generatePlayerId } from '@/lib/gameState';
+import {
+  loadGameSession,
+  saveGameSession,
+  getOrCreatePlayerId,
+  subscribeToGameSession,
+} from '@/lib/supabase/gameState';
 import type { GeisterState, GeisterClientState, Position } from '@/lib/games/geister/types';
 import { BOARD_SIZE } from '@/lib/games/geister/constants';
 
@@ -19,43 +24,66 @@ export default function PlayPage() {
   const params = useParams();
   const gameId = params.sessionId as string;
 
-  const [playerId] = useState(() => generatePlayerId());
+  const [playerId, setPlayerId] = useState<string | null>(null);
   const [gameState, setGameState] = useState<GeisterState | null>(null);
   const [clientState, setClientState] = useState<GeisterClientState | null>(null);
   const [selectedPieceId, setSelectedPieceId] = useState<string | null>(null);
   const [validMoves, setValidMoves] = useState<Position[]>([]);
 
-  // ゲーム状態の読み込みと更新（ポーリング）
+  // ゲーム状態の読み込みとリアルタイム更新
   useEffect(() => {
-    const loadState = () => {
-      const state = loadGameState(gameId);
-      if (!state) {
-        alert('ゲームが見つかりません');
-        router.push('/games');
-        return;
-      }
-
-      setGameState(state);
-
+    const initGame = async () => {
       try {
-        const client = toClientState(state, playerId);
-        setClientState(client);
+        const pid = await getOrCreatePlayerId();
+        setPlayerId(pid);
+
+        const state = await loadGameSession(gameId);
+        if (!state) {
+          alert('ゲームが見つかりません');
+          router.push('/games');
+          return;
+        }
+
+        setGameState(state);
+
+        try {
+          const client = toClientState(state, pid);
+          setClientState(client);
+        } catch (error) {
+          console.error('クライアント状態の取得エラー:', error);
+          alert('このゲームの参加者ではありません');
+          router.push('/games');
+          return;
+        }
+
+        // リアルタイム更新を購読
+        const unsubscribe = subscribeToGameSession(gameId, (newState) => {
+          setGameState(newState);
+          try {
+            const newClient = toClientState(newState, pid);
+            setClientState(newClient);
+          } catch (error) {
+            console.error('クライアント状態の更新エラー:', error);
+          }
+        });
+
+        return unsubscribe;
       } catch (error) {
-        console.error('クライアント状態の取得エラー:', error);
-        alert('このゲームの参加者ではありません');
+        console.error('ゲーム初期化エラー:', error);
+        alert('ゲームの読み込みに失敗しました');
         router.push('/games');
       }
     };
 
-    loadState();
+    const unsubscribePromise = initGame();
 
-    // 3秒ごとにポーリング（簡易実装）
-    const interval = setInterval(loadState, 3000);
-    return () => clearInterval(interval);
-  }, [gameId, playerId, router]);
+    return () => {
+      unsubscribePromise?.then((unsub) => unsub?.());
+    };
+  }, [gameId, router]);
 
   const handlePieceClick = (pieceId: string) => {
-    if (!gameState || !clientState) return;
+    if (!gameState || !clientState || !playerId) return;
 
     // 操作可能かチェック
     if (!clientState.canOperate) {
@@ -73,8 +101,8 @@ export default function PlayPage() {
     setValidMoves(moves);
   };
 
-  const handleCellClick = (position: Position) => {
-    if (!gameState || !selectedPieceId || !clientState) return;
+  const handleCellClick = async (position: Position) => {
+    if (!gameState || !selectedPieceId || !clientState || !playerId) return;
 
     // 視点変換：表示座標を内部座標に変換
     let internalPos = position;
@@ -88,13 +116,9 @@ export default function PlayPage() {
     try {
       // 移動を適用
       const newState = movePiece(gameState, playerId, selectedPieceId, internalPos);
-      saveGameState(gameId, newState);
-      setGameState(newState);
+      await saveGameSession(gameId, newState);
 
-      // クライアント状態を更新
-      const newClientState = toClientState(newState, playerId);
-      setClientState(newClientState);
-
+      // リアルタイム更新により自動的に状態が更新される
       setSelectedPieceId(null);
       setValidMoves([]);
 

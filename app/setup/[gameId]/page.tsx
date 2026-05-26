@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { setupPieces, toClientState } from '@/lib/games/geister/engine';
-import { loadGameState, saveGameState, generatePlayerId } from '@/lib/gameState';
+import { loadGameSession, saveGameSession, getOrCreatePlayerId } from '@/lib/supabase/gameState';
 import type { PieceSetup, PieceType } from '@/lib/games/geister/types';
 import { BOARD_SIZE, SETUP_COLS } from '@/lib/games/geister/constants';
 
@@ -14,32 +14,45 @@ export default function SetupPage() {
   const params = useParams();
   const gameId = params.gameId as string;
 
-  const [playerId] = useState(() => generatePlayerId());
+  const [playerId, setPlayerId] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<PieceType>('good');
   const [setup, setSetup] = useState<PieceSetup[]>([]);
   const [myRole, setMyRole] = useState<'player1' | 'player2' | null>(null);
 
   useEffect(() => {
-    const state = loadGameState(gameId);
-    if (!state) {
-      alert('ゲームが見つかりません');
-      router.push('/games');
-      return;
-    }
+    const initSetup = async () => {
+      try {
+        const pid = await getOrCreatePlayerId();
+        setPlayerId(pid);
 
-    // 自分のロールを判定
-    if (state.players.player1 === playerId) {
-      setMyRole('player1');
-    } else if (state.players.player2 === playerId) {
-      setMyRole('player2');
-    } else {
-      alert('このゲームの参加者ではありません');
-      router.push('/games');
-    }
-  }, [gameId, playerId, router]);
+        const state = await loadGameSession(gameId);
+        if (!state) {
+          alert('ゲームが見つかりません');
+          router.push('/games');
+          return;
+        }
+
+        // 自分のロールを判定
+        if (state.players.player1 === pid) {
+          setMyRole('player1');
+        } else if (state.players.player2 === pid) {
+          setMyRole('player2');
+        } else {
+          alert('このゲームの参加者ではありません');
+          router.push('/games');
+        }
+      } catch (error) {
+        console.error('セットアップエラー:', error);
+        alert('ゲームの読み込みに失敗しました');
+        router.push('/games');
+      }
+    };
+
+    initSetup();
+  }, [gameId, router]);
 
   const handleCellClick = (x: number, y: number) => {
-    if (!myRole) return;
+    if (!myRole || !playerId) return;
 
     // 配置可能範囲チェック
     const allowedRows = myRole === 'player1' ? [0, 1] : [4, 5];
@@ -82,7 +95,9 @@ export default function SetupPage() {
     }
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    if (!playerId) return;
+
     if (setup.length !== 8) {
       alert('8個すべて配置してください');
       return;
@@ -95,14 +110,14 @@ export default function SetupPage() {
     }
 
     try {
-      const state = loadGameState(gameId);
+      const state = await loadGameSession(gameId);
       if (!state) {
         alert('ゲームが見つかりません');
         return;
       }
 
       const newState = setupPieces(state, playerId, setup);
-      saveGameState(gameId, newState);
+      await saveGameSession(gameId, newState);
 
       // 対戦画面に遷移
       router.push(`/play/${gameId}`);

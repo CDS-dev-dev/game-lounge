@@ -5,20 +5,25 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { createInitialState } from '@/lib/games/geister/engine';
-import { generateGameId, generatePlayerId, saveGameState } from '@/lib/gameState';
+import { generateGameId, getOrCreatePlayerId, saveGameSession } from '@/lib/supabase/gameState';
 
 export default function GamesPage() {
   const router = useRouter();
 
-  const handleCreateGame = () => {
-    const gameId = generateGameId();
-    const playerId = generatePlayerId();
+  const handleCreateGame = async () => {
+    try {
+      const gameId = generateGameId();
+      const playerId = await getOrCreatePlayerId();
 
-    const initialState = createInitialState(gameId, playerId);
-    saveGameState(gameId, initialState);
+      const initialState = createInitialState(gameId, playerId);
+      await saveGameSession(gameId, initialState);
 
-    // 初期配置画面に遷移
-    router.push(`/setup/${gameId}`);
+      // 初期配置画面に遷移
+      router.push(`/setup/${gameId}`);
+    } catch (error) {
+      console.error('ゲーム作成エラー:', error);
+      alert('ゲームの作成に失敗しました');
+    }
   };
 
   return (
