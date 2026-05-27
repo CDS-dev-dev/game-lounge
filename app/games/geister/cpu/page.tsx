@@ -154,16 +154,16 @@ export default function GeisterCpuPage() {
 
         {/* 配置フェーズ */}
         {phase === 'setup' && (
-          <Card>
+          <Card className="bg-white/95">
             <CardHeader>
-              <h2 className="text-2xl font-bold">駒の初期配置</h2>
+              <h2 className="text-2xl font-bold text-slate-900">駒の初期配置</h2>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-700 mb-4">
+              <p className="text-slate-700 mb-4 font-medium">
                 good（青）4個、bad（赤）4個を中央4列×2行に配置してください
               </p>
               {/* TODO: SetupComponent */}
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-slate-600 font-medium">
                 実装中：一時的に自動配置します
               </p>
               <Button
@@ -190,12 +190,12 @@ export default function GeisterCpuPage() {
 
         {/* CPU思考中 */}
         {phase === 'cpuThinking' && (
-          <Card>
+          <Card className="bg-white/95">
             <CardContent className="py-12 text-center">
               <div className="flex justify-center mb-4">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-500"></div>
               </div>
-              <p className="text-xl font-semibold text-gray-900">CPUが思考中...</p>
+              <p className="text-xl font-semibold text-slate-900">CPUが思考中...</p>
             </CardContent>
           </Card>
         )}
@@ -203,18 +203,18 @@ export default function GeisterCpuPage() {
         {/* ゲームプレイ */}
         {(phase === 'playing' || phase === 'finished') && (
           <>
-            <Card className="mb-6">
+            <Card className="mb-6 bg-white/95">
               <CardContent className="py-4">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-sm text-gray-600">現在のターン</p>
-                    <p className="text-xl font-bold text-gray-900">
+                    <p className="text-sm text-slate-600 font-medium">現在のターン</p>
+                    <p className="text-xl font-bold text-slate-900">
                       {gameState.currentTurn === 'player1' ? 'あなた' : 'CPU'}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-600">捕獲した駒</p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-sm text-slate-600 font-medium">捕獲した駒</p>
+                    <p className="text-lg font-semibold text-slate-900">
                       {clientState.opponentPiecesCount.captured} / 8
                     </p>
                   </div>
@@ -231,14 +231,14 @@ export default function GeisterCpuPage() {
             />
 
             {phase === 'finished' && (
-              <Card className="mt-6">
+              <Card className="mt-6 bg-white/95">
                 <CardHeader>
-                  <h2 className="text-3xl font-bold text-center">
+                  <h2 className="text-3xl font-bold text-center text-slate-900">
                     {gameState.winner === 'player1' ? '🎉 あなたの勝ち！' : '😢 CPUの勝ち'}
                   </h2>
                 </CardHeader>
                 <CardContent className="text-center">
-                  <p className="text-gray-700 mb-6">
+                  <p className="text-slate-700 mb-6 font-medium">
                     {gameState.winReason === 'escape' && '脱出成功！'}
                     {gameState.winReason === 'captureAllGood' && '相手のgood駒を全て捕獲！'}
                     {gameState.winReason === 'loseAllBad' && '自分のbad駒を全て取らせた！'}

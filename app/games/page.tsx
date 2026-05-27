@@ -17,15 +17,15 @@ export default function GamesPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card className="hover:shadow-xl transition-shadow duration-200">
+          <Card className="hover:shadow-xl transition-shadow duration-200 bg-white/95">
             <CardHeader>
-              <h2 className="text-2xl font-bold text-gray-800">ガイスター</h2>
+              <h2 className="text-2xl font-bold text-slate-900">ガイスター</h2>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 mb-4">
+              <p className="text-slate-700 mb-4 font-medium">
                 青と赤のオバケ駒を使った心理戦ボードゲーム
               </p>
-              <p className="text-sm text-gray-500 mb-4">プレイ人数: 2人</p>
+              <p className="text-sm text-slate-600 mb-4 font-medium">プレイ人数: 2人</p>
               <div className="flex flex-col gap-2">
                 <Button
                   variant="primary"
@@ -36,7 +36,7 @@ export default function GamesPage() {
                 </Button>
                 <Link
                   href="/games/geister/rules"
-                  className="block w-full bg-gray-200 hover:bg-gray-300 text-gray-800 text-center font-semibold px-4 py-2 rounded-lg transition-colors duration-200"
+                  className="block w-full bg-slate-200 hover:bg-slate-300 text-slate-900 text-center font-semibold px-4 py-2 rounded-lg transition-colors duration-200"
                 >
                   ルールを見る
                 </Link>
@@ -45,11 +45,11 @@ export default function GamesPage() {
           </Card>
         </div>
 
-        <Card className="mt-12 max-w-2xl mx-auto">
+        <Card className="mt-12 max-w-2xl mx-auto bg-white/95">
           <CardHeader>
-            <h3 className="text-xl font-bold">遊び方</h3>
+            <h3 className="text-xl font-bold text-slate-900">遊び方</h3>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm">
+          <CardContent className="space-y-2 text-sm text-slate-700 font-medium">
             <p>1. 遊びたいゲームを選択</p>
             <p>2. プレイモード（オンライン対戦など）を選択</p>
             <p>3. ゲーム開始！</p>
