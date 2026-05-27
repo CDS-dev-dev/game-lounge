@@ -72,6 +72,34 @@ export default function GamesPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* 中国象棋 */}
+          <Card className="hover:shadow-xl transition-shadow duration-200 bg-white/95">
+            <CardHeader>
+              <h2 className="text-2xl font-bold text-slate-900">中国象棋</h2>
+            </CardHeader>
+            <CardContent>
+              <p className="text-slate-700 mb-4 font-medium">
+                中国伝統の将棋ゲーム。楚河漢界と7種類の駒
+              </p>
+              <p className="text-sm text-slate-600 mb-4 font-medium">プレイ人数: 2人</p>
+              <div className="flex flex-col gap-2">
+                <Button
+                  variant="primary"
+                  className="w-full"
+                  onClick={() => router.push('/games/xiangqi')}
+                >
+                  遊ぶ
+                </Button>
+                <Link
+                  href="/games/xiangqi/rules"
+                  className="block w-full bg-slate-200 hover:bg-slate-300 text-slate-900 text-center font-semibold px-4 py-2 rounded-lg transition-colors duration-200"
+                >
+                  ルールを見る
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <Card className="mt-12 max-w-2xl mx-auto bg-white/95">
