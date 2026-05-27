@@ -197,7 +197,8 @@ export default function GeisterCpuPage() {
     };
   };
 
-  const clientState = createCpuClientState(gameState);
+  // setup状態の時はclientStateを作らない
+  const clientState = phase === 'setup' ? null : createCpuClientState(gameState);
   const isPlayerTurn = phase === 'playing' && gameState.currentTurn === 'player1';
 
   return (
@@ -258,7 +259,7 @@ export default function GeisterCpuPage() {
         )}
 
         {/* ゲームプレイ */}
-        {(phase === 'playing' || phase === 'finished') && (
+        {(phase === 'playing' || phase === 'finished') && clientState && (
           <>
             <Card className="mb-6 bg-white/95">
               <CardContent className="py-4">
