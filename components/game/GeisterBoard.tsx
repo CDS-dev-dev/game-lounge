@@ -54,8 +54,13 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
   return (
     <div className="inline-block bg-amber-100 p-4 rounded-lg shadow-lg">
       <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)` }}>
-        {Array.from({ length: BOARD_SIZE }).map((_, y) =>
-          Array.from({ length: BOARD_SIZE }).map((_, x) => {
+        {Array.from({ length: BOARD_SIZE }).map((_, rowIndex) => {
+          // プレイヤー視点に応じて盤面を反転（自分が常に下に来るように）
+          const y = gameState.myRole === 'player1'
+            ? BOARD_SIZE - 1 - rowIndex // player1は通常の順序（下から上）
+            : rowIndex; // player2は反転（上から下）
+
+          return Array.from({ length: BOARD_SIZE }).map((_, x) => {
             const piece = gameState.board[y][x];
             const isSelected = piece?.id === selectedPieceId;
             const isEscape = isEscapePosition(x, y);
@@ -88,8 +93,8 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
                 )}
               </div>
             );
-          })
-        )}
+          });
+        })}
       </div>
     </div>
   );
