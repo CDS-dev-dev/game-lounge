@@ -313,9 +313,9 @@ export default function GeisterLocalPage() {
             </CardHeader>
             <CardContent className="text-center">
               <p className="text-gray-700 mb-6">
-                {gameState.winReason === 'escape' && '脱出成功！'}
-                {gameState.winReason === 'captureAllGood' && '相手のgood駒を全て捕獲！'}
-                {gameState.winReason === 'loseAllBad' && '相手にbad駒を全て取らせた！'}
+                {gameState.winReason === 'escape' && '青いお化け👻の脱出成功！'}
+                {gameState.winReason === 'captureAllGood' && '相手の青いお化け👻を全て捕獲！'}
+                {gameState.winReason === 'loseAllBad' && '相手に赤い悪魔😈を全て取らせた！'}
               </p>
               <div className="flex gap-4 justify-center">
                 <Button variant="primary" onClick={handleReplay}>

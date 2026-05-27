@@ -96,7 +96,7 @@ export default function GeisterModePage() {
           </CardHeader>
           <CardContent className="text-sm space-y-2">
             <p className="text-slate-700 font-medium leading-relaxed">
-              ガイスターは、good（青）とbad（赤）のオバケ駒を使った心理戦ボードゲームです。
+              ガイスターは、青いお化け👻と赤い悪魔😈を使った心理戦ボードゲームです。
               相手の駒の種類は見えないため、ブラフや読み合いが重要になります。
             </p>
             <div className="mt-4">

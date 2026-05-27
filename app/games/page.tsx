@@ -23,7 +23,7 @@ export default function GamesPage() {
             </CardHeader>
             <CardContent>
               <p className="text-slate-700 mb-4 font-medium">
-                青と赤のオバケ駒を使った心理戦ボードゲーム
+                青いお化け👻と赤い悪魔😈を使った心理戦ボードゲーム
               </p>
               <p className="text-sm text-slate-600 mb-4 font-medium">プレイ人数: 2人</p>
               <div className="flex flex-col gap-2">

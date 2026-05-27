@@ -160,7 +160,7 @@ export default function GeisterCpuPage() {
             </CardHeader>
             <CardContent>
               <p className="text-slate-700 mb-4 font-medium">
-                good（青）4個、bad（赤）4個を中央4列×2行に配置してください
+                青いお化け👻×4、赤い悪魔😈×4を中央4列×2行に配置してください
               </p>
               {/* TODO: SetupComponent */}
               <p className="text-sm text-slate-600 font-medium">
@@ -239,9 +239,9 @@ export default function GeisterCpuPage() {
                 </CardHeader>
                 <CardContent className="text-center">
                   <p className="text-slate-700 mb-6 font-medium">
-                    {gameState.winReason === 'escape' && '脱出成功！'}
-                    {gameState.winReason === 'captureAllGood' && '相手のgood駒を全て捕獲！'}
-                    {gameState.winReason === 'loseAllBad' && '自分のbad駒を全て取らせた！'}
+                    {gameState.winReason === 'escape' && '青いお化け👻の脱出成功！'}
+                    {gameState.winReason === 'captureAllGood' && '相手の青いお化け👻を全て捕獲！'}
+                    {gameState.winReason === 'loseAllBad' && '自分の赤い悪魔😈を全て取らせた！'}
                   </p>
                   <div className="flex gap-4 justify-center">
                     <Button variant="primary" onClick={handleReplay}>

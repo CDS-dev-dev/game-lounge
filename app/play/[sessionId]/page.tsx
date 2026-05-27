@@ -129,10 +129,10 @@ export default function PlayPage() {
             newState.winner === clientState.myRole ? 'あなた' : '相手';
           const reasonText =
             newState.winReason === 'escape'
-              ? 'good駒を脱出させた'
+              ? '青いお化け👻を脱出させた'
               : newState.winReason === 'captureAllGood'
-              ? '相手のgood駒を全て取った'
-              : '自分のbad駒を全て取らせた';
+              ? '相手の青いお化け👻を全て取った'
+              : '自分の赤い悪魔😈を全て取らせた';
 
           alert(`ゲーム終了！\n勝者: ${winnerText}\n理由: ${reasonText}`);
           router.push('/games');
@@ -272,9 +272,9 @@ export default function PlayPage() {
                 <h3 className="text-lg font-bold">勝利条件</h3>
               </CardHeader>
               <CardContent className="text-sm space-y-1">
-                <p>✓ 相手のgood駒（👻）を4個全て取る</p>
-                <p>✓ 自分のbad駒（😈）を4個全て取らせる</p>
-                <p>✓ 自分のgood駒を脱出口（🚪）から脱出させる</p>
+                <p>✓ 相手の青いお化け（👻）を4個全て取る</p>
+                <p>✓ 自分の赤い悪魔（😈）を4個全て取らせる</p>
+                <p>✓ 自分の青いお化けを脱出口（🚪）から脱出させる</p>
               </CardContent>
             </Card>
           </div>
