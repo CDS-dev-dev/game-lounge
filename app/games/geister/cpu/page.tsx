@@ -16,6 +16,7 @@ import {
 import { calculateCpuMove, generateCpuSetup } from '@/lib/games/geister/ai';
 import type { GeisterState, PieceSetup, Position, GeisterClientState } from '@/lib/games/geister/types';
 import { GeisterBoard } from '@/components/game/GeisterBoard';
+import { SetupBoard } from '@/components/game/SetupBoard';
 
 type CpuGamePhase = 'setup' | 'playing' | 'cpuThinking' | 'finished';
 
@@ -31,13 +32,15 @@ export default function GeisterCpuPage() {
   );
   const [selectedPiece, setSelectedPiece] = useState<string | null>(null);
   const [validMoves, setValidMoves] = useState<Position[]>([]);
+  const [playerSetup, setPlayerSetup] = useState<PieceSetup[]>([]);
 
-  // CPU自動配置（ゲーム開始時）
+  // CPU自動参加（ゲーム開始時）
   useEffect(() => {
-    if (gameState.status === 'setup' && !gameState.players.player2) {
+    if (!gameState.players.player2) {
       // Player2としてCPUを参加させる
       const newState: GeisterState = {
         ...gameState,
+        status: 'setup',
         players: {
           ...gameState.players,
           player2: CPU_ID,
@@ -48,7 +51,7 @@ export default function GeisterCpuPage() {
   }, []);
 
   // プレイヤーの配置完了
-  const handlePlayerSetupComplete = async (setup: PieceSetup[]) => {
+  const handlePlayerSetupComplete = (setup: PieceSetup[]) => {
     try {
       let newState = setupPieces(gameState, PLAYER_ID, setup);
 
@@ -215,33 +218,17 @@ export default function GeisterCpuPage() {
           <Card className="bg-white/95">
             <CardHeader>
               <h2 className="text-2xl font-bold text-slate-900">駒の初期配置</h2>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-700 mb-4 font-medium">
+              <p className="text-sm text-slate-600 mt-2 font-medium">
                 青いお化け👻×4、赤い悪魔😈×4を中央4列×2行に配置してください
               </p>
-              {/* TODO: SetupComponent */}
-              <p className="text-sm text-slate-600 font-medium">
-                実装中：一時的に自動配置します
-              </p>
-              <Button
-                variant="primary"
-                onClick={() => {
-                  const autoSetup: PieceSetup[] = [
-                    { pieceId: 'p1', type: 'good', position: { x: 1, y: 0 } },
-                    { pieceId: 'p2', type: 'good', position: { x: 2, y: 0 } },
-                    { pieceId: 'p3', type: 'good', position: { x: 3, y: 0 } },
-                    { pieceId: 'p4', type: 'good', position: { x: 4, y: 0 } },
-                    { pieceId: 'p5', type: 'bad', position: { x: 1, y: 1 } },
-                    { pieceId: 'p6', type: 'bad', position: { x: 2, y: 1 } },
-                    { pieceId: 'p7', type: 'bad', position: { x: 3, y: 1 } },
-                    { pieceId: 'p8', type: 'bad', position: { x: 4, y: 1 } },
-                  ];
-                  handlePlayerSetupComplete(autoSetup);
-                }}
-              >
-                配置完了（仮）
-              </Button>
+            </CardHeader>
+            <CardContent>
+              <SetupBoard
+                myRole="player1"
+                setup={playerSetup}
+                onSetupChange={setPlayerSetup}
+                onComplete={handlePlayerSetupComplete}
+              />
             </CardContent>
           </Card>
         )}
