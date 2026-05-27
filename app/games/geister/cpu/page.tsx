@@ -14,7 +14,7 @@ import {
   getValidMoves,
 } from '@/lib/games/geister/engine';
 import { calculateCpuMove, generateCpuSetup } from '@/lib/games/geister/ai';
-import type { GeisterState, PieceSetup, Position } from '@/lib/games/geister/types';
+import type { GeisterState, PieceSetup, Position, GeisterClientState } from '@/lib/games/geister/types';
 import { GeisterBoard } from '@/components/game/GeisterBoard';
 
 type CpuGamePhase = 'setup' | 'playing' | 'cpuThinking' | 'finished';
@@ -140,7 +140,64 @@ export default function GeisterCpuPage() {
     setValidMoves([]);
   };
 
-  const clientState = toClientState(gameState, PLAYER_ID);
+  // CPU対戦用のクライアント状態を作成
+  const createCpuClientState = (state: GeisterState): GeisterClientState => {
+    const myRole = 'player1';
+    const opponentRole = 'player2';
+
+    // 盤面を変換（相手の駒のtypeを隠す）
+    const clientBoard = state.board.map((row) =>
+      row.map((piece) => {
+        if (!piece) return null;
+        return {
+          id: piece.id,
+          owner: piece.owner,
+          position: piece.position,
+          type: piece.owner === myRole ? piece.type : undefined,
+          captured: piece.captured,
+          escaped: piece.escaped,
+        };
+      })
+    );
+
+    const opponentPieces = state.pieces[opponentRole];
+    const opponentCaptured = opponentPieces.filter((p) => p.captured).length;
+
+    const myCapturedGood = state.pieces[myRole].filter((p) => p.type === 'good' && p.captured).length;
+    const myCapturedBad = state.pieces[myRole].filter((p) => p.type === 'bad' && p.captured).length;
+    const opponentCapturedGood = opponentPieces.filter((p) => p.type === 'good' && p.captured).length;
+    const opponentCapturedBad = opponentPieces.filter((p) => p.type === 'bad' && p.captured).length;
+
+    return {
+      gameId: state.gameId,
+      status: state.status,
+      board: clientBoard,
+      currentTurn: state.currentTurn,
+      myRole,
+      myPlayerId: PLAYER_ID,
+      myPieces: state.pieces[myRole],
+      isMyTurn: state.currentTurn === myRole,
+      canOperate: state.status === 'playing' && state.currentTurn === myRole,
+      opponentPiecesCount: {
+        total: 8,
+        captured: opponentCaptured,
+      },
+      capturedCounts: {
+        myGood: myCapturedGood,
+        myBad: myCapturedBad,
+        opponentGood: opponentCapturedGood,
+        opponentBad: opponentCapturedBad,
+      },
+      setupReady: {
+        player1: state.status !== 'setup',
+        player2: state.status !== 'setup',
+      },
+      winner: state.winner,
+      winReason: state.winReason,
+    };
+  };
+
+  const clientState = createCpuClientState(gameState);
   const isPlayerTurn = phase === 'playing' && gameState.currentTurn === 'player1';
 
   return (
