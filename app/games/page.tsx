@@ -17,6 +17,7 @@ export default function GamesPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* ガイスター */}
           <Card className="hover:shadow-xl transition-shadow duration-200 bg-white/95">
             <CardHeader>
               <h2 className="text-2xl font-bold text-slate-900">ガイスター</h2>
@@ -36,6 +37,34 @@ export default function GamesPage() {
                 </Button>
                 <Link
                   href="/games/geister/rules"
+                  className="block w-full bg-slate-200 hover:bg-slate-300 text-slate-900 text-center font-semibold px-4 py-2 rounded-lg transition-colors duration-200"
+                >
+                  ルールを見る
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 立体四目並べ */}
+          <Card className="hover:shadow-xl transition-shadow duration-200 bg-white/95">
+            <CardHeader>
+              <h2 className="text-2xl font-bold text-slate-900">立体四目並べ</h2>
+            </CardHeader>
+            <CardContent>
+              <p className="text-slate-700 mb-4 font-medium">
+                4×4×4の立体空間で4つ揃える戦略ゲーム
+              </p>
+              <p className="text-sm text-slate-600 mb-4 font-medium">プレイ人数: 2人</p>
+              <div className="flex flex-col gap-2">
+                <Button
+                  variant="primary"
+                  className="w-full"
+                  onClick={() => router.push('/games/connect4')}
+                >
+                  遊ぶ
+                </Button>
+                <Link
+                  href="/games/connect4/rules"
                   className="block w-full bg-slate-200 hover:bg-slate-300 text-slate-900 text-center font-semibold px-4 py-2 rounded-lg transition-colors duration-200"
                 >
                   ルールを見る
