@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4">
+    <div className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4 py-12 min-h-[calc(100vh-64px)]">
       <div className="max-w-4xl w-full text-center">
         <h1 className="text-6xl font-bold text-white mb-6">
           ゲームラウンジ

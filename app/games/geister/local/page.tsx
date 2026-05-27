@@ -15,6 +15,9 @@ import {
 } from '@/lib/games/geister/engine';
 import type { GeisterState, PieceSetup, Position, PlayerRole } from '@/lib/games/geister/types';
 import { GeisterBoard } from '@/components/game/GeisterBoard';
+import { SetupBoard } from '@/components/game/SetupBoard';
+import { RulesSummary } from '@/components/game/RulesSummary';
+import { useToast } from '@/components/ui/Toast';
 
 type LocalGamePhase = 'setup-p1' | 'setup-p2-interstitial' | 'setup-p2' | 'playing' | 'turnChange' | 'finished';
 
@@ -24,6 +27,7 @@ const GAME_ID = 'local-game';
 
 export default function GeisterLocalPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [phase, setPhase] = useState<LocalGamePhase>('setup-p1');
   const [gameState, setGameState] = useState<GeisterState>(() => {
     const initial = createInitialState(GAME_ID, PLAYER1_ID);
@@ -39,6 +43,8 @@ export default function GeisterLocalPage() {
   const [currentPlayer, setCurrentPlayer] = useState<PlayerRole>('player1');
   const [selectedPiece, setSelectedPiece] = useState<string | null>(null);
   const [validMoves, setValidMoves] = useState<Position[]>([]);
+  const [player1Setup, setPlayer1Setup] = useState<PieceSetup[]>([]);
+  const [player2Setup, setPlayer2Setup] = useState<PieceSetup[]>([]);
 
   // Player1の配置完了
   const handlePlayer1SetupComplete = (setup: PieceSetup[]) => {
@@ -48,7 +54,7 @@ export default function GeisterLocalPage() {
       setPhase('setup-p2-interstitial');
     } catch (error) {
       console.error('Setup error:', error);
-      alert((error as Error).message);
+      showToast((error as Error).message, 'error');
     }
   };
 
@@ -61,7 +67,7 @@ export default function GeisterLocalPage() {
       setCurrentPlayer('player1');
     } catch (error) {
       console.error('Setup error:', error);
-      alert((error as Error).message);
+      showToast((error as Error).message, 'error');
     }
   };
 
@@ -115,7 +121,7 @@ export default function GeisterLocalPage() {
       setPhase('turnChange');
     } catch (error) {
       console.error('Move error:', error);
-      alert((error as Error).message);
+      showToast((error as Error).message, 'error');
       setSelectedPiece(null);
       setValidMoves([]);
     }
@@ -154,35 +160,20 @@ export default function GeisterLocalPage() {
 
         {/* Player1配置フェーズ */}
         {phase === 'setup-p1' && (
-          <Card>
+          <Card className="bg-white/95">
             <CardHeader>
-              <h2 className="text-2xl font-bold">Player 1 - 駒の初期配置</h2>
+              <h2 className="text-2xl font-bold text-slate-900">Player 1 - 駒の初期配置</h2>
+              <p className="text-sm text-slate-600 mt-2 font-medium">
+                青いお化け👻×4、赤い悪魔😈×4を中央4列×2行（下側）に配置してください
+              </p>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-700 mb-4">
-                good（青）4個、bad（赤）4個を中央4列×2行（下側）に配置してください
-              </p>
-              <p className="text-sm text-gray-500 mb-4">
-                実装中：一時的に自動配置します
-              </p>
-              <Button
-                variant="primary"
-                onClick={() => {
-                  const autoSetup: PieceSetup[] = [
-                    { pieceId: 'p1-1', type: 'good', position: { x: 1, y: 0 } },
-                    { pieceId: 'p1-2', type: 'good', position: { x: 2, y: 0 } },
-                    { pieceId: 'p1-3', type: 'good', position: { x: 3, y: 0 } },
-                    { pieceId: 'p1-4', type: 'good', position: { x: 4, y: 0 } },
-                    { pieceId: 'p1-5', type: 'bad', position: { x: 1, y: 1 } },
-                    { pieceId: 'p1-6', type: 'bad', position: { x: 2, y: 1 } },
-                    { pieceId: 'p1-7', type: 'bad', position: { x: 3, y: 1 } },
-                    { pieceId: 'p1-8', type: 'bad', position: { x: 4, y: 1 } },
-                  ];
-                  handlePlayer1SetupComplete(autoSetup);
-                }}
-              >
-                配置完了（仮）
-              </Button>
+              <SetupBoard
+                myRole="player1"
+                setup={player1Setup}
+                onSetupChange={setPlayer1Setup}
+                onComplete={handlePlayer1SetupComplete}
+              />
             </CardContent>
           </Card>
         )}
@@ -205,35 +196,20 @@ export default function GeisterLocalPage() {
 
         {/* Player2配置フェーズ */}
         {phase === 'setup-p2' && (
-          <Card>
+          <Card className="bg-white/95">
             <CardHeader>
-              <h2 className="text-2xl font-bold">Player 2 - 駒の初期配置</h2>
+              <h2 className="text-2xl font-bold text-slate-900">Player 2 - 駒の初期配置</h2>
+              <p className="text-sm text-slate-600 mt-2 font-medium">
+                青いお化け👻×4、赤い悪魔😈×4を中央4列×2行（上側）に配置してください
+              </p>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-700 mb-4">
-                good（青）4個、bad（赤）4個を中央4列×2行（上側）に配置してください
-              </p>
-              <p className="text-sm text-gray-500 mb-4">
-                実装中：一時的に自動配置します
-              </p>
-              <Button
-                variant="primary"
-                onClick={() => {
-                  const autoSetup: PieceSetup[] = [
-                    { pieceId: 'p2-1', type: 'good', position: { x: 1, y: 4 } },
-                    { pieceId: 'p2-2', type: 'good', position: { x: 2, y: 4 } },
-                    { pieceId: 'p2-3', type: 'good', position: { x: 3, y: 4 } },
-                    { pieceId: 'p2-4', type: 'good', position: { x: 4, y: 4 } },
-                    { pieceId: 'p2-5', type: 'bad', position: { x: 1, y: 5 } },
-                    { pieceId: 'p2-6', type: 'bad', position: { x: 2, y: 5 } },
-                    { pieceId: 'p2-7', type: 'bad', position: { x: 3, y: 5 } },
-                    { pieceId: 'p2-8', type: 'bad', position: { x: 4, y: 5 } },
-                  ];
-                  handlePlayer2SetupComplete(autoSetup);
-                }}
-              >
-                配置完了（仮）
-              </Button>
+              <SetupBoard
+                myRole="player2"
+                setup={player2Setup}
+                onSetupChange={setPlayer2Setup}
+                onComplete={handlePlayer2SetupComplete}
+              />
             </CardContent>
           </Card>
         )}
@@ -259,24 +235,29 @@ export default function GeisterLocalPage() {
         {/* ゲームプレイ */}
         {phase === 'playing' && clientState && (
           <>
-            <Card className="mb-6">
+            <Card className="mb-6 bg-white/95">
               <CardContent className="py-4">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-sm text-gray-600">現在のターン</p>
-                    <p className="text-xl font-bold text-gray-900">
+                    <p className="text-sm text-slate-600 font-medium">現在のターン</p>
+                    <p className="text-xl font-bold text-slate-900">
                       Player {currentPlayer === 'player1' ? '1' : '2'}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-600">捕獲した駒</p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-sm text-slate-600 font-medium">捕獲した駒</p>
+                    <p className="text-lg font-semibold text-slate-900">
                       {clientState.capturedCounts.opponentGood + clientState.capturedCounts.opponentBad} / 8
                     </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
+
+            {/* ルール概要 */}
+            <div className="mb-6">
+              <RulesSummary />
+            </div>
 
             <GeisterBoard
               gameState={clientState}

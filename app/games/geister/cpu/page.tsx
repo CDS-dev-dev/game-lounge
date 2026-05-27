@@ -17,6 +17,8 @@ import { calculateCpuMove, generateCpuSetup } from '@/lib/games/geister/ai';
 import type { GeisterState, PieceSetup, Position, GeisterClientState } from '@/lib/games/geister/types';
 import { GeisterBoard } from '@/components/game/GeisterBoard';
 import { SetupBoard } from '@/components/game/SetupBoard';
+import { RulesSummary } from '@/components/game/RulesSummary';
+import { useToast } from '@/components/ui/Toast';
 
 type CpuGamePhase = 'setup' | 'playing' | 'cpuThinking' | 'finished';
 
@@ -26,6 +28,7 @@ const GAME_ID = 'cpu-game';
 
 export default function GeisterCpuPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [phase, setPhase] = useState<CpuGamePhase>('setup');
   const [gameState, setGameState] = useState<GeisterState>(() =>
     createInitialState(GAME_ID, PLAYER_ID)
@@ -69,7 +72,7 @@ export default function GeisterCpuPage() {
       setPhase('playing');
     } catch (error) {
       console.error('Setup error:', error);
-      alert((error as Error).message);
+      showToast((error as Error).message, 'error');
     }
   };
 
@@ -266,6 +269,11 @@ export default function GeisterCpuPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* ルール概要 */}
+            <div className="mb-6">
+              <RulesSummary />
+            </div>
 
             <GeisterBoard
               gameState={clientState}

@@ -18,6 +18,7 @@ import {
 } from '@/lib/supabase/gameState';
 import type { GeisterState, GeisterClientState, Position } from '@/lib/games/geister/types';
 import { BOARD_SIZE } from '@/lib/games/geister/constants';
+import { RulesSummary } from '@/components/game/RulesSummary';
 
 export default function PlayPage() {
   const router = useRouter();
@@ -267,16 +268,9 @@ export default function PlayPage() {
             </div>
 
             {/* ルール簡易説明 */}
-            <Card className="max-w-md">
-              <CardHeader>
-                <h3 className="text-lg font-bold">勝利条件</h3>
-              </CardHeader>
-              <CardContent className="text-sm space-y-1">
-                <p>✓ 相手の青いお化け（👻）を4個全て取る</p>
-                <p>✓ 自分の赤い悪魔（😈）を4個全て取らせる</p>
-                <p>✓ 自分の青いお化けを脱出口（🚪）から脱出させる</p>
-              </CardContent>
-            </Card>
+            <div className="max-w-md">
+              <RulesSummary />
+            </div>
           </div>
 
           {/* 右サイド: 自分情報 */}
