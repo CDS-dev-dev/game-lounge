@@ -173,16 +173,18 @@ export default function XiangqiCpuPage() {
           </Card>
         )}
 
-        {/* CPU思考中 */}
+        {/* CPU思考中インジケーター（固定オーバーレイ） */}
         {phase === 'cpuThinking' && (
-          <Card className="bg-white/95 mb-6">
-            <CardContent className="py-12 text-center">
-              <div className="flex justify-center mb-4">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-500"></div>
-              </div>
-              <p className="text-xl font-semibold text-slate-900">CPUが思考中...</p>
-            </CardContent>
-          </Card>
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <Card className="bg-white/95">
+              <CardContent className="py-6 px-8 text-center">
+                <div className="flex justify-center mb-3">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+                </div>
+                <p className="text-lg font-semibold text-slate-900">CPUが思考中...</p>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {/* ゲームプレイ */}

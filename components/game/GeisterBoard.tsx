@@ -91,7 +91,7 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [focusedCell, gameState.canOperate, selectedPieceId]);
 
-  const getPieceDisplay = (piece: any) => {
+  const getPieceDisplay = (piece: NonNullable<GeisterClientState['board'][number][number]>) => {
     if (piece.owner === gameState.myRole) {
       // 自分の駒：typeが見える
       return piece.type === 'good' ? '👻' : '😈';

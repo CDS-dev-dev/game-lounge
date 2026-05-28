@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import type { PieceSetup, Position, PlayerRole } from '@/lib/games/geister/types';
 import { BOARD_SIZE, SETUP_COLS } from '@/lib/games/geister/constants';
 import { Button } from '@/components/ui/Button';
+import { useToast } from '@/components/ui/Toast';
 
 interface SetupBoardProps {
   myRole: PlayerRole;
@@ -22,6 +23,7 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
   onTimeout,
   onComplete,
 }) => {
+  const { showToast } = useToast();
   const [selectedType, setSelectedType] = useState<'good' | 'bad'>('good');
   const [remainingTime, setRemainingTime] = useState(timeLimit || 0);
   const [isTimedOut, setIsTimedOut] = useState(false);
@@ -114,12 +116,12 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
 
   const handleCompleteClick = () => {
     if (setup.length !== 8) {
-      alert('8個すべて配置してください');
+      showToast('8個すべて配置してください', 'error');
       return;
     }
 
     if (goodCount !== 4 || badCount !== 4) {
-      alert('good 4個、bad 4個を配置してください');
+      showToast('good 4個、bad 4個を配置してください', 'error');
       return;
     }
 

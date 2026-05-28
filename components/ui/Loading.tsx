@@ -1,16 +1,37 @@
-// ローディングコンポーネント
+// 共通ローディングコンポーネント
+
+'use client';
 
 import React from 'react';
+import { Card, CardContent } from './Card';
 
 interface LoadingProps {
-  text?: string;
+  message?: string;
+  fullScreen?: boolean;
 }
 
-export const Loading: React.FC<LoadingProps> = ({ text = '読み込み中...' }) => {
-  return (
-    <div className="flex flex-col items-center justify-center py-8">
-      <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-      <p className="mt-4 text-gray-600">{text}</p>
-    </div>
+export const Loading: React.FC<LoadingProps> = ({
+  message = '読み込み中...',
+  fullScreen = false,
+}) => {
+  const content = (
+    <Card className={fullScreen ? 'bg-white/95' : ''}>
+      <CardContent className="py-12 text-center">
+        <div className="flex justify-center mb-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+        </div>
+        <p className="text-slate-900 text-lg font-semibold">{message}</p>
+      </CardContent>
+    </Card>
   );
+
+  if (fullScreen) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4">
+        {content}
+      </div>
+    );
+  }
+
+  return content;
 };
