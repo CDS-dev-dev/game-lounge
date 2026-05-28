@@ -2,7 +2,7 @@
 
 export type PieceType = 'good' | 'bad';
 export type PlayerRole = 'player1' | 'player2';
-export type WinReason = 'escape' | 'captureAllGood' | 'loseAllBad';
+export type WinReason = 'escape' | 'captureAllGood' | 'loseAllBad' | 'draw';
 
 export interface Position {
   x: number;
@@ -39,6 +39,7 @@ export interface GeisterState {
   };
   winner: PlayerRole | null;
   winReason: WinReason | null;
+  moveCount: number; // 手数カウント（引き分け判定用）
   createdAt: number;
   updatedAt: number;
 }

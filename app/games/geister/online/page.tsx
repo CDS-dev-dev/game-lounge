@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { useToast } from '@/components/ui/Toast';
 import {
   findOrCreateGame,
   getOrCreatePlayerId,
@@ -16,6 +17,7 @@ type MatchingStatus = 'searching' | 'waiting' | 'matched';
 
 export default function GeisterOnlinePage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [matchingStatus, setMatchingStatus] = useState<MatchingStatus>('searching');
   const [gameId, setGameId] = useState<string | null>(null);
 
@@ -86,7 +88,7 @@ export default function GeisterOnlinePage() {
       }
     } catch (error) {
       console.error('マッチング エラー:', error);
-      alert('マッチングに失敗しました');
+      showToast('マッチングに失敗しました。もう一度お試しください', 'error');
       setMatchingStatus('searching');
     }
   };

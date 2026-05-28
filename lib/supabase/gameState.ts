@@ -1,45 +1,68 @@
 import { supabase } from './client';
 import type { GeisterState } from '../games/geister/types';
+import { withRetry, isNetworkError } from '../utils/retry';
 
 /**
- * ゲームセッションをSupabaseに保存
+ * ゲームセッションをSupabaseに保存（リトライ付き）
  */
 export async function saveGameSession(gameId: string, state: GeisterState): Promise<void> {
-  const { error } = await supabase
-    .from('game_sessions')
-    .upsert({
-      id: gameId,
-      game_type: 'geister',
-      player1_id: state.players.player1,
-      player2_id: state.players.player2,
-      game_state: state,
-      status: state.status,
-      winner_id: state.winner ? state.players[state.winner] : null,
-      updated_at: new Date().toISOString(),
-    });
+  await withRetry(
+    async () => {
+      const { error } = await supabase
+        .from('game_sessions')
+        .upsert({
+          id: gameId,
+          game_type: 'geister',
+          player1_id: state.players.player1,
+          player2_id: state.players.player2,
+          game_state: state,
+          status: state.status,
+          winner_id: state.winner ? state.players[state.winner] : null,
+          updated_at: new Date().toISOString(),
+        });
 
-  if (error) {
-    console.error('Failed to save game session:', error);
-    throw new Error('ゲームの保存に失敗しました');
-  }
+      if (error) {
+        console.error('Failed to save game session:', error);
+        throw new Error('ゲームの保存に失敗しました');
+      }
+    },
+    {
+      maxRetries: 3,
+      delayMs: 1000,
+      onRetry: (attempt) => {
+        console.log(`ゲーム保存をリトライ中... (${attempt}/3)`);
+      },
+    }
+  );
 }
 
 /**
- * ゲームセッションをSupabaseから読み込み
+ * ゲームセッションをSupabaseから読み込み（リトライ付き）
  */
 export async function loadGameSession(gameId: string): Promise<GeisterState | null> {
-  const { data, error } = await supabase
-    .from('game_sessions')
-    .select('game_state')
-    .eq('id', gameId)
-    .single();
+  return await withRetry(
+    async () => {
+      const { data, error } = await supabase
+        .from('game_sessions')
+        .select('game_state')
+        .eq('id', gameId)
+        .single();
 
-  if (error) {
-    console.error('Failed to load game session:', error);
-    return null;
-  }
+      if (error) {
+        console.error('Failed to load game session:', error);
+        throw new Error('ゲームの読み込みに失敗しました');
+      }
 
-  return data?.game_state as GeisterState;
+      return data?.game_state as GeisterState;
+    },
+    {
+      maxRetries: 3,
+      delayMs: 1000,
+      onRetry: (attempt) => {
+        console.log(`ゲーム読み込みをリトライ中... (${attempt}/3)`);
+      },
+    }
+  ).catch(() => null);
 }
 
 /**

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Card, CardHeader, CardContent } from '@/components/ui/Card';
+import { useToast } from '@/components/ui/Toast';
 import { setupPieces } from '@/lib/games/geister/engine';
 import { loadGameSession, saveGameSession, getOrCreatePlayerId } from '@/lib/supabase/gameState';
 import type { PieceSetup, PlayerRole } from '@/lib/games/geister/types';
@@ -14,6 +15,7 @@ export default function SetupPage() {
   const router = useRouter();
   const params = useParams();
   const gameId = params.gameId as string;
+  const { showToast } = useToast();
 
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [setup, setSetup] = useState<PieceSetup[]>([]);
@@ -27,7 +29,7 @@ export default function SetupPage() {
 
         const state = await loadGameSession(gameId);
         if (!state) {
-          alert('ゲームが見つかりません');
+          showToast('ゲームが見つかりません', 'error');
           router.push('/games');
           return;
         }
@@ -38,18 +40,18 @@ export default function SetupPage() {
         } else if (state.players.player2 === pid) {
           setMyRole('player2');
         } else {
-          alert('このゲームの参加者ではありません');
+          showToast('このゲームの参加者ではありません', 'error');
           router.push('/games');
         }
       } catch (error) {
         console.error('セットアップエラー:', error);
-        alert('ゲームの読み込みに失敗しました');
+        showToast('ゲームの読み込みに失敗しました', 'error');
         router.push('/games');
       }
     };
 
     initSetup();
-  }, [gameId, router]);
+  }, [gameId, router, showToast]);
 
   const handleComplete = async (finalSetup: PieceSetup[]) => {
     if (!playerId) return;
@@ -57,18 +59,19 @@ export default function SetupPage() {
     try {
       const state = await loadGameSession(gameId);
       if (!state) {
-        alert('ゲームが見つかりません');
+        showToast('ゲームが見つかりません', 'error');
         return;
       }
 
       const newState = setupPieces(state, playerId, finalSetup);
       await saveGameSession(gameId, newState);
 
+      showToast('配置完了！対戦画面に移動します', 'success');
       // 対戦画面に遷移
-      router.push(`/play/${gameId}`);
+      setTimeout(() => router.push(`/play/${gameId}`), 1000);
     } catch (error) {
       console.error('配置エラー:', error);
-      alert(error instanceof Error ? error.message : '配置に失敗しました');
+      showToast(error instanceof Error ? error.message : '配置に失敗しました', 'error');
     }
   };
 
@@ -85,22 +88,22 @@ export default function SetupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 sm:py-8 px-2 sm:px-4">
       <div className="max-w-4xl mx-auto">
-        <Card className="mb-6">
+        <Card className="mb-3 sm:mb-6">
           <CardHeader>
-            <h1 className="text-4xl font-bold text-center">駒の配置</h1>
+            <h1 className="text-2xl sm:text-4xl font-bold text-center">駒の配置</h1>
           </CardHeader>
           <CardContent>
-            <div className="text-center mb-6">
-              <p className="text-lg text-gray-700">
+            <div className="text-center mb-3 sm:mb-6">
+              <p className="text-base sm:text-lg text-gray-700">
                 あなたは{' '}
                 <span className="font-bold text-indigo-600">
                   {myRole === 'player1' ? 'プレイヤー1' : 'プレイヤー2'}
                 </span>{' '}
                 です
               </p>
-              <p className="text-sm text-gray-600 mt-2">
+              <p className="text-xs sm:text-sm text-gray-600 mt-2">
                 good 4個、bad 4個を自陣に配置してください（制限時間: 1分）
               </p>
             </div>

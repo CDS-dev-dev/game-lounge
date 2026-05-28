@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { GeisterBoard } from '@/components/game/GeisterBoard';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
+import { useToast } from '@/components/ui/Toast';
 import {
   movePiece,
   toClientState,
@@ -24,6 +25,7 @@ export default function PlayPage() {
   const router = useRouter();
   const params = useParams();
   const gameId = params.sessionId as string;
+  const { showToast } = useToast();
 
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [gameState, setGameState] = useState<GeisterState | null>(null);
@@ -40,7 +42,7 @@ export default function PlayPage() {
 
         const state = await loadGameSession(gameId);
         if (!state) {
-          alert('ゲームが見つかりません');
+          showToast('ゲームが見つかりません', 'error');
           router.push('/games');
           return;
         }
@@ -52,7 +54,7 @@ export default function PlayPage() {
           setClientState(client);
         } catch (error) {
           console.error('クライアント状態の取得エラー:', error);
-          alert('このゲームの参加者ではありません');
+          showToast('このゲームの参加者ではありません', 'error');
           router.push('/games');
           return;
         }
@@ -71,7 +73,7 @@ export default function PlayPage() {
         return unsubscribe;
       } catch (error) {
         console.error('ゲーム初期化エラー:', error);
-        alert('ゲームの読み込みに失敗しました');
+        showToast('ゲームの読み込みに失敗しました', 'error');
         router.push('/games');
       }
     };
@@ -135,20 +137,27 @@ export default function PlayPage() {
               ? '相手の青いお化け👻を全て取った'
               : '自分の赤い悪魔😈を全て取らせた';
 
-          alert(`ゲーム終了！\n勝者: ${winnerText}\n理由: ${reasonText}`);
-          router.push('/games');
+          showToast(`ゲーム終了！勝者: ${winnerText} | ${reasonText}`, 'success');
+          setTimeout(() => router.push('/games'), 2000);
         }, 500);
       }
     } catch (error) {
       console.error('移動エラー:', error);
-      alert(error instanceof Error ? error.message : '無効な移動です');
+      showToast(error instanceof Error ? error.message : '無効な移動です', 'error');
     }
   };
 
   if (!clientState || !gameState) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <p className="text-white text-xl">ゲームを読み込み中...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4">
+        <Card className="text-center">
+          <CardContent className="py-12">
+            <div className="flex justify-center mb-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+            </div>
+            <p className="text-slate-900 text-lg font-semibold">ゲームを読み込み中...</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -194,40 +203,40 @@ export default function PlayPage() {
   const opponentRole = clientState.myRole === 'player1' ? 'player2' : 'player1';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 sm:py-8 px-2 sm:px-4">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold text-white text-center mb-6">
+        <h1 className="text-2xl sm:text-4xl font-bold text-white text-center mb-3 sm:mb-6">
           ガイスター（オンライン対戦）
         </h1>
 
-        <div className="text-white text-center mb-4">
-          <p className="text-sm bg-white/10 px-4 py-2 rounded inline-block">
-            ゲームID: <span className="font-mono font-bold">{gameId}</span>
+        <div className="text-white text-center mb-3 sm:mb-4">
+          <p className="text-xs sm:text-sm bg-white/10 px-3 sm:px-4 py-1 sm:py-2 rounded inline-block">
+            ゲームID: <span className="font-mono font-bold text-xs sm:text-sm">{gameId.slice(0, 8)}...</span>
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-6">
           {/* 左サイド: 相手情報 */}
-          <div className="space-y-4">
-            <Card className={!clientState.isMyTurn ? 'ring-4 ring-yellow-500' : ''}>
+          <div className="space-y-2 sm:space-y-4">
+            <Card className={!clientState.isMyTurn ? 'ring-2 sm:ring-4 ring-yellow-500' : ''}>
               <CardHeader>
-                <h2 className="text-xl font-bold">相手</h2>
-                <p className="text-sm text-gray-600">
+                <h2 className="text-lg sm:text-xl font-bold">相手</h2>
+                <p className="text-xs sm:text-sm text-gray-600">
                   ({opponentRole})
                 </p>
               </CardHeader>
               <CardContent>
-                <p className="text-sm font-semibold">
+                <p className="text-xs sm:text-sm font-semibold">
                   {!clientState.isMyTurn ? '🟡 相手のターン' : '⚪ 待機中'}
                 </p>
-                <div className="mt-3 text-sm space-y-1">
+                <div className="mt-2 sm:mt-3 text-xs sm:text-sm space-y-1">
                   <p>
                     残り駒:{' '}
                     {clientState.opponentPiecesCount.total -
                       clientState.opponentPiecesCount.captured}{' '}
                     / 8
                   </p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-[10px] sm:text-xs text-gray-600">
                     捕獲した駒: {clientState.opponentPiecesCount.captured}
                   </p>
                 </div>
@@ -236,9 +245,9 @@ export default function PlayPage() {
           </div>
 
           {/* 中央: ゲーム盤面 */}
-          <div className="lg:col-span-2 flex flex-col items-center space-y-4">
-            <div className="bg-white/10 px-6 py-3 rounded-lg">
-              <p className="text-white text-lg font-semibold text-center">
+          <div className="lg:col-span-2 flex flex-col items-center space-y-2 sm:space-y-4">
+            <div className="bg-white/10 px-3 sm:px-6 py-2 sm:py-3 rounded-lg">
+              <p className="text-white text-sm sm:text-lg font-semibold text-center">
                 {clientState.isMyTurn ? '🟢 あなたのターン' : '⏳ 相手のターンを待っています'}
               </p>
             </div>
@@ -253,48 +262,48 @@ export default function PlayPage() {
 
             <div className="text-white text-center">
               {selectedPieceId ? (
-                <p className="text-sm bg-indigo-600 px-4 py-2 rounded">
+                <p className="text-xs sm:text-sm bg-indigo-600 px-3 sm:px-4 py-1.5 sm:py-2 rounded">
                   駒を選択中。移動先（緑色）をクリックしてください。
                 </p>
               ) : clientState.canOperate ? (
-                <p className="text-sm bg-white/10 px-4 py-2 rounded">
+                <p className="text-xs sm:text-sm bg-white/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded">
                   自分の駒をクリックして選択してください
                 </p>
               ) : (
-                <p className="text-sm bg-white/10 px-4 py-2 rounded">
+                <p className="text-xs sm:text-sm bg-white/10 px-3 sm:px-4 py-1.5 sm:py-2 rounded">
                   相手のターンです
                 </p>
               )}
             </div>
 
             {/* ルール簡易説明 */}
-            <div className="max-w-md">
+            <div className="max-w-md w-full">
               <RulesSummary />
             </div>
           </div>
 
           {/* 右サイド: 自分情報 */}
-          <div className="space-y-4">
-            <Card className={clientState.isMyTurn ? 'ring-4 ring-green-500' : ''}>
+          <div className="space-y-2 sm:space-y-4">
+            <Card className={clientState.isMyTurn ? 'ring-2 sm:ring-4 ring-green-500' : ''}>
               <CardHeader>
-                <h2 className="text-xl font-bold">あなた</h2>
-                <p className="text-sm text-gray-600">
+                <h2 className="text-lg sm:text-xl font-bold">あなた</h2>
+                <p className="text-xs sm:text-sm text-gray-600">
                   ({clientState.myRole})
                 </p>
               </CardHeader>
               <CardContent>
-                <p className="text-sm font-semibold">
+                <p className="text-xs sm:text-sm font-semibold">
                   {clientState.isMyTurn ? '🟢 あなたのターン' : '⚪ 待機中'}
                 </p>
-                <div className="mt-3 text-sm space-y-1">
+                <div className="mt-2 sm:mt-3 text-xs sm:text-sm space-y-1">
                   <p>
                     残り駒:{' '}
                     {clientState.myPieces.filter((p) => !p.captured && !p.escaped).length} / 8
                   </p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-[10px] sm:text-xs text-gray-600">
                     捕獲されたgood: {clientState.capturedCounts.myGood}
                   </p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-[10px] sm:text-xs text-gray-600">
                     捕獲されたbad: {clientState.capturedCounts.myBad}
                   </p>
                 </div>
@@ -304,7 +313,7 @@ export default function PlayPage() {
             <div className="space-y-2">
               <Button
                 variant="secondary"
-                className="w-full"
+                className="w-full text-sm sm:text-base"
                 onClick={() => router.push('/games')}
               >
                 ゲーム選択に戻る

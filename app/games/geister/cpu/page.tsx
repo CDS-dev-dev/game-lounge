@@ -131,7 +131,7 @@ export default function GeisterCpuPage() {
       setPhase('playing');
     } catch (error) {
       console.error('Move error:', error);
-      alert((error as Error).message);
+      showToast((error as Error).message, 'error');
       setSelectedPiece(null);
       setValidMoves([]);
       setPhase('playing');
