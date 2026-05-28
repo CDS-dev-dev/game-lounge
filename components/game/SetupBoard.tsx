@@ -210,18 +210,22 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 sm:p-4 text-xs sm:text-sm text-blue-900">
         <p className="font-semibold mb-1 sm:mb-2">💡 操作方法</p>
         <ul className="space-y-0.5 sm:space-y-1 list-disc list-inside">
-          <li>緑色のマスをクリックして駒を配置</li>
+          <li>盤面の<strong>下側2行（緑色）</strong>に駒を配置</li>
           <li>配置済みの駒をクリックして種類を変更（👻 ⇔ 😈）</li>
           <li>上のボタンで配置する駒の種類を選択</li>
         </ul>
       </div>
 
       {/* 盤面 */}
-      <div className="flex justify-center overflow-x-auto">
-        <div className="inline-block bg-amber-100 p-2 sm:p-4 rounded-lg shadow-lg">
+      <div className="flex justify-center">
+        <div className="inline-block bg-amber-100 p-2 sm:p-4 rounded-lg shadow-lg max-w-full">
           <div className="grid gap-0.5 sm:gap-1" style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)` }}>
-            {Array.from({ length: BOARD_SIZE }).map((_, y) =>
-              Array.from({ length: BOARD_SIZE }).map((_, x) => {
+            {Array.from({ length: BOARD_SIZE }).map((_, rowIndex) => {
+              // player1（自分が下）の場合: y=5,4,3,2,1,0（上から下に描画）
+              // player2（自分が上）の場合: y=0,1,2,3,4,5（上から下に描画）
+              const y = myRole === 'player1' ? BOARD_SIZE - 1 - rowIndex : rowIndex;
+
+              return Array.from({ length: BOARD_SIZE }).map((_, x) => {
                 const piece = getPieceAtPosition(x, y);
                 const isAllowed = allowedRows.includes(y) && SETUP_COLS.includes(x);
 
@@ -230,7 +234,7 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
                     key={`${x}-${y}`}
                     onClick={() => isAllowed && handleCellClick(x, y)}
                     className={`
-                      w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center border-2 transition-all
+                      w-10 h-10 sm:w-16 sm:h-16 flex items-center justify-center border-2 transition-all
                       ${
                         isAllowed
                           ? 'bg-green-100 border-green-300 cursor-pointer hover:bg-green-200'
@@ -247,8 +251,8 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
                     )}
                   </div>
                 );
-              })
-            )}
+              });
+            })}
           </div>
         </div>
       </div>
