@@ -34,8 +34,23 @@ export default function XiangqiRulesPage() {
               {/* 帥/将 */}
               <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
                 <h3 className="font-bold text-lg text-red-900 mb-2">帥/将（King）</h3>
+                <div className="flex gap-4 items-center mb-2">
+                  <div className="grid grid-cols-3 gap-1 bg-amber-100 p-2 rounded">
+                    <div className="w-8 h-8 border border-gray-400"></div>
+                    <div className="w-8 h-8 border border-gray-400 bg-yellow-200 flex items-center justify-center text-xs">↑</div>
+                    <div className="w-8 h-8 border border-gray-400"></div>
+                    <div className="w-8 h-8 border border-gray-400 bg-yellow-200 flex items-center justify-center text-xs">←</div>
+                    <div className="w-8 h-8 border-2 border-red-600 bg-red-100 flex items-center justify-center font-bold">帥</div>
+                    <div className="w-8 h-8 border border-gray-400 bg-yellow-200 flex items-center justify-center text-xs">→</div>
+                    <div className="w-8 h-8 border border-gray-400"></div>
+                    <div className="w-8 h-8 border border-gray-400 bg-yellow-200 flex items-center justify-center text-xs">↓</div>
+                    <div className="w-8 h-8 border border-gray-400"></div>
+                  </div>
+                  <p className="text-xs text-red-800 font-medium flex-1">
+                    九宮内で<br/>縦横1マスのみ
+                  </p>
+                </div>
                 <p className="text-sm text-red-800 font-medium">
-                  • 九宮内で縦横1マス<br />
                   • 九宮から出られない<br />
                   • 対面禁止：相手の将と向き合えない
                 </p>
@@ -44,8 +59,23 @@ export default function XiangqiRulesPage() {
               {/* 仕/士 */}
               <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-4">
                 <h3 className="font-bold text-lg text-orange-900 mb-2">仕/士（Advisor）</h3>
+                <div className="flex gap-4 items-center mb-2">
+                  <div className="grid grid-cols-3 gap-1 bg-amber-100 p-2 rounded">
+                    <div className="w-8 h-8 border border-gray-400 bg-yellow-200 flex items-center justify-center text-xs">↖</div>
+                    <div className="w-8 h-8 border border-gray-400"></div>
+                    <div className="w-8 h-8 border border-gray-400 bg-yellow-200 flex items-center justify-center text-xs">↗</div>
+                    <div className="w-8 h-8 border border-gray-400"></div>
+                    <div className="w-8 h-8 border-2 border-orange-600 bg-orange-100 flex items-center justify-center font-bold">士</div>
+                    <div className="w-8 h-8 border border-gray-400"></div>
+                    <div className="w-8 h-8 border border-gray-400 bg-yellow-200 flex items-center justify-center text-xs">↙</div>
+                    <div className="w-8 h-8 border border-gray-400"></div>
+                    <div className="w-8 h-8 border border-gray-400 bg-yellow-200 flex items-center justify-center text-xs">↘</div>
+                  </div>
+                  <p className="text-xs text-orange-800 font-medium flex-1">
+                    九宮内で<br/>斜め1マスのみ
+                  </p>
+                </div>
                 <p className="text-sm text-orange-800 font-medium">
-                  • 九宮内で斜め1マス<br />
                   • 九宮から出られない<br />
                   • 各陣営2個
                 </p>
@@ -54,8 +84,40 @@ export default function XiangqiRulesPage() {
               {/* 相/象 */}
               <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4">
                 <h3 className="font-bold text-lg text-yellow-900 mb-2">相/象（Elephant）</h3>
+                <div className="flex gap-4 items-center mb-2">
+                  <div className="grid grid-cols-5 gap-0.5 bg-amber-100 p-2 rounded">
+                    <div className="w-6 h-6 border border-gray-400 bg-yellow-200 flex items-center justify-center text-[10px]">↖</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400 bg-yellow-200 flex items-center justify-center text-[10px]">↗</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-red-400 bg-red-100 flex items-center justify-center text-[10px]">×</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-red-400 bg-red-100 flex items-center justify-center text-[10px]">×</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border-2 border-yellow-600 bg-yellow-100 flex items-center justify-center font-bold text-sm">象</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-red-400 bg-red-100 flex items-center justify-center text-[10px]">×</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-red-400 bg-red-100 flex items-center justify-center text-[10px]">×</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400 bg-yellow-200 flex items-center justify-center text-[10px]">↙</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400 bg-yellow-200 flex items-center justify-center text-[10px]">↘</div>
+                  </div>
+                  <p className="text-xs text-yellow-800 font-medium flex-1">
+                    斜め2マス<br/>
+                    （×は塞象眼）
+                  </p>
+                </div>
                 <p className="text-sm text-yellow-800 font-medium">
-                  • 斜め2マス（田の字型）<br />
                   • 川を渡れない（自陣のみ）<br />
                   • 塞象眼：中間に駒があると移動不可
                 </p>
@@ -64,8 +126,41 @@ export default function XiangqiRulesPage() {
               {/* 馬 */}
               <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
                 <h3 className="font-bold text-lg text-green-900 mb-2">馬（Horse）</h3>
+                <div className="flex gap-4 items-center mb-2">
+                  <div className="grid grid-cols-5 gap-0.5 bg-amber-100 p-2 rounded">
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400 bg-green-200 flex items-center justify-center text-[10px]">↖</div>
+                    <div className="w-6 h-6 border border-red-400 bg-red-100 flex items-center justify-center text-[10px]">×</div>
+                    <div className="w-6 h-6 border border-gray-400 bg-green-200 flex items-center justify-center text-[10px]">↗</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400 bg-green-200 flex items-center justify-center text-[10px]">↖</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-red-400 bg-red-100 flex items-center justify-center text-[10px]">×</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400 bg-green-200 flex items-center justify-center text-[10px]">↗</div>
+                    <div className="w-6 h-6 border border-red-400 bg-red-100 flex items-center justify-center text-[10px]">×</div>
+                    <div className="w-6 h-6 border border-red-400 bg-red-100 flex items-center justify-center text-[10px]">×</div>
+                    <div className="w-6 h-6 border-2 border-green-600 bg-green-100 flex items-center justify-center font-bold text-sm">馬</div>
+                    <div className="w-6 h-6 border border-red-400 bg-red-100 flex items-center justify-center text-[10px]">×</div>
+                    <div className="w-6 h-6 border border-red-400 bg-red-100 flex items-center justify-center text-[10px]">×</div>
+                    <div className="w-6 h-6 border border-gray-400 bg-green-200 flex items-center justify-center text-[10px]">↙</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-red-400 bg-red-100 flex items-center justify-center text-[10px]">×</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400 bg-green-200 flex items-center justify-center text-[10px]">↘</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400 bg-green-200 flex items-center justify-center text-[10px]">↙</div>
+                    <div className="w-6 h-6 border border-red-400 bg-red-100 flex items-center justify-center text-[10px]">×</div>
+                    <div className="w-6 h-6 border border-gray-400 bg-green-200 flex items-center justify-center text-[10px]">↘</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                  </div>
+                  <p className="text-xs text-green-800 font-medium flex-1">
+                    日の字型<br/>
+                    （×は蹩馬腿）
+                  </p>
+                </div>
                 <p className="text-sm text-green-800 font-medium">
-                  • 縦横1マス→斜め1マス（日の字型）<br />
+                  • 縦横1マス→斜め1マス<br />
                   • 蹩馬腿：最初の1マスに駒があると移動不可<br />
                   • チェスのナイトと異なり飛び越えられない
                 </p>
@@ -74,8 +169,39 @@ export default function XiangqiRulesPage() {
               {/* 車 */}
               <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
                 <h3 className="font-bold text-lg text-blue-900 mb-2">車（Chariot）</h3>
+                <div className="flex gap-4 items-center mb-2">
+                  <div className="grid grid-cols-5 gap-0.5 bg-amber-100 p-2 rounded">
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400 bg-blue-200 flex items-center justify-center text-[10px]">↑</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400 bg-blue-200 flex items-center justify-center text-[10px]">↑</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400 bg-blue-200 flex items-center justify-center text-[10px]">←</div>
+                    <div className="w-6 h-6 border border-gray-400 bg-blue-200 flex items-center justify-center text-[10px]">←</div>
+                    <div className="w-6 h-6 border-2 border-blue-600 bg-blue-100 flex items-center justify-center font-bold text-sm">車</div>
+                    <div className="w-6 h-6 border border-gray-400 bg-blue-200 flex items-center justify-center text-[10px]">→</div>
+                    <div className="w-6 h-6 border border-gray-400 bg-blue-200 flex items-center justify-center text-[10px]">→</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400 bg-blue-200 flex items-center justify-center text-[10px]">↓</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400 bg-blue-200 flex items-center justify-center text-[10px]">↓</div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                    <div className="w-6 h-6 border border-gray-400"></div>
+                  </div>
+                  <p className="text-xs text-blue-800 font-medium flex-1">
+                    縦横に<br/>何マスでも
+                  </p>
+                </div>
                 <p className="text-sm text-blue-800 font-medium">
-                  • 縦横に何マスでも<br />
                   • 間に駒があると移動不可<br />
                   • 最強の駒
                 </p>
@@ -84,8 +210,62 @@ export default function XiangqiRulesPage() {
               {/* 炮/砲 */}
               <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
                 <h3 className="font-bold text-lg text-purple-900 mb-2">炮/砲（Cannon）</h3>
+                <div className="flex gap-4 items-center mb-2">
+                  <div className="grid grid-cols-7 gap-0.5 bg-amber-100 p-2 rounded">
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400 bg-purple-200 flex items-center justify-center text-[8px]">↑</div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400 bg-red-200 flex items-center justify-center text-[8px] font-bold">敵</div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400 bg-slate-300 flex items-center justify-center text-[8px]">台</div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400 bg-purple-200 flex items-center justify-center text-[8px]">←</div>
+                    <div className="w-5 h-5 border border-gray-400 bg-slate-300 flex items-center justify-center text-[8px]">台</div>
+                    <div className="w-5 h-5 border-2 border-purple-600 bg-purple-100 flex items-center justify-center font-bold text-xs">炮</div>
+                    <div className="w-5 h-5 border border-gray-400 bg-slate-300 flex items-center justify-center text-[8px]">台</div>
+                    <div className="w-5 h-5 border border-gray-400 bg-purple-200 flex items-center justify-center text-[8px]">→</div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400 bg-slate-300 flex items-center justify-center text-[8px]">台</div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400 bg-red-200 flex items-center justify-center text-[8px] font-bold">敵</div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400 bg-purple-200 flex items-center justify-center text-[8px]">↓</div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                    <div className="w-5 h-5 border border-gray-400"></div>
+                  </div>
+                  <p className="text-xs text-purple-800 font-medium flex-1">
+                    台を1つ飛び越えて<br/>攻撃できる
+                  </p>
+                </div>
                 <p className="text-sm text-purple-800 font-medium">
-                  • 縦横に何マスでも<br />
                   • 移動：間に駒なし<br />
                   • 攻撃：必ず1つの駒を飛び越える
                 </p>
@@ -94,9 +274,38 @@ export default function XiangqiRulesPage() {
               {/* 兵/卒 */}
               <div className="bg-pink-50 border-2 border-pink-300 rounded-lg p-4">
                 <h3 className="font-bold text-lg text-pink-900 mb-2">兵/卒（Soldier）</h3>
+                <div className="flex gap-2 items-center mb-2">
+                  <div>
+                    <p className="text-[10px] text-pink-900 font-bold mb-1 text-center">川を渡る前</p>
+                    <div className="grid grid-cols-3 gap-0.5 bg-amber-100 p-1.5 rounded">
+                      <div className="w-6 h-6 border border-gray-400"></div>
+                      <div className="w-6 h-6 border border-gray-400 bg-pink-200 flex items-center justify-center text-[10px]">↑</div>
+                      <div className="w-6 h-6 border border-gray-400"></div>
+                      <div className="w-6 h-6 border border-gray-400"></div>
+                      <div className="w-6 h-6 border-2 border-pink-600 bg-pink-100 flex items-center justify-center font-bold text-sm">兵</div>
+                      <div className="w-6 h-6 border border-gray-400"></div>
+                      <div className="w-6 h-6 border border-gray-400"></div>
+                      <div className="w-6 h-6 border border-gray-400"></div>
+                      <div className="w-6 h-6 border border-gray-400"></div>
+                    </div>
+                  </div>
+                  <div className="text-xl text-pink-900">→</div>
+                  <div>
+                    <p className="text-[10px] text-pink-900 font-bold mb-1 text-center">川を渡った後</p>
+                    <div className="grid grid-cols-3 gap-0.5 bg-amber-100 p-1.5 rounded">
+                      <div className="w-6 h-6 border border-gray-400"></div>
+                      <div className="w-6 h-6 border border-gray-400 bg-pink-200 flex items-center justify-center text-[10px]">↑</div>
+                      <div className="w-6 h-6 border border-gray-400"></div>
+                      <div className="w-6 h-6 border border-gray-400 bg-pink-200 flex items-center justify-center text-[10px]">←</div>
+                      <div className="w-6 h-6 border-2 border-pink-600 bg-pink-100 flex items-center justify-center font-bold text-sm">兵</div>
+                      <div className="w-6 h-6 border border-gray-400 bg-pink-200 flex items-center justify-center text-[10px]">→</div>
+                      <div className="w-6 h-6 border border-gray-400"></div>
+                      <div className="w-6 h-6 border border-gray-400"></div>
+                      <div className="w-6 h-6 border border-gray-400"></div>
+                    </div>
+                  </div>
+                </div>
                 <p className="text-sm text-pink-800 font-medium">
-                  • 川を渡る前：前に1マスのみ<br />
-                  • 川を渡った後：前・左・右に1マス<br />
                   • 後退不可、成りなし
                 </p>
               </div>
