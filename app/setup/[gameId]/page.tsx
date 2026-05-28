@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
 import { Card, CardHeader, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import { setupPieces } from '@/lib/games/geister/engine';
 import { loadGameSession, saveGameSession, getOrCreatePlayerId } from '@/lib/supabase/gameState';
@@ -118,6 +120,12 @@ export default function SetupPage() {
             />
           </CardContent>
         </Card>
+
+        <div className="mt-4 text-center">
+          <Link href="/games/geister" className="text-gray-200 hover:text-white underline text-sm">
+            キャンセルしてモード選択に戻る
+          </Link>
+        </div>
       </div>
     </div>
   );

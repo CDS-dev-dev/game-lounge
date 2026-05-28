@@ -118,6 +118,13 @@ export default function GeisterOnlinePage() {
                   <p>ゲームID: {gameId?.slice(0, 8)}...</p>
                   <p className="mt-1">マッチングが完了すると自動的に駒の配置画面に移動します</p>
                 </div>
+                <Button
+                  variant="secondary"
+                  onClick={() => router.push('/games/geister')}
+                  className="mt-4"
+                >
+                  マッチングをキャンセル
+                </Button>
               </>
             )}
 

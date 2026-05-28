@@ -129,48 +129,55 @@ export default function XiangqiCpuPage() {
 
         {/* 難易度選択 */}
         {phase === 'difficulty-select' && (
-          <Card className="bg-white/95 max-w-2xl mx-auto">
-            <CardHeader>
-              <h2 className="text-2xl font-bold text-slate-900">難易度を選択</h2>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Button
-                  variant="primary"
-                  onClick={() => startGame('easy')}
-                  className="py-8 text-lg"
-                >
-                  <div>
-                    <div className="text-3xl mb-2">😊</div>
-                    <div>初級</div>
-                    <div className="text-xs mt-1 opacity-70">初心者向け</div>
-                  </div>
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={() => startGame('medium')}
-                  className="py-8 text-lg"
-                >
-                  <div>
-                    <div className="text-3xl mb-2">🤔</div>
-                    <div>中級</div>
-                    <div className="text-xs mt-1 opacity-70">標準</div>
-                  </div>
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={() => startGame('hard')}
-                  className="py-8 text-lg"
-                >
-                  <div>
-                    <div className="text-3xl mb-2">🔥</div>
-                    <div>上級</div>
-                    <div className="text-xs mt-1 opacity-70">挑戦者向け</div>
-                  </div>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <>
+            <Card className="bg-white/95 max-w-2xl mx-auto">
+              <CardHeader>
+                <h2 className="text-2xl font-bold text-slate-900">難易度を選択</h2>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button
+                    variant="primary"
+                    onClick={() => startGame('easy')}
+                    className="py-8 text-lg"
+                  >
+                    <div>
+                      <div className="text-3xl mb-2">😊</div>
+                      <div>初級</div>
+                      <div className="text-xs mt-1 opacity-70">初心者向け</div>
+                    </div>
+                  </Button>
+                  <Button
+                    variant="primary"
+                    onClick={() => startGame('medium')}
+                    className="py-8 text-lg"
+                  >
+                    <div>
+                      <div className="text-3xl mb-2">🤔</div>
+                      <div>中級</div>
+                      <div className="text-xs mt-1 opacity-70">標準</div>
+                    </div>
+                  </Button>
+                  <Button
+                    variant="primary"
+                    onClick={() => startGame('hard')}
+                    className="py-8 text-lg"
+                  >
+                    <div>
+                      <div className="text-3xl mb-2">🔥</div>
+                      <div>上級</div>
+                      <div className="text-xs mt-1 opacity-70">挑戦者向け</div>
+                    </div>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            <div className="mt-4 text-center">
+              <Link href="/games/xiangqi" className="text-gray-200 hover:text-white underline text-sm">
+                モード選択に戻る
+              </Link>
+            </div>
+          </>
         )}
 
         {/* CPU思考中インジケーター（固定オーバーレイ） */}

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { GeisterClientState, Position } from '@/lib/games/geister/types';
 import { BOARD_SIZE, PLAYER1_ESCAPE_POSITIONS, PLAYER2_ESCAPE_POSITIONS } from '@/lib/games/geister/constants';
+import { KeyboardHelpModal } from '@/components/ui/KeyboardHelpModal';
 
 interface GeisterBoardProps {
   gameState: GeisterClientState;
@@ -125,14 +126,22 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
     return label;
   };
 
+  const keyboardShortcuts = [
+    { keys: ['↑', '↓', '←', '→'], description: 'セルを移動' },
+    { keys: ['Enter'], description: '駒を選択/移動実行' },
+    { keys: ['Space'], description: '駒を選択/移動実行' },
+  ];
+
   return (
-    <div
-      ref={boardRef}
-      className="inline-block bg-amber-100 p-2 sm:p-4 rounded-lg shadow-lg"
-      role="grid"
-      aria-label="ガイスターの盤面"
-      tabIndex={0}
-    >
+    <>
+      <KeyboardHelpModal shortcuts={keyboardShortcuts} gameName="ガイスター" />
+      <div
+        ref={boardRef}
+        className="inline-block bg-amber-100 p-2 sm:p-4 rounded-lg shadow-lg"
+        role="grid"
+        aria-label="ガイスターの盤面"
+        tabIndex={0}
+      >
       <div className="grid gap-0.5 sm:gap-1" style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)` }}>
         {Array.from({ length: BOARD_SIZE }).map((_, rowIndex) => {
           // プレイヤー視点に応じて盤面を反転（自分が常に下に来るように）
@@ -183,6 +192,15 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
           });
         })}
       </div>
+
+      {/* 操作説明 */}
+      <div className="mt-3 sm:mt-4 text-center text-xs sm:text-sm text-slate-600 max-w-md px-2">
+        <p className="font-medium">駒をクリックして選択 → 移動先をクリック</p>
+        <p className="text-[10px] sm:text-xs mt-1 text-slate-500">
+          矢印キー: 移動 | Enter/Space: 選択/移動 | ⌨️ヘルプボタンで詳細
+        </p>
+      </div>
     </div>
+    </>
   );
 };

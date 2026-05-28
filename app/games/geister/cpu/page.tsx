@@ -218,22 +218,29 @@ export default function GeisterCpuPage() {
 
         {/* 配置フェーズ */}
         {phase === 'setup' && (
-          <Card className="bg-white/95">
-            <CardHeader>
-              <h2 className="text-2xl font-bold text-slate-900">駒の初期配置</h2>
-              <p className="text-sm text-slate-600 mt-2 font-medium">
-                青いお化け👻×4、赤い悪魔😈×4を中央4列×2行に配置してください
-              </p>
-            </CardHeader>
-            <CardContent>
-              <SetupBoard
-                myRole="player1"
-                setup={playerSetup}
-                onSetupChange={setPlayerSetup}
-                onComplete={handlePlayerSetupComplete}
-              />
-            </CardContent>
-          </Card>
+          <>
+            <Card className="bg-white/95">
+              <CardHeader>
+                <h2 className="text-2xl font-bold text-slate-900">駒の初期配置</h2>
+                <p className="text-sm text-slate-600 mt-2 font-medium">
+                  青いお化け👻×4、赤い悪魔😈×4を中央4列×2行に配置してください
+                </p>
+              </CardHeader>
+              <CardContent>
+                <SetupBoard
+                  myRole="player1"
+                  setup={playerSetup}
+                  onSetupChange={setPlayerSetup}
+                  onComplete={handlePlayerSetupComplete}
+                />
+              </CardContent>
+            </Card>
+            <div className="mt-4 text-center">
+              <Link href="/games/geister" className="text-gray-200 hover:text-white underline text-sm">
+                モード選択に戻る
+              </Link>
+            </div>
+          </>
         )}
 
         {/* CPU思考中インジケーター（画面サイズを変えない固定配置） */}
@@ -288,9 +295,9 @@ export default function GeisterCpuPage() {
             </div>
 
             {phase === 'finished' && (
-              <Card className="mt-6 bg-white/95 animate-[fadeIn_0.5s_ease-in]">
+              <Card className="mt-6 bg-white/95 animate-[fadeIn_0.5s_ease-in]" role="alert" aria-live="assertive">
                 <CardHeader>
-                  <h2 className="text-2xl sm:text-3xl font-bold text-center text-slate-900 animate-[bounce_1s_ease-in-out]">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-center text-slate-900 animate-[bounce_1s_ease-in-out]" tabIndex={-1} ref={(el) => el?.focus()}>
                     {gameState.winner === 'player1' ? '🎉 あなたの勝ち！' : gameState.winner === 'player2' ? '😢 CPUの勝ち' : '🤝 引き分け'}
                   </h2>
                 </CardHeader>
