@@ -109,85 +109,97 @@ export const Connect4Board: React.FC<Connect4BoardProps> = ({
     <div className="flex flex-col items-center">
       <div
         ref={boardRef}
-        className="inline-block bg-slate-800 p-3 sm:p-4 rounded-lg shadow-2xl"
+        className="inline-block bg-gradient-to-br from-slate-800 to-slate-900 p-4 sm:p-6 rounded-lg shadow-2xl"
         role="grid"
         aria-label="立体四目並べの盤面"
         tabIndex={0}
       >
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
-          {Array.from({ length: BOARD_SIZE })
-            .map((_, z) => BOARD_SIZE - 1 - z) // 上から下へ（z=3,2,1,0）
-            .map((z) => (
-              <div key={z} className="relative">
-                {/* 層番号 */}
-                <div className="text-center mb-1.5">
-                  <span className="text-xs sm:text-sm font-bold text-white bg-slate-700 px-2 py-0.5 rounded-full">
-                    L{z + 1}
-                  </span>
-                </div>
+        {/* アイソメトリック表示: 斜め上から見た立体 */}
+        <div className="relative" style={{ width: '280px', height: '280px', margin: '0 auto' }}>
+          {/* 全64箇所を1つの視点で表示 */}
+          {Array.from({ length: BOARD_SIZE }).map((_, z) =>
+            Array.from({ length: BOARD_SIZE }).map((_, y) =>
+              Array.from({ length: BOARD_SIZE }).map((_, x) => {
+                const pos: Position3D = { x, y, z };
+                const piece = gameState.board[z][y][x];
+                const available = isAvailable(pos);
+                const isWinning = isWinningPiece(pos);
+                const isFocused = focusedCell && focusedCell.x === x && focusedCell.y === y && focusedCell.z === z;
 
-                {/* グリッド */}
-                <div className="bg-slate-700/50 p-1 sm:p-1.5 rounded">
+                // アイソメトリック座標計算（斜め上から見た配置）
+                const offsetX = x * 16 + y * 16 + z * 3;
+                const offsetY = y * 8 - x * 8 + z * 20;
+
+                return (
                   <div
-                    className="grid gap-0.5 sm:gap-1"
-                    style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)` }}
+                    key={`${x}-${y}-${z}`}
+                    role="gridcell"
+                    aria-label={getCellAriaLabel(pos)}
+                    onClick={() => available && onCellClick?.(pos)}
+                    onFocus={() => setFocusedCell(pos)}
+                    tabIndex={isFocused ? 0 : -1}
+                    className={`
+                      absolute w-7 h-7 sm:w-9 sm:h-9 rounded border-2 flex items-center justify-center
+                      transition-all duration-200
+                      ${
+                        piece
+                          ? `bg-slate-600 border-slate-500 ${isWinning ? 'ring-2 ring-yellow-400 animate-pulse' : ''}`
+                          : available
+                          ? 'bg-blue-600/70 border-blue-500 hover:bg-blue-500 cursor-pointer hover:scale-110'
+                          : 'bg-slate-700/40 border-slate-600'
+                      }
+                      ${isFocused ? 'ring-2 ring-blue-400 z-50' : ''}
+                    `}
+                    style={{
+                      left: `${offsetX}px`,
+                      top: `${offsetY}px`,
+                      zIndex: z * 10 + y * 2 + x,
+                    }}
                   >
-                    {Array.from({ length: BOARD_SIZE }).map((_, y) =>
-                      Array.from({ length: BOARD_SIZE }).map((_, x) => {
-                        const pos: Position3D = { x, y, z };
-                        const piece = gameState.board[z][y][x];
-                        const available = isAvailable(pos);
-                        const isWinning = isWinningPiece(pos);
-                        const isFocused = focusedCell && focusedCell.x === x && focusedCell.y === y && focusedCell.z === z;
-
-                        return (
-                          <div
-                            key={`${x}-${y}`}
-                            role="gridcell"
-                            aria-label={getCellAriaLabel(pos)}
-                            onClick={() => available && onCellClick?.(pos)}
-                            onFocus={() => setFocusedCell(pos)}
-                            tabIndex={isFocused ? 0 : -1}
-                            className={`
-                              w-8 h-8 sm:w-12 sm:h-12 rounded border-2 flex items-center justify-center
-                              transition-all duration-200
-                              ${
-                                piece
-                                  ? isWinning
-                                    ? 'ring-2 ring-yellow-400 animate-pulse'
-                                    : ''
-                                  : available
-                                  ? 'bg-slate-600 border-slate-500 hover:bg-slate-500 cursor-pointer hover:scale-105'
-                                  : 'bg-slate-700 border-slate-600'
-                              }
-                              ${isFocused ? 'ring-2 ring-blue-400' : ''}
-                            `}
-                          >
-                            {piece && (
-                              <div
-                                className={`text-xl sm:text-3xl ${
-                                  isWinning ? 'animate-bounce' : ''
-                                }`}
-                              >
-                                {PLAYER_COLORS[piece.owner].emoji}
-                              </div>
-                            )}
-                            {!piece && available && (
-                              <div className="text-sm sm:text-xl opacity-30">+</div>
-                            )}
-                          </div>
-                        );
-                      })
+                    {piece && (
+                      <div
+                        className={`text-base sm:text-xl ${
+                          isWinning ? 'animate-bounce' : ''
+                        }`}
+                      >
+                        {PLAYER_COLORS[piece.owner].emoji}
+                      </div>
+                    )}
+                    {!piece && available && (
+                      <div className="text-xs sm:text-sm opacity-60 font-bold text-white">+</div>
+                    )}
+                    {/* 層番号（最下層のみ表示） */}
+                    {z === 0 && x === 0 && y === 0 && (
+                      <div className="absolute -top-5 left-0 text-[8px] sm:text-[10px] font-bold text-white bg-slate-700 px-1 rounded">
+                        L1
+                      </div>
+                    )}
+                    {z === 1 && x === 0 && y === 0 && (
+                      <div className="absolute -top-5 left-0 text-[8px] sm:text-[10px] font-bold text-white bg-slate-600 px-1 rounded">
+                        L2
+                      </div>
+                    )}
+                    {z === 2 && x === 0 && y === 0 && (
+                      <div className="absolute -top-5 left-0 text-[8px] sm:text-[10px] font-bold text-white bg-slate-500 px-1 rounded">
+                        L3
+                      </div>
+                    )}
+                    {z === 3 && x === 0 && y === 0 && (
+                      <div className="absolute -top-5 left-0 text-[8px] sm:text-[10px] font-bold text-white bg-slate-400 px-1 rounded">
+                        L4
+                      </div>
                     )}
                   </div>
-                </div>
-              </div>
-            ))}
+                );
+              })
+            )
+          )}
         </div>
       </div>
 
       {/* 操作説明 */}
       <div className="mt-3 sm:mt-4 text-center text-xs sm:text-sm text-white max-w-md px-2">
+        <p className="font-semibold mb-1">🎯 立体的に64箇所全てが見えます</p>
         <p className="text-[10px] sm:text-xs text-slate-300">
           矢印キー: 平面移動 | W/S or PageUp/Down: 層移動 | Enter/Space: 配置
         </p>
