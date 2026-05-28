@@ -6,17 +6,20 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { GameHeader } from '@/components/layout/GameHeader';
 
 export default function XiangqiModePage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-6 sm:py-12 px-3 sm:px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8 sm:mb-12">
-          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">中国象棋（シャンチー）</h1>
-          <p className="text-sm sm:text-base text-gray-100">プレイモードを選択してください</p>
-        </div>
+    <>
+      <GameHeader title="中国象棋" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-6 sm:pb-12 px-3 sm:px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8 sm:mb-12">
+            <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">中国象棋（シャンチー）</h1>
+            <p className="text-sm sm:text-base text-gray-100">プレイモードを選択してください</p>
+          </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* オンライン対戦 */}
@@ -114,12 +117,8 @@ export default function XiangqiModePage() {
           </CardContent>
         </Card>
 
-        <div className="text-center">
-          <Link href="/games" className="text-gray-200 hover:text-white underline">
-            ゲーム選択に戻る
-          </Link>
-        </div>
       </div>
     </div>
+    </>
   );
 }

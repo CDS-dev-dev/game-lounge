@@ -1,12 +1,18 @@
 // ガイスターのルールページ
 
-import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
+import { GameHeader } from '@/components/layout/GameHeader';
 
 export default function GeisterRulesPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 sm:py-8 md:py-12 px-2 sm:px-4">
-      <div className="max-w-4xl mx-auto">
+    <>
+      <GameHeader
+        title="ガイスタールール"
+        backUrl="/games/geister"
+        backLabel="モード選択"
+      />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">
+        <div className="max-w-4xl mx-auto">
         <Card className="bg-white/95">
           <CardHeader>
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">ガイスター（Geister）ルール</h1>
@@ -144,23 +150,10 @@ export default function GeisterRulesPage() {
               <li>😈を全て取らせる勝ち方も意識する</li>
             </ul>
 
-            <div className="mt-12 flex justify-center gap-4">
-              <Link
-                href="/games/geister"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200"
-              >
-                対戦開始
-              </Link>
-              <Link
-                href="/games"
-                className="bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold px-6 py-3 rounded-lg transition-colors duration-200"
-              >
-                ゲーム選択に戻る
-              </Link>
-            </div>
           </CardContent>
         </Card>
       </div>
     </div>
+    </>
   );
 }

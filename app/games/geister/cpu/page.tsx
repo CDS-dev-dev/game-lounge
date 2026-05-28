@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { GameHeader } from '@/components/layout/GameHeader';
 import {
   createInitialState,
   setupPieces,
@@ -208,13 +209,19 @@ export default function GeisterCpuPage() {
   const isPlayerTurn = phase === 'playing' && gameState.currentTurn === 'player1';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 px-2 sm:py-8 sm:px-4">
-      <div className="max-w-4xl mx-auto">
-        {/* ヘッダー */}
-        <div className="text-center mb-4 sm:mb-6">
-          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2">CPU対戦</h1>
-          <p className="text-sm sm:text-base text-gray-200">あなた vs コンピュータ</p>
-        </div>
+    <>
+      <GameHeader
+        title="ガイスター CPU対戦"
+        backUrl="/games/geister"
+        backLabel="モード選択"
+      />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">
+        <div className="max-w-4xl mx-auto">
+          {/* ヘッダー */}
+          <div className="text-center mb-4 sm:mb-6">
+            <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2">CPU対戦</h1>
+            <p className="text-sm sm:text-base text-gray-200">あなた vs コンピュータ</p>
+          </div>
 
         {/* 配置フェーズ */}
         {phase === 'setup' && (
@@ -324,12 +331,8 @@ export default function GeisterCpuPage() {
           </>
         )}
 
-        <div className="mt-8 text-center">
-          <Link href="/games/geister" className="text-gray-200 hover:text-white underline">
-            モード選択に戻る
-          </Link>
-        </div>
       </div>
     </div>
+    </>
   );
 }
