@@ -20,7 +20,7 @@ export default function MatchingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4">
       <div className="text-center">
-        <Loading text="対戦相手を探しています..." />
+        <Loading message="対戦相手を探しています..." />
         <p className="mt-4 text-gray-300">
           マッチングが完了するまでお待ちください
         </p>
