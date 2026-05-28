@@ -19,6 +19,7 @@ import {
   PLAYER2_ESCAPE_POSITIONS,
   GOOD_PIECES_COUNT,
   BAD_PIECES_COUNT,
+  MAX_MOVES_FOR_DRAW,
 } from './constants';
 
 // 空の盤面を作成
@@ -80,6 +81,7 @@ export function createInitialState(gameId: string, player1Id: string): GeisterSt
     },
     winner: null,
     winReason: null,
+    moveCount: 0,
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
@@ -378,12 +380,13 @@ export function movePiece(
     ...state,
     board: newBoard,
     pieces: newPieces,
+    moveCount: state.moveCount + 1,
     updatedAt: Date.now(),
   };
 
   // 勝者判定
   const winResult = checkWinner(newState);
-  if (winResult.winner) {
+  if (winResult.winner !== undefined) {
     return {
       ...newState,
       winner: winResult.winner,
@@ -407,7 +410,7 @@ function switchTurn(state: GeisterState): GeisterState {
 // 勝者判定
 export function checkWinner(state: GeisterState): {
   winner: PlayerRole | null;
-  reason: 'escape' | 'captureAllGood' | 'loseAllBad' | null;
+  reason: 'escape' | 'captureAllGood' | 'loseAllBad' | 'draw' | null;
 } {
   // 1. 脱出勝ち: good駒が脱出した
   for (const player of ['player1', 'player2'] as PlayerRole[]) {
@@ -445,6 +448,11 @@ export function checkWinner(state: GeisterState): {
   }
   if (player2BadCaptured === BAD_PIECES_COUNT) {
     return { winner: 'player2', reason: 'loseAllBad' };
+  }
+
+  // 4. 引き分け判定: 最大手数に達した
+  if (state.moveCount >= MAX_MOVES_FOR_DRAW) {
+    return { winner: null, reason: 'draw' };
   }
 
   return { winner: null, reason: null };

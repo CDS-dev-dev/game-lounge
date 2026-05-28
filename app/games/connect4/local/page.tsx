@@ -45,8 +45,8 @@ export default function Connect4LocalPage() {
       const playerId = currentPlayer === 'player1' ? PLAYER1_ID : PLAYER2_ID;
       let newState = placePiece(gameState, playerId, pos);
 
-      // 勝敗判定
-      const result = checkWinner(newState);
+      // 勝敗判定（最適化：最後に置いた位置のみチェック）
+      const result = checkWinner(newState, pos);
       if (result.winner !== null) {
         newState = finishGame(newState, result.winner, result.winningLine);
         setGameState(newState);

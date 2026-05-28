@@ -128,17 +128,26 @@ export default function PlayPage() {
       // ゲーム終了チェック
       if (newState.status === 'finished') {
         setTimeout(() => {
-          const winnerText =
-            newState.winner === clientState.myRole ? 'あなた' : '相手';
+          const isWinner = newState.winner === clientState.myRole;
+          const winnerText = isWinner ? 'あなた' : '相手';
           const reasonText =
             newState.winReason === 'escape'
               ? '青いお化け👻を脱出させた'
               : newState.winReason === 'captureAllGood'
               ? '相手の青いお化け👻を全て取った'
+              : newState.winReason === 'draw'
+              ? '引き分け（手数制限）'
               : '自分の赤い悪魔😈を全て取らせた';
 
-          showToast(`ゲーム終了！勝者: ${winnerText} | ${reasonText}`, 'success');
-          setTimeout(() => router.push('/games'), 2000);
+          if (newState.winReason === 'draw') {
+            showToast(`ゲーム終了！引き分けです`, 'info');
+          } else {
+            showToast(
+              `ゲーム終了！${isWinner ? '🎉 勝利！' : '😢 敗北'} ${reasonText}`,
+              isWinner ? 'success' : 'info'
+            );
+          }
+          setTimeout(() => router.push('/games'), 3000);
         }, 500);
       }
     } catch (error) {

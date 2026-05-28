@@ -53,8 +53,8 @@ export default function Connect4CpuPage() {
       // プレイヤーの配置
       let newState = placePiece(gameState, PLAYER_ID, pos);
 
-      // 勝敗判定
-      const result = checkWinner(newState);
+      // 勝敗判定（最適化：最後に置いた位置のみチェック）
+      const result = checkWinner(newState, pos);
       if (result.winner !== null) {
         newState = finishGame(newState, result.winner, result.winningLine);
         setGameState(newState);
@@ -83,8 +83,8 @@ export default function Connect4CpuPage() {
       const cpuMove = calculateCpuMove(newState, 'player2', difficulty);
       newState = placePiece(newState, CPU_ID, cpuMove);
 
-      // 勝敗判定
-      const cpuResult = checkWinner(newState);
+      // 勝敗判定（最適化：最後に置いた位置のみチェック）
+      const cpuResult = checkWinner(newState, cpuMove);
       if (cpuResult.winner !== null) {
         newState = finishGame(newState, cpuResult.winner, cpuResult.winningLine);
         setGameState(newState);

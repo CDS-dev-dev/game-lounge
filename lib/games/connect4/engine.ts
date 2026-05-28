@@ -162,46 +162,27 @@ export function placePiece(
   };
 }
 
-// 勝敗判定
-export function checkWinner(state: Connect4State): {
+// 勝敗判定（最適化版：最後に置いた駒の位置のみチェック）
+export function checkWinner(state: Connect4State, lastMove?: Position3D): {
   winner: PlayerRole | null;
   winningLine: Position3D[] | null;
 } {
-  // 全ての駒について、その駒から始まる4つ揃いをチェック
-  for (const role of ['player1', 'player2'] as PlayerRole[]) {
-    for (const piece of state.pieces[role]) {
-      const pos = piece.position;
-
-      // 各方向をチェック
-      for (const dir of WIN_DIRECTIONS) {
-        const line: Position3D[] = [pos];
-
-        // その方向に3つ続いているか確認
-        for (let i = 1; i < WIN_COUNT; i++) {
-          const nextPos: Position3D = {
-            x: pos.x + dir.dx * i,
-            y: pos.y + dir.dy * i,
-            z: pos.z + dir.dz * i,
-          };
-
-          if (!isValidPosition(nextPos)) {
-            break;
-          }
-
-          const nextPiece = state.board[nextPos.z][nextPos.y][nextPos.x];
-          if (!nextPiece || nextPiece.owner !== role) {
-            break;
-          }
-
-          line.push(nextPos);
-        }
-
-        // 4つ揃ったら勝利
-        if (line.length === WIN_COUNT) {
-          return {
-            winner: role,
-            winningLine: line,
-          };
+  // 最後の手がある場合は、その位置のみチェック（最適化）
+  if (lastMove) {
+    const piece = state.board[lastMove.z][lastMove.y][lastMove.x];
+    if (piece) {
+      const result = checkPositionForWin(state, lastMove, piece.owner);
+      if (result.winner) {
+        return result;
+      }
+    }
+  } else {
+    // 最後の手がない場合は全駒チェック（後方互換性）
+    for (const role of ['player1', 'player2'] as PlayerRole[]) {
+      for (const piece of state.pieces[role]) {
+        const result = checkPositionForWin(state, piece.position, role);
+        if (result.winner) {
+          return result;
         }
       }
     }
@@ -217,6 +198,55 @@ export function checkWinner(state: Connect4State): {
       winner: null, // 引き分け
       winningLine: null,
     };
+  }
+
+  return {
+    winner: null,
+    winningLine: null,
+  };
+}
+
+// 特定の位置から勝利条件をチェック
+function checkPositionForWin(
+  state: Connect4State,
+  pos: Position3D,
+  role: PlayerRole
+): {
+  winner: PlayerRole | null;
+  winningLine: Position3D[] | null;
+} {
+  // 各方向をチェック
+  for (const dir of WIN_DIRECTIONS) {
+    const line: Position3D[] = [];
+
+    // 反対方向も含めてチェック（中心からの双方向）
+    for (let i = -WIN_COUNT + 1; i < WIN_COUNT; i++) {
+      const checkPos: Position3D = {
+        x: pos.x + dir.dx * i,
+        y: pos.y + dir.dy * i,
+        z: pos.z + dir.dz * i,
+      };
+
+      if (!isValidPosition(checkPos)) {
+        continue;
+      }
+
+      const checkPiece = state.board[checkPos.z][checkPos.y][checkPos.x];
+      if (checkPiece && checkPiece.owner === role) {
+        line.push(checkPos);
+
+        // 4つ揃ったら勝利
+        if (line.length === WIN_COUNT) {
+          return {
+            winner: role,
+            winningLine: line,
+          };
+        }
+      } else {
+        // 連続が途切れたらリセット
+        line.length = 0;
+      }
+    }
   }
 
   return {

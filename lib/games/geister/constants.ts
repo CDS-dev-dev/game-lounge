@@ -38,3 +38,6 @@ export const BAD_PIECES_COUNT = 4;
 
 // タイマー設定（秒）
 export const TIME_LIMIT = 300; // 5分
+
+// 引き分け判定用の最大手数
+export const MAX_MOVES_FOR_DRAW = 200; // 100手（各プレイヤー100手ずつ）

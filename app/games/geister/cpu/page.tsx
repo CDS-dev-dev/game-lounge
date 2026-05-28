@@ -288,23 +288,24 @@ export default function GeisterCpuPage() {
             </div>
 
             {phase === 'finished' && (
-              <Card className="mt-6 bg-white/95">
+              <Card className="mt-6 bg-white/95 animate-[fadeIn_0.5s_ease-in]">
                 <CardHeader>
-                  <h2 className="text-3xl font-bold text-center text-slate-900">
-                    {gameState.winner === 'player1' ? '🎉 あなたの勝ち！' : '😢 CPUの勝ち'}
+                  <h2 className="text-2xl sm:text-3xl font-bold text-center text-slate-900 animate-[bounce_1s_ease-in-out]">
+                    {gameState.winner === 'player1' ? '🎉 あなたの勝ち！' : gameState.winner === 'player2' ? '😢 CPUの勝ち' : '🤝 引き分け'}
                   </h2>
                 </CardHeader>
                 <CardContent className="text-center">
-                  <p className="text-slate-700 mb-6 font-medium">
+                  <p className="text-sm sm:text-base text-slate-700 mb-4 sm:mb-6 font-medium">
                     {gameState.winReason === 'escape' && '青いお化け👻の脱出成功！'}
                     {gameState.winReason === 'captureAllGood' && '相手の青いお化け👻を全て捕獲！'}
                     {gameState.winReason === 'loseAllBad' && '自分の赤い悪魔😈を全て取らせた！'}
+                    {gameState.winReason === 'draw' && '手数制限により引き分け'}
                   </p>
-                  <div className="flex gap-4 justify-center">
-                    <Button variant="primary" onClick={handleReplay}>
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center">
+                    <Button variant="primary" onClick={handleReplay} className="w-full sm:w-auto">
                       もう一度プレイ
                     </Button>
-                    <Button variant="secondary" onClick={() => router.push('/games/geister')}>
+                    <Button variant="secondary" onClick={() => router.push('/games/geister')} className="w-full sm:w-auto">
                       モード選択に戻る
                     </Button>
                   </div>
