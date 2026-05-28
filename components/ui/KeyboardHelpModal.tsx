@@ -41,10 +41,8 @@ export const KeyboardHelpModal: React.FC<KeyboardHelpModalProps> = ({
           aria-modal="true"
           aria-labelledby="keyboard-help-title"
         >
-          <Card
-            className="max-w-md w-full bg-white"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div onClick={(e) => e.stopPropagation()}>
+            <Card className="max-w-md w-full bg-white">
             <CardHeader>
               <h2 id="keyboard-help-title" className="text-2xl font-bold text-slate-900">
                 キーボード操作
@@ -77,6 +75,7 @@ export const KeyboardHelpModal: React.FC<KeyboardHelpModalProps> = ({
               </div>
             </CardContent>
           </Card>
+          </div>
         </div>
       )}
     </>

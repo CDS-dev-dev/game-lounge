@@ -295,12 +295,13 @@ export default function GeisterCpuPage() {
             </div>
 
             {phase === 'finished' && (
-              <Card className="mt-6 bg-white/95 animate-[fadeIn_0.5s_ease-in]" role="alert" aria-live="assertive">
-                <CardHeader>
-                  <h2 className="text-2xl sm:text-3xl font-bold text-center text-slate-900 animate-[bounce_1s_ease-in-out]" tabIndex={-1} ref={(el) => el?.focus()}>
-                    {gameState.winner === 'player1' ? '🎉 あなたの勝ち！' : gameState.winner === 'player2' ? '😢 CPUの勝ち' : '🤝 引き分け'}
-                  </h2>
-                </CardHeader>
+              <div role="alert" aria-live="assertive">
+                <Card className="mt-6 bg-white/95 animate-[fadeIn_0.5s_ease-in]">
+                  <CardHeader>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-center text-slate-900 animate-[bounce_1s_ease-in-out]">
+                      {gameState.winner === 'player1' ? '🎉 あなたの勝ち！' : gameState.winner === 'player2' ? '😢 CPUの勝ち' : '🤝 引き分け'}
+                    </h2>
+                  </CardHeader>
                 <CardContent className="text-center">
                   <p className="text-sm sm:text-base text-slate-700 mb-4 sm:mb-6 font-medium">
                     {gameState.winReason === 'escape' && '青いお化け👻の脱出成功！'}
@@ -318,6 +319,7 @@ export default function GeisterCpuPage() {
                   </div>
                 </CardContent>
               </Card>
+              </div>
             )}
           </>
         )}
