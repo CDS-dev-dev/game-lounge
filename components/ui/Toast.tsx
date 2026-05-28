@@ -30,7 +30,7 @@ export const Toast: React.FC<ToastProps> = ({
     return () => clearTimeout(timer);
   }, [duration, onClose]);
 
-  const baseClasses = 'fixed bottom-4 right-4 px-6 py-4 rounded-lg shadow-lg transition-all duration-300 max-w-md z-50';
+  const baseClasses = 'px-6 py-4 rounded-lg shadow-lg transition-all duration-300 max-w-md';
 
   const typeClasses = {
     success: 'bg-green-600 text-white',
@@ -101,7 +101,7 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed bottom-0 right-0 p-4 space-y-2 pointer-events-none">
+      <div className="fixed bottom-4 right-4 space-y-2 pointer-events-none z-50 flex flex-col items-end">
         {toasts.map((toast) => (
           <div key={toast.id} className="pointer-events-auto">
             <Toast
