@@ -30,8 +30,11 @@ export default function GeisterOnlinePage() {
   useEffect(() => {
     if (!gameId) return;
 
+    let isMounted = true;
+
     // ゲーム状態をリアルタイム監視
     const unsubscribe = subscribeToGameSession(gameId, (state) => {
+      if (!isMounted) return;
       console.log('Game state updated:', state.status);
 
       // setupフェーズになったら配置画面へ遷移
@@ -41,23 +44,8 @@ export default function GeisterOnlinePage() {
       }
     });
 
-    // 現在の状態も確認
-    loadGameSession(gameId).then((state) => {
-      if (state) {
-        if (state.status === 'setup') {
-          setMatchingStatus('matched');
-          router.push(`/setup/${gameId}`);
-        } else if (state.status === 'waiting') {
-          if (state.players.player2) {
-            setMatchingStatus('matched');
-          } else {
-            setMatchingStatus('waiting');
-          }
-        }
-      }
-    });
-
     return () => {
+      isMounted = false;
       unsubscribe();
     };
   }, [gameId, router]);

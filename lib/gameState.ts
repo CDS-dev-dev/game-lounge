@@ -15,7 +15,14 @@ export function loadGameState(gameId: string): GeisterState | null {
   if (typeof window !== 'undefined') {
     const data = localStorage.getItem(STORAGE_KEY_PREFIX + gameId);
     if (data) {
-      return JSON.parse(data);
+      try {
+        return JSON.parse(data);
+      } catch (error) {
+        console.error('Failed to parse game state:', error);
+        // 破損データを削除
+        localStorage.removeItem(STORAGE_KEY_PREFIX + gameId);
+        return null;
+      }
     }
   }
   return null;
