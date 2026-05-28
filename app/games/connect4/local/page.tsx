@@ -93,11 +93,11 @@ export default function Connect4LocalPage() {
   const availablePositions = phase === 'playing' ? getAvailablePositions(gameState) : [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12 px-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 px-2 sm:py-8 sm:px-4">
+      <div className="max-w-4xl mx-auto">
         {/* ヘッダー */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">立体四目並べ ローカル対戦</h1>
+        <div className="text-center mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2">立体四目並べ ローカル対戦</h1>
           <p className="text-gray-200">同じ端末で2人対戦</p>
         </div>
 

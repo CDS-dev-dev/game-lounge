@@ -52,13 +52,13 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
   };
 
   return (
-    <div className="inline-block bg-amber-100 p-4 rounded-lg shadow-lg">
-      <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)` }}>
+    <div className="inline-block bg-amber-100 p-2 sm:p-4 rounded-lg shadow-lg">
+      <div className="grid gap-0.5 sm:gap-1" style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)` }}>
         {Array.from({ length: BOARD_SIZE }).map((_, rowIndex) => {
           // プレイヤー視点に応じて盤面を反転（自分が常に下に来るように）
           const y = gameState.myRole === 'player1'
-            ? BOARD_SIZE - 1 - rowIndex // player1は通常の順序（下から上）
-            : rowIndex; // player2は反転（上から下）
+            ? rowIndex // player1は通常の順序（上から下）
+            : BOARD_SIZE - 1 - rowIndex; // player2は反転（下から上）
 
           return Array.from({ length: BOARD_SIZE }).map((_, x) => {
             const piece = gameState.board[y][x];
@@ -71,16 +71,16 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
                 key={`${x}-${y}`}
                 onClick={() => handleCellClick(x, y)}
                 className={`
-                  w-16 h-16 flex items-center justify-center border-2 cursor-pointer transition-all
+                  w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center border-2 cursor-pointer transition-all
                   ${isEscape ? 'bg-yellow-200 border-yellow-400' : 'bg-amber-50 border-amber-300'}
-                  ${isSelected ? 'ring-4 ring-indigo-500' : ''}
+                  ${isSelected ? 'ring-2 sm:ring-4 ring-indigo-500' : ''}
                   ${canMove ? 'bg-green-200 ring-2 ring-green-400' : ''}
                   ${!isSelected && !canMove ? 'hover:bg-amber-100' : ''}
                 `}
               >
                 {piece && !piece.captured && !piece.escaped && (
                   <div
-                    className={`text-4xl ${
+                    className={`text-2xl sm:text-4xl ${
                       piece.owner === gameState.myRole ? 'opacity-100' : 'opacity-80'
                     }`}
                   >
@@ -89,7 +89,7 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
                 )}
                 {/* 脱出口のマーカー */}
                 {isEscape && !piece && (
-                  <div className="text-2xl">🚪</div>
+                  <div className="text-xl sm:text-2xl">🚪</div>
                 )}
               </div>
             );

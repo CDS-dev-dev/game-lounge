@@ -122,12 +122,12 @@ export default function Connect4CpuPage() {
   const availablePositions = gameState && phase === 'playing' ? getAvailablePositions(gameState) : [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12 px-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 px-2 sm:py-8 sm:px-4">
+      <div className="max-w-4xl mx-auto">
         {/* ヘッダー */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">立体四目並べ CPU対戦</h1>
-          <p className="text-gray-200">4×4×4の立体空間で4つ揃えよう！</p>
+        <div className="text-center mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2">立体四目並べ CPU対戦</h1>
+          <p className="text-sm sm:text-base text-gray-200">4×4×4の立体空間で4つ揃えよう！</p>
         </div>
 
         {/* 難易度選択 */}
@@ -176,42 +176,44 @@ export default function Connect4CpuPage() {
           </Card>
         )}
 
-        {/* CPU思考中 */}
+        {/* CPU思考中インジケーター（固定配置） */}
         {phase === 'cpuThinking' && (
-          <Card className="bg-white/95 mb-6">
-            <CardContent className="py-12 text-center">
-              <div className="flex justify-center mb-4">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-500"></div>
-              </div>
-              <p className="text-xl font-semibold text-slate-900">CPUが思考中...</p>
-            </CardContent>
-          </Card>
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <Card className="bg-white/95">
+              <CardContent className="py-6 px-8 text-center">
+                <div className="flex justify-center mb-3">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+                </div>
+                <p className="text-lg font-semibold text-slate-900">CPUが思考中...</p>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {/* ゲームプレイ */}
         {(phase === 'playing' || phase === 'finished' || phase === 'cpuThinking') && clientState && (
           <>
-            <Card className="mb-6 bg-white/95">
-              <CardContent className="py-4">
-                <div className="flex justify-between items-center">
+            <Card className="mb-3 sm:mb-4 bg-white/95">
+              <CardContent className="py-2 sm:py-3">
+                <div className="flex justify-between items-center text-xs sm:text-sm">
                   <div>
-                    <p className="text-sm text-slate-600 font-medium">現在のターン</p>
-                    <p className="text-xl font-bold text-slate-900">
-                      {gameState!.currentTurn === 'player1' ? 'あなた 🔵' : 'CPU 🔴'}
+                    <p className="text-slate-600 font-medium">ターン</p>
+                    <p className="text-base sm:text-xl font-bold text-slate-900">
+                      {gameState!.currentTurn === 'player1' ? '🔵 あなた' : '🔴 CPU'}
                     </p>
                   </div>
                   <div className="text-center">
-                    <p className="text-sm text-slate-600 font-medium">難易度</p>
-                    <p className="text-lg font-semibold text-slate-900">
-                      {difficulty === 'easy' && '初級 😊'}
-                      {difficulty === 'medium' && '中級 🤔'}
-                      {difficulty === 'hard' && '上級 🔥'}
+                    <p className="text-slate-600 font-medium">難易度</p>
+                    <p className="text-sm sm:text-lg font-semibold text-slate-900">
+                      {difficulty === 'easy' && '😊 初級'}
+                      {difficulty === 'medium' && '🤔 中級'}
+                      {difficulty === 'hard' && '🔥 上級'}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-slate-600 font-medium">配置した駒</p>
-                    <p className="text-lg font-semibold text-slate-900">
-                      あなた: {clientState.myPiecesCount} / CPU: {clientState.opponentPiecesCount}
+                    <p className="text-slate-600 font-medium">駒数</p>
+                    <p className="text-sm sm:text-lg font-semibold text-slate-900">
+                      {clientState.myPiecesCount} / {clientState.opponentPiecesCount}
                     </p>
                   </div>
                 </div>
@@ -219,10 +221,13 @@ export default function Connect4CpuPage() {
             </Card>
 
             {/* ルール概要 */}
-            <div className="mb-6 bg-indigo-50 border border-indigo-200 rounded-lg p-3 text-sm">
+            <div className="mb-3 sm:mb-4 bg-indigo-50 border border-indigo-200 rounded-lg p-2 text-xs sm:text-sm">
               <p className="font-semibold text-indigo-900 mb-1">🎯 勝利条件</p>
               <p className="text-indigo-800">
                 • 縦・横・斜め（3次元含む）のいずれかで<span className="font-bold">4つ揃える</span>
+              </p>
+              <p className="text-indigo-700 mt-1 text-[10px] sm:text-xs">
+                💡 4つの層（L1〜L4）を俯瞰して戦略を立てよう
               </p>
             </div>
 

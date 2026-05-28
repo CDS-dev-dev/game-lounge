@@ -208,12 +208,12 @@ export default function GeisterCpuPage() {
   const isPlayerTurn = phase === 'playing' && gameState.currentTurn === 'player1';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 px-2 sm:py-8 sm:px-4">
       <div className="max-w-4xl mx-auto">
         {/* ヘッダー */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">CPU対戦</h1>
-          <p className="text-gray-200">あなた vs コンピュータ</p>
+        <div className="text-center mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2">CPU対戦</h1>
+          <p className="text-sm sm:text-base text-gray-200">あなた vs コンピュータ</p>
         </div>
 
         {/* 配置フェーズ */}
@@ -236,33 +236,35 @@ export default function GeisterCpuPage() {
           </Card>
         )}
 
-        {/* CPU思考中 */}
+        {/* CPU思考中インジケーター（画面サイズを変えない固定配置） */}
         {phase === 'cpuThinking' && (
-          <Card className="bg-white/95">
-            <CardContent className="py-12 text-center">
-              <div className="flex justify-center mb-4">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-500"></div>
-              </div>
-              <p className="text-xl font-semibold text-slate-900">CPUが思考中...</p>
-            </CardContent>
-          </Card>
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <Card className="bg-white/95">
+              <CardContent className="py-6 px-8 text-center">
+                <div className="flex justify-center mb-3">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+                </div>
+                <p className="text-lg font-semibold text-slate-900">CPUが思考中...</p>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {/* ゲームプレイ */}
-        {(phase === 'playing' || phase === 'finished') && clientState && (
+        {(phase === 'playing' || phase === 'finished' || phase === 'cpuThinking') && clientState && (
           <>
-            <Card className="mb-6 bg-white/95">
-              <CardContent className="py-4">
+            <Card className="mb-3 sm:mb-4 bg-white/95">
+              <CardContent className="py-2 sm:py-3">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-sm text-slate-600 font-medium">現在のターン</p>
-                    <p className="text-xl font-bold text-slate-900">
+                    <p className="text-xs sm:text-sm text-slate-600 font-medium">現在のターン</p>
+                    <p className="text-base sm:text-xl font-bold text-slate-900">
                       {gameState.currentTurn === 'player1' ? 'あなた' : 'CPU'}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-slate-600 font-medium">捕獲した駒</p>
-                    <p className="text-lg font-semibold text-slate-900">
+                    <p className="text-xs sm:text-sm text-slate-600 font-medium">捕獲した駒</p>
+                    <p className="text-sm sm:text-lg font-semibold text-slate-900">
                       {clientState.opponentPiecesCount.captured} / 8
                     </p>
                   </div>
@@ -271,17 +273,19 @@ export default function GeisterCpuPage() {
             </Card>
 
             {/* ルール概要 */}
-            <div className="mb-6">
+            <div className="mb-3 sm:mb-4">
               <RulesSummary />
             </div>
 
-            <GeisterBoard
-              gameState={clientState}
-              onPieceClick={handlePieceClick}
-              onCellClick={handleMove}
-              selectedPieceId={selectedPiece}
-              validMoves={validMoves}
-            />
+            <div className="flex justify-center">
+              <GeisterBoard
+                gameState={clientState}
+                onPieceClick={handlePieceClick}
+                onCellClick={handleMove}
+                selectedPieceId={selectedPiece}
+                validMoves={validMoves}
+              />
+            </div>
 
             {phase === 'finished' && (
               <Card className="mt-6 bg-white/95">

@@ -27,76 +27,74 @@ export const Connect4Board: React.FC<Connect4BoardProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center space-y-8">
-      {/* 各層を上から下へ表示 */}
-      {Array.from({ length: BOARD_SIZE })
-        .map((_, z) => BOARD_SIZE - 1 - z) // 上から下へ（z=3,2,1,0）
-        .map((z) => (
-          <div key={z} className="relative">
-            {/* 層番号 */}
-            <div className="text-center mb-2">
-              <span className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">
-                レベル {z + 1}
-              </span>
-            </div>
+    <div className="flex justify-center">
+      {/* 4つの層を2×2グリッドで表示 */}
+      <div className="inline-block bg-slate-800 p-3 sm:p-4 rounded-lg shadow-2xl">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          {Array.from({ length: BOARD_SIZE })
+            .map((_, z) => BOARD_SIZE - 1 - z) // 上から下へ（z=3,2,1,0）
+            .map((z) => (
+              <div key={z} className="relative">
+                {/* 層番号 */}
+                <div className="text-center mb-1.5">
+                  <span className="text-xs sm:text-sm font-bold text-white bg-slate-700 px-2 py-0.5 rounded-full">
+                    L{z + 1}
+                  </span>
+                </div>
 
-            {/* グリッド */}
-            <div
-              className="inline-block bg-slate-800 p-2 rounded-lg shadow-2xl"
-              style={{
-                transform: `perspective(800px) rotateX(${10 + z * 2}deg)`,
-                opacity: 1 - z * 0.05,
-              }}
-            >
-              <div
-                className="grid gap-2"
-                style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)` }}
-              >
-                {Array.from({ length: BOARD_SIZE }).map((_, y) =>
-                  Array.from({ length: BOARD_SIZE }).map((_, x) => {
-                    const pos: Position3D = { x, y, z };
-                    const piece = gameState.board[z][y][x];
-                    const available = isAvailable(pos);
-                    const isWinning = isWinningPiece(pos);
+                {/* グリッド */}
+                <div className="bg-slate-700/50 p-1 sm:p-1.5 rounded">
+                  <div
+                    className="grid gap-0.5 sm:gap-1"
+                    style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)` }}
+                  >
+                    {Array.from({ length: BOARD_SIZE }).map((_, y) =>
+                      Array.from({ length: BOARD_SIZE }).map((_, x) => {
+                        const pos: Position3D = { x, y, z };
+                        const piece = gameState.board[z][y][x];
+                        const available = isAvailable(pos);
+                        const isWinning = isWinningPiece(pos);
 
-                    return (
-                      <div
-                        key={`${x}-${y}`}
-                        onClick={() => available && onCellClick?.(pos)}
-                        className={`
-                          w-16 h-16 rounded-lg border-2 flex items-center justify-center
-                          transition-all duration-200
-                          ${
-                            piece
-                              ? isWinning
-                                ? 'ring-4 ring-yellow-400 animate-pulse'
-                                : ''
-                              : available
-                              ? 'bg-slate-600 border-slate-500 hover:bg-slate-500 cursor-pointer hover:scale-105'
-                              : 'bg-slate-700 border-slate-600'
-                          }
-                        `}
-                      >
-                        {piece && (
+                        return (
                           <div
-                            className={`text-5xl ${
-                              isWinning ? 'animate-bounce' : ''
-                            }`}
+                            key={`${x}-${y}`}
+                            onClick={() => available && onCellClick?.(pos)}
+                            className={`
+                              w-8 h-8 sm:w-12 sm:h-12 rounded border-2 flex items-center justify-center
+                              transition-all duration-200
+                              ${
+                                piece
+                                  ? isWinning
+                                    ? 'ring-2 ring-yellow-400 animate-pulse'
+                                    : ''
+                                  : available
+                                  ? 'bg-slate-600 border-slate-500 hover:bg-slate-500 cursor-pointer hover:scale-105'
+                                  : 'bg-slate-700 border-slate-600'
+                              }
+                            `}
                           >
-                            {PLAYER_COLORS[piece.owner].emoji}
+                            {piece && (
+                              <div
+                                className={`text-xl sm:text-3xl ${
+                                  isWinning ? 'animate-bounce' : ''
+                                }`}
+                              >
+                                {PLAYER_COLORS[piece.owner].emoji}
+                              </div>
+                            )}
+                            {!piece && available && (
+                              <div className="text-sm sm:text-xl opacity-30">+</div>
+                            )}
                           </div>
-                        )}
-                        {!piece && available && (
-                          <div className="text-2xl opacity-30">+</div>
-                        )}
-                      </div>
-                    );
-                  })
-                )}
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
+            ))}
+        </div>
+      </div>
     </div>
   );
 };
