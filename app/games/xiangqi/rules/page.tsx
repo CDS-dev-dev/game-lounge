@@ -5,11 +5,11 @@ import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 
 export default function XiangqiRulesPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 sm:py-8 md:py-12 px-2 sm:px-4">
       <div className="max-w-4xl mx-auto">
         <Card className="bg-white/95">
           <CardHeader>
-            <h1 className="text-3xl font-bold text-slate-800">中国象棋（シャンチー）ルール</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-800">中国象棋（シャンチー）ルール</h1>
           </CardHeader>
           <CardContent className="prose prose-lg max-w-none">
             <h2 className="text-2xl font-bold mt-6 mb-4 text-slate-900">ゲーム概要</h2>

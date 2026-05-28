@@ -11,11 +11,11 @@ export default function XiangqiModePage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-6 sm:py-12 px-3 sm:px-4">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">中国象棋（シャンチー）</h1>
-          <p className="text-gray-100">プレイモードを選択してください</p>
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">中国象棋（シャンチー）</h1>
+          <p className="text-sm sm:text-base text-gray-100">プレイモードを選択してください</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

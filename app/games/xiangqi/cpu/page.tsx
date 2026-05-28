@@ -119,12 +119,12 @@ export default function XiangqiCpuPage() {
   const clientState = gameState ? toClientState(gameState, PLAYER_ID) : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 sm:py-8 md:py-12 px-2 sm:px-4">
       <div className="max-w-5xl mx-auto">
         {/* ヘッダー */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">中国象棋 CPU対戦</h1>
-          <p className="text-gray-200">中国伝統の将棋ゲーム</p>
+        <div className="text-center mb-4 sm:mb-6 md:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">中国象棋 CPU対戦</h1>
+          <p className="text-sm sm:text-base text-gray-200">中国伝統の将棋ゲーム</p>
         </div>
 
         {/* 難易度選択 */}

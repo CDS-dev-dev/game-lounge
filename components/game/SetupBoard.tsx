@@ -152,25 +152,25 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
       )}
 
       {/* 駒タイプ選択 */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-4">
         <button
           onClick={() => setSelectedType('good')}
           disabled={isTimedOut}
           className={`
-            p-6 rounded-xl border-4 transition-all
+            p-3 sm:p-6 rounded-xl border-2 sm:border-4 transition-all
             ${
               selectedType === 'good'
-                ? 'border-blue-500 bg-blue-50 ring-4 ring-blue-200'
+                ? 'border-blue-500 bg-blue-50 ring-2 sm:ring-4 ring-blue-200'
                 : 'border-gray-300 bg-white hover:border-blue-300'
             }
             ${isTimedOut ? 'opacity-50 cursor-not-allowed' : ''}
           `}
         >
-          <div className="text-6xl mb-2">👻</div>
-          <div className="text-xl font-bold text-gray-900">Good駒</div>
-          <div className="text-sm text-gray-700 mt-2">残り: {4 - goodCount} / 4</div>
+          <div className="text-4xl sm:text-6xl mb-1 sm:mb-2">👻</div>
+          <div className="text-base sm:text-xl font-bold text-gray-900">Good駒</div>
+          <div className="text-xs sm:text-sm text-gray-700 mt-1 sm:mt-2">残り: {4 - goodCount} / 4</div>
           {/* プログレスバー */}
-          <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="mt-1 sm:mt-2 h-1.5 sm:h-2 bg-gray-200 rounded-full overflow-hidden">
             <div
               className="h-full bg-blue-500 transition-all"
               style={{ width: `${(goodCount / 4) * 100}%` }}
@@ -182,20 +182,20 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
           onClick={() => setSelectedType('bad')}
           disabled={isTimedOut}
           className={`
-            p-6 rounded-xl border-4 transition-all
+            p-3 sm:p-6 rounded-xl border-2 sm:border-4 transition-all
             ${
               selectedType === 'bad'
-                ? 'border-red-500 bg-red-50 ring-4 ring-red-200'
+                ? 'border-red-500 bg-red-50 ring-2 sm:ring-4 ring-red-200'
                 : 'border-gray-300 bg-white hover:border-red-300'
             }
             ${isTimedOut ? 'opacity-50 cursor-not-allowed' : ''}
           `}
         >
-          <div className="text-6xl mb-2">😈</div>
-          <div className="text-xl font-bold text-gray-900">Bad駒</div>
-          <div className="text-sm text-gray-700 mt-2">残り: {4 - badCount} / 4</div>
+          <div className="text-4xl sm:text-6xl mb-1 sm:mb-2">😈</div>
+          <div className="text-base sm:text-xl font-bold text-gray-900">Bad駒</div>
+          <div className="text-xs sm:text-sm text-gray-700 mt-1 sm:mt-2">残り: {4 - badCount} / 4</div>
           {/* プログレスバー */}
-          <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="mt-1 sm:mt-2 h-1.5 sm:h-2 bg-gray-200 rounded-full overflow-hidden">
             <div
               className="h-full bg-red-500 transition-all"
               style={{ width: `${(badCount / 4) * 100}%` }}
@@ -205,9 +205,9 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
       </div>
 
       {/* ヒント */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-900">
-        <p className="font-semibold mb-2">💡 操作方法</p>
-        <ul className="space-y-1 list-disc list-inside">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 sm:p-4 text-xs sm:text-sm text-blue-900">
+        <p className="font-semibold mb-1 sm:mb-2">💡 操作方法</p>
+        <ul className="space-y-0.5 sm:space-y-1 list-disc list-inside">
           <li>緑色のマスをクリックして駒を配置</li>
           <li>配置済みの駒をクリックして種類を変更（👻 ⇔ 😈）</li>
           <li>上のボタンで配置する駒の種類を選択</li>
@@ -215,9 +215,9 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
       </div>
 
       {/* 盤面 */}
-      <div className="flex justify-center">
-        <div className="inline-block bg-amber-100 p-4 rounded-lg shadow-lg">
-          <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)` }}>
+      <div className="flex justify-center overflow-x-auto">
+        <div className="inline-block bg-amber-100 p-2 sm:p-4 rounded-lg shadow-lg">
+          <div className="grid gap-0.5 sm:gap-1" style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)` }}>
             {Array.from({ length: BOARD_SIZE }).map((_, y) =>
               Array.from({ length: BOARD_SIZE }).map((_, x) => {
                 const piece = getPieceAtPosition(x, y);
@@ -228,7 +228,7 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
                     key={`${x}-${y}`}
                     onClick={() => isAllowed && handleCellClick(x, y)}
                     className={`
-                      w-16 h-16 flex items-center justify-center border-2 transition-all
+                      w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center border-2 transition-all
                       ${
                         isAllowed
                           ? 'bg-green-100 border-green-300 cursor-pointer hover:bg-green-200'
@@ -239,7 +239,7 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
                     `}
                   >
                     {piece && (
-                      <div className="text-4xl">
+                      <div className="text-2xl sm:text-4xl">
                         {piece.type === 'good' ? '👻' : '😈'}
                       </div>
                     )}
@@ -252,7 +252,7 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
       </div>
 
       {/* アクションボタン */}
-      <div className="flex gap-4 justify-center">
+      <div className="flex gap-2 sm:gap-4 justify-center">
         <Button variant="secondary" onClick={handleRandomSetup} disabled={isTimedOut}>
           ランダム配置
         </Button>
