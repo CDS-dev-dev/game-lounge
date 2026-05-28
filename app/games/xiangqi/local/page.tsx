@@ -19,6 +19,7 @@ import {
 import type { XiangqiState, Position, PlayerRole } from '@/lib/games/xiangqi/types';
 import { XiangqiBoard } from '@/components/game/XiangqiBoard';
 import { useToast } from '@/components/ui/Toast';
+import { GameHeader } from '@/components/layout/GameHeader';
 
 type LocalGamePhase = 'playing' | 'turnChange' | 'finished';
 
@@ -104,13 +105,19 @@ export default function XiangqiLocalPage() {
   const clientState = toClientState(gameState, playerId);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 sm:py-8 md:py-12 px-2 sm:px-4">
-      <div className="max-w-5xl mx-auto">
-        {/* ヘッダー */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">中国象棋 ローカル対戦</h1>
-          <p className="text-gray-200">同じ端末で2人対戦</p>
-        </div>
+    <>
+      <GameHeader
+        title="中国象棋 ローカル対戦"
+        backUrl="/games/xiangqi"
+        backLabel="モード選択"
+      />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">
+        <div className="max-w-5xl mx-auto">
+          {/* ヘッダー */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-white mb-2">中国象棋 ローカル対戦</h1>
+            <p className="text-gray-200">同じ端末で2人対戦</p>
+          </div>
 
         {/* ターン交代画面 */}
         {phase === 'turnChange' && (
@@ -192,12 +199,8 @@ export default function XiangqiLocalPage() {
           </Card>
         )}
 
-        <div className="mt-8 text-center">
-          <Link href="/games/xiangqi" className="text-gray-200 hover:text-white underline">
-            モード選択に戻る
-          </Link>
-        </div>
       </div>
     </div>
+    </>
   );
 }

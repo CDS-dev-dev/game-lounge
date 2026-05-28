@@ -21,6 +21,7 @@ import type { Connect4State, Position3D, Connect4ClientState } from '@/lib/games
 import { Connect4Board } from '@/components/game/Connect4Board';
 import { useToast } from '@/components/ui/Toast';
 import { PLAYER_COLORS } from '@/lib/games/connect4/constants';
+import { GameHeader } from '@/components/layout/GameHeader';
 
 type CpuGamePhase = 'difficulty-select' | 'playing' | 'cpuThinking' | 'finished';
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -122,13 +123,19 @@ export default function Connect4CpuPage() {
   const availablePositions = gameState && phase === 'playing' ? getAvailablePositions(gameState) : [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 px-2 sm:py-8 sm:px-4">
-      <div className="max-w-4xl mx-auto">
-        {/* ヘッダー */}
-        <div className="text-center mb-4 sm:mb-6">
-          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2">立体四目並べ CPU対戦</h1>
-          <p className="text-sm sm:text-base text-gray-200">4×4×4の立体空間で4つ揃えよう！</p>
-        </div>
+    <>
+      <GameHeader
+        title="立体四目並べ CPU対戦"
+        backUrl="/games/connect4"
+        backLabel="モード選択"
+      />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">
+        <div className="max-w-4xl mx-auto">
+          {/* ヘッダー */}
+          <div className="text-center mb-4 sm:mb-6">
+            <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2">立体四目並べ CPU対戦</h1>
+            <p className="text-sm sm:text-base text-gray-200">4×4×4の立体空間で4つ揃えよう！</p>
+          </div>
 
         {/* 難易度選択 */}
         {phase === 'difficulty-select' && (
@@ -268,12 +275,8 @@ export default function Connect4CpuPage() {
           </>
         )}
 
-        <div className="mt-8 text-center">
-          <Link href="/games/connect4" className="text-gray-200 hover:text-white underline">
-            モード選択に戻る
-          </Link>
-        </div>
       </div>
     </div>
+    </>
   );
 }

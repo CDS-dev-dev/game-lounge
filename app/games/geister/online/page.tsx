@@ -12,6 +12,7 @@ import {
   loadGameSession,
   subscribeToGameSession
 } from '@/lib/supabase/gameState';
+import { GameHeader } from '@/components/layout/GameHeader';
 
 type MatchingStatus = 'searching' | 'waiting' | 'matched';
 
@@ -82,8 +83,14 @@ export default function GeisterOnlinePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 sm:py-8 md:py-12 px-2 sm:px-4">
-      <div className="max-w-2xl mx-auto">
+    <>
+      <GameHeader
+        title="ガイスター オンライン対戦"
+        backUrl="/games/geister"
+        backLabel="モード選択"
+      />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">
+        <div className="max-w-2xl mx-auto">
         <Card className="text-center">
           <CardHeader>
             <h1 className="text-3xl font-bold">オンライン対戦</h1>
@@ -154,5 +161,6 @@ export default function GeisterOnlinePage() {
         </Card>
       </div>
     </div>
+    </>
   );
 }

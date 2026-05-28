@@ -18,6 +18,7 @@ import { GeisterBoard } from '@/components/game/GeisterBoard';
 import { SetupBoard } from '@/components/game/SetupBoard';
 import { RulesSummary } from '@/components/game/RulesSummary';
 import { useToast } from '@/components/ui/Toast';
+import { GameHeader } from '@/components/layout/GameHeader';
 
 type LocalGamePhase = 'setup-p1' | 'setup-p2-interstitial' | 'setup-p2' | 'playing' | 'turnChange' | 'finished';
 
@@ -150,13 +151,19 @@ export default function GeisterLocalPage() {
     : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 sm:py-8 md:py-12 px-2 sm:px-4">
-      <div className="max-w-4xl mx-auto">
-        {/* ヘッダー */}
-        <div className="text-center mb-4 sm:mb-6 md:mb-8">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">ローカル対戦</h1>
-          <p className="text-sm sm:text-base text-gray-200">同じ端末で2人対戦</p>
-        </div>
+    <>
+      <GameHeader
+        title="ガイスター ローカル対戦"
+        backUrl="/games/geister"
+        backLabel="モード選択"
+      />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">
+        <div className="max-w-4xl mx-auto">
+          {/* ヘッダー */}
+          <div className="text-center mb-4 sm:mb-6 md:mb-8">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">ローカル対戦</h1>
+            <p className="text-sm sm:text-base text-gray-200">同じ端末で2人対戦</p>
+          </div>
 
         {/* Player1配置フェーズ */}
         {phase === 'setup-p1' && (
@@ -310,12 +317,8 @@ export default function GeisterLocalPage() {
           </Card>
         )}
 
-        <div className="mt-8 text-center">
-          <Link href="/games/geister" className="text-gray-200 hover:text-white underline">
-            モード選択に戻る
-          </Link>
-        </div>
       </div>
     </div>
+    </>
   );
 }

@@ -5,14 +5,21 @@
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { GameHeader } from '@/components/layout/GameHeader';
 
 export default function Connect4OnlinePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 sm:py-8 md:py-12 px-2 sm:px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2">立体四目並べ オンライン対戦</h1>
-        </div>
+    <>
+      <GameHeader
+        title="立体四目並べ オンライン対戦"
+        backUrl="/games/connect4"
+        backLabel="モード選択"
+      />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2">立体四目並べ オンライン対戦</h1>
+          </div>
 
         <Card className="bg-white/95">
           <CardHeader>
@@ -37,12 +44,8 @@ export default function Connect4OnlinePage() {
           </CardContent>
         </Card>
 
-        <div className="mt-8 text-center">
-          <Link href="/games/connect4" className="text-gray-200 hover:text-white underline">
-            モード選択に戻る
-          </Link>
-        </div>
       </div>
     </div>
+    </>
   );
 }

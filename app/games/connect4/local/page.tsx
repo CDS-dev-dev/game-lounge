@@ -19,6 +19,7 @@ import {
 import type { Connect4State, Position3D, PlayerRole } from '@/lib/games/connect4/types';
 import { Connect4Board } from '@/components/game/Connect4Board';
 import { useToast } from '@/components/ui/Toast';
+import { GameHeader } from '@/components/layout/GameHeader';
 
 type LocalGamePhase = 'playing' | 'turnChange' | 'finished';
 
@@ -93,13 +94,19 @@ export default function Connect4LocalPage() {
   const availablePositions = phase === 'playing' ? getAvailablePositions(gameState) : [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 px-2 sm:py-8 sm:px-4">
-      <div className="max-w-4xl mx-auto">
-        {/* ヘッダー */}
-        <div className="text-center mb-4 sm:mb-6">
-          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2">立体四目並べ ローカル対戦</h1>
-          <p className="text-gray-200">同じ端末で2人対戦</p>
-        </div>
+    <>
+      <GameHeader
+        title="立体四目並べ ローカル対戦"
+        backUrl="/games/connect4"
+        backLabel="モード選択"
+      />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">
+        <div className="max-w-4xl mx-auto">
+          {/* ヘッダー */}
+          <div className="text-center mb-4 sm:mb-6">
+            <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2">立体四目並べ ローカル対戦</h1>
+            <p className="text-gray-200">同じ端末で2人対戦</p>
+          </div>
 
         {/* ターン交代画面 */}
         {phase === 'turnChange' && (
@@ -181,12 +188,8 @@ export default function Connect4LocalPage() {
           </Card>
         )}
 
-        <div className="mt-8 text-center">
-          <Link href="/games/connect4" className="text-gray-200 hover:text-white underline">
-            モード選択に戻る
-          </Link>
-        </div>
       </div>
     </div>
+    </>
   );
 }
