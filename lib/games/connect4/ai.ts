@@ -145,11 +145,18 @@ function minimax(
 
   if (isMaximizing) {
     let maxEval = -Infinity;
+    const currentRole = state.currentTurn;
 
     for (const pos of availablePositions) {
       try {
-        const playerId = state.players[aiRole];
+        const playerId = state.players[currentRole];
         if (!playerId) continue;
+
+        // currentTurnと一致するプレイヤーIDでのみ評価
+        if (currentRole !== aiRole) {
+          // ターンが違う場合はスキップ
+          continue;
+        }
 
         const newState = placePiece(state, playerId, pos);
         const evalScore = minimax(newState, depth - 1, alpha, beta, false, aiRole);
@@ -165,15 +172,22 @@ function minimax(
       }
     }
 
-    return maxEval;
+    return maxEval === -Infinity ? 0 : maxEval;
   } else {
     let minEval = Infinity;
     const opponentRole: PlayerRole = aiRole === 'player1' ? 'player2' : 'player1';
+    const currentRole = state.currentTurn;
 
     for (const pos of availablePositions) {
       try {
-        const playerId = state.players[opponentRole];
+        const playerId = state.players[currentRole];
         if (!playerId) continue;
+
+        // currentTurnと一致するプレイヤーIDでのみ評価
+        if (currentRole !== opponentRole) {
+          // ターンが違う場合はスキップ
+          continue;
+        }
 
         const newState = placePiece(state, playerId, pos);
         const evalScore = minimax(newState, depth - 1, alpha, beta, true, aiRole);
@@ -189,7 +203,7 @@ function minimax(
       }
     }
 
-    return minEval;
+    return minEval === Infinity ? 0 : minEval;
   }
 }
 
