@@ -106,7 +106,17 @@ export default function XiangqiRulesPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
               {/* 帥/将 */}
               <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
-                <h3 className="font-bold text-lg text-red-900 mb-2">帥/将（King）</h3>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex gap-2">
+                    <div className="w-12 h-12 rounded-full bg-red-600 border-2 border-red-800 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                      帥
+                    </div>
+                    <div className="w-12 h-12 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                      将
+                    </div>
+                  </div>
+                  <h3 className="font-bold text-lg text-red-900">帥/将（King）</h3>
+                </div>
                 <div className="flex gap-4 items-center mb-2">
                   <div className="grid grid-cols-3 gap-1 bg-amber-100 p-2 rounded">
                     <div className="w-8 h-8 border border-gray-400"></div>
@@ -131,7 +141,17 @@ export default function XiangqiRulesPage() {
 
               {/* 仕/士 */}
               <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-4">
-                <h3 className="font-bold text-lg text-orange-900 mb-2">仕/士（Advisor）</h3>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex gap-2">
+                    <div className="w-12 h-12 rounded-full bg-red-600 border-2 border-red-800 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                      仕
+                    </div>
+                    <div className="w-12 h-12 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                      士
+                    </div>
+                  </div>
+                  <h3 className="font-bold text-lg text-orange-900">仕/士（Advisor）</h3>
+                </div>
                 <div className="flex gap-4 items-center mb-2">
                   <div className="grid grid-cols-3 gap-1 bg-amber-100 p-2 rounded">
                     <div className="w-8 h-8 border border-gray-400 bg-yellow-200 flex items-center justify-center text-xs">↖</div>
@@ -156,7 +176,17 @@ export default function XiangqiRulesPage() {
 
               {/* 相/象 */}
               <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4">
-                <h3 className="font-bold text-lg text-yellow-900 mb-2">相/象（Elephant）</h3>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex gap-2">
+                    <div className="w-12 h-12 rounded-full bg-red-600 border-2 border-red-800 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                      相
+                    </div>
+                    <div className="w-12 h-12 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                      象
+                    </div>
+                  </div>
+                  <h3 className="font-bold text-lg text-yellow-900">相/象（Elephant）</h3>
+                </div>
                 <div className="flex gap-4 items-center mb-2">
                   <div className="grid grid-cols-5 gap-0.5 bg-amber-100 p-2 rounded">
                     <div className="w-6 h-6 border border-gray-400 bg-yellow-200 flex items-center justify-center text-[10px]">↖</div>
@@ -198,7 +228,17 @@ export default function XiangqiRulesPage() {
 
               {/* 馬 */}
               <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
-                <h3 className="font-bold text-lg text-green-900 mb-2">馬（Horse）</h3>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex gap-2">
+                    <div className="w-12 h-12 rounded-full bg-red-600 border-2 border-red-800 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                      馬
+                    </div>
+                    <div className="w-12 h-12 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                      馬
+                    </div>
+                  </div>
+                  <h3 className="font-bold text-lg text-green-900">馬（Horse）</h3>
+                </div>
                 <div className="flex gap-4 items-center mb-2">
                   <div className="grid grid-cols-5 gap-0.5 bg-amber-100 p-2 rounded">
                     <div className="w-6 h-6 border border-gray-400"></div>
@@ -241,7 +281,17 @@ export default function XiangqiRulesPage() {
 
               {/* 車 */}
               <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
-                <h3 className="font-bold text-lg text-blue-900 mb-2">車（Chariot）</h3>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex gap-2">
+                    <div className="w-12 h-12 rounded-full bg-red-600 border-2 border-red-800 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                      車
+                    </div>
+                    <div className="w-12 h-12 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                      車
+                    </div>
+                  </div>
+                  <h3 className="font-bold text-lg text-blue-900">車（Chariot）</h3>
+                </div>
                 <div className="flex gap-4 items-center mb-2">
                   <div className="grid grid-cols-5 gap-0.5 bg-amber-100 p-2 rounded">
                     <div className="w-6 h-6 border border-gray-400"></div>
@@ -282,7 +332,17 @@ export default function XiangqiRulesPage() {
 
               {/* 炮/砲 */}
               <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
-                <h3 className="font-bold text-lg text-purple-900 mb-2">炮/砲（Cannon）</h3>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex gap-2">
+                    <div className="w-12 h-12 rounded-full bg-red-600 border-2 border-red-800 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                      炮
+                    </div>
+                    <div className="w-12 h-12 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                      砲
+                    </div>
+                  </div>
+                  <h3 className="font-bold text-lg text-purple-900">炮/砲（Cannon）</h3>
+                </div>
                 <div className="flex gap-4 items-center mb-2">
                   <div className="grid grid-cols-5 gap-0.5 bg-amber-100 p-2 rounded">
                     <div className="w-6 h-6 border border-gray-400"></div>
@@ -333,7 +393,17 @@ export default function XiangqiRulesPage() {
 
               {/* 兵/卒 */}
               <div className="bg-pink-50 border-2 border-pink-300 rounded-lg p-4">
-                <h3 className="font-bold text-lg text-pink-900 mb-2">兵/卒（Soldier）</h3>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex gap-2">
+                    <div className="w-12 h-12 rounded-full bg-red-600 border-2 border-red-800 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                      兵
+                    </div>
+                    <div className="w-12 h-12 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                      卒
+                    </div>
+                  </div>
+                  <h3 className="font-bold text-lg text-pink-900">兵/卒（Soldier）</h3>
+                </div>
                 <div className="flex gap-2 items-center mb-2">
                   <div>
                     <p className="text-[10px] text-pink-900 font-bold mb-1 text-center">川を渡る前</p>
