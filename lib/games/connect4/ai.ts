@@ -145,18 +145,13 @@ function minimax(
 
   if (isMaximizing) {
     let maxEval = -Infinity;
-    const currentRole = state.currentTurn;
 
     for (const pos of availablePositions) {
       try {
+        // 現在のターンのプレイヤーIDを取得
+        const currentRole = state.currentTurn;
         const playerId = state.players[currentRole];
         if (!playerId) continue;
-
-        // currentTurnと一致するプレイヤーIDでのみ評価
-        if (currentRole !== aiRole) {
-          // ターンが違う場合はスキップ
-          continue;
-        }
 
         const newState = placePiece(state, playerId, pos);
         const evalScore = minimax(newState, depth - 1, alpha, beta, false, aiRole);
@@ -167,7 +162,9 @@ function minimax(
         if (beta <= alpha) {
           break; // ベータカット
         }
-      } catch {
+      } catch (error) {
+        // エラーをログに出力して問題を追跡
+        console.error('minimax error (maximizing):', error);
         continue;
       }
     }
@@ -175,19 +172,13 @@ function minimax(
     return maxEval === -Infinity ? 0 : maxEval;
   } else {
     let minEval = Infinity;
-    const opponentRole: PlayerRole = aiRole === 'player1' ? 'player2' : 'player1';
-    const currentRole = state.currentTurn;
 
     for (const pos of availablePositions) {
       try {
+        // 現在のターンのプレイヤーIDを取得
+        const currentRole = state.currentTurn;
         const playerId = state.players[currentRole];
         if (!playerId) continue;
-
-        // currentTurnと一致するプレイヤーIDでのみ評価
-        if (currentRole !== opponentRole) {
-          // ターンが違う場合はスキップ
-          continue;
-        }
 
         const newState = placePiece(state, playerId, pos);
         const evalScore = minimax(newState, depth - 1, alpha, beta, true, aiRole);
@@ -198,7 +189,9 @@ function minimax(
         if (beta <= alpha) {
           break; // アルファカット
         }
-      } catch {
+      } catch (error) {
+        // エラーをログに出力して問題を追跡
+        console.error('minimax error (minimizing):', error);
         continue;
       }
     }
@@ -224,6 +217,16 @@ export function calculateCpuMove(
   const playerId = state.players[cpuRole];
   if (!playerId) {
     throw new Error('CPUプレイヤーが見つかりません');
+  }
+
+  // デバッグ: ターンとロールの一致確認
+  if (state.currentTurn !== cpuRole) {
+    console.error('Turn mismatch:', {
+      currentTurn: state.currentTurn,
+      cpuRole,
+      players: state.players,
+    });
+    throw new Error(`CPUのターンではありません（現在: ${state.currentTurn}, CPU: ${cpuRole}）`);
   }
 
   // 難易度に応じた深さ
