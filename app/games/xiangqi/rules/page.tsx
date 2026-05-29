@@ -27,11 +27,76 @@ export default function XiangqiRulesPage() {
 
             <h2 className="text-2xl font-bold mt-8 mb-4 text-slate-900">盤面構成</h2>
             <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-6 my-6">
-              <ul className="list-disc pl-6 text-slate-700 font-medium space-y-2">
-                <li><strong>サイズ</strong>: 9列（a-i）× 10行（1-10）</li>
-                <li><strong>楚河漢界</strong>: 4行目と5行目の間にある「川」</li>
-                <li><strong>九宮</strong>: 各陣地の中央3×3エリア（将/帥と士/仕の移動範囲）</li>
-              </ul>
+              <div className="mb-4">
+                <h3 className="font-bold text-lg mb-3 text-amber-900">盤面サイズと構造</h3>
+                <ul className="list-disc pl-6 text-slate-700 font-medium space-y-2">
+                  <li><strong>サイズ</strong>: 9列（a-i）× 10行（1-10）</li>
+                  <li><strong>楚河漢界</strong>: 4行目と5行目の間にある「川」</li>
+                  <li><strong>九宮</strong>: 各陣地の中央3×3エリア（将/帥と士/仕の移動範囲）</li>
+                </ul>
+              </div>
+
+              <div className="mt-6">
+                <h3 className="font-bold text-lg mb-3 text-amber-900">初期配置図</h3>
+                <div className="bg-amber-100 p-4 rounded-lg overflow-x-auto">
+                  <div className="grid grid-cols-9 gap-0.5 min-w-[300px]">
+                    {/* 10行目（黒側最後列） */}
+                    {['車','馬','象','士','将','士','象','馬','車'].map((p, i) => (
+                      <div key={`b10-${i}`} className="w-8 h-8 bg-slate-700 text-white flex items-center justify-center text-xs font-bold rounded">
+                        {p}
+                      </div>
+                    ))}
+                    {/* 9行目 */}
+                    {Array(9).fill(null).map((_, i) => (
+                      <div key={`b9-${i}`} className="w-8 h-8 bg-amber-200 border border-amber-400"></div>
+                    ))}
+                    {/* 8行目（砲の列） */}
+                    {Array(9).fill(null).map((_, i) => (
+                      <div key={`b8-${i}`} className={`w-8 h-8 flex items-center justify-center text-xs font-bold rounded ${i === 1 || i === 7 ? 'bg-slate-700 text-white' : 'bg-amber-200 border border-amber-400'}`}>
+                        {(i === 1 || i === 7) ? '砲' : ''}
+                      </div>
+                    ))}
+                    {/* 7行目（卒の列） */}
+                    {Array(9).fill(null).map((_, i) => (
+                      <div key={`b7-${i}`} className={`w-8 h-8 flex items-center justify-center text-xs font-bold rounded ${i % 2 === 0 ? 'bg-slate-700 text-white' : 'bg-amber-200 border border-amber-400'}`}>
+                        {i % 2 === 0 ? '卒' : ''}
+                      </div>
+                    ))}
+                    {/* 6-5行目（川） */}
+                    {Array(18).fill(null).map((_, i) => (
+                      <div key={`river-${i}`} className="w-8 h-8 bg-blue-100 border border-blue-300 flex items-center justify-center text-[8px] text-blue-600">
+                        {Math.floor(i / 9) === 0 && i === 4 ? '楚河' : Math.floor(i / 9) === 1 && i === 13 ? '漢界' : ''}
+                      </div>
+                    ))}
+                    {/* 4行目（兵の列） */}
+                    {Array(9).fill(null).map((_, i) => (
+                      <div key={`r4-${i}`} className={`w-8 h-8 flex items-center justify-center text-xs font-bold rounded ${i % 2 === 0 ? 'bg-red-600 text-white' : 'bg-amber-200 border border-amber-400'}`}>
+                        {i % 2 === 0 ? '兵' : ''}
+                      </div>
+                    ))}
+                    {/* 3行目（炮の列） */}
+                    {Array(9).fill(null).map((_, i) => (
+                      <div key={`r3-${i}`} className={`w-8 h-8 flex items-center justify-center text-xs font-bold rounded ${i === 1 || i === 7 ? 'bg-red-600 text-white' : 'bg-amber-200 border border-amber-400'}`}>
+                        {(i === 1 || i === 7) ? '炮' : ''}
+                      </div>
+                    ))}
+                    {/* 2行目 */}
+                    {Array(9).fill(null).map((_, i) => (
+                      <div key={`r2-${i}`} className="w-8 h-8 bg-amber-200 border border-amber-400"></div>
+                    ))}
+                    {/* 1行目（紅側最後列） */}
+                    {['車','馬','相','仕','帥','仕','相','馬','車'].map((p, i) => (
+                      <div key={`r1-${i}`} className="w-8 h-8 bg-red-600 text-white flex items-center justify-center text-xs font-bold rounded">
+                        {p}
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-amber-900 mt-3 text-center">
+                    <span className="inline-block bg-red-600 text-white px-2 py-0.5 rounded mr-2">紅（先手）</span>
+                    <span className="inline-block bg-slate-700 text-white px-2 py-0.5 rounded">黒（後手）</span>
+                  </p>
+                </div>
+              </div>
             </div>
 
             <h2 className="text-2xl font-bold mt-8 mb-4 text-slate-900">駒の種類と動き</h2>
