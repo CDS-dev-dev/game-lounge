@@ -135,12 +135,14 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
     }
   };
 
-  const getCellAriaLabel = (x: number, y: number): string => {
-    const piece = gameState.board[y][x];
-    const isEscape = isEscapePosition(x, y);
-    const canMove = isValidMove(x, y);
+  const getCellAriaLabel = (internalX: number, internalY: number): string => {
+    const piece = gameState.board[internalY][internalX];
+    const isEscape = isEscapePosition(internalX, internalY);
+    // canMoveは表示座標で判定する必要があるため、内部→表示に変換
+    const display = toDisplayCoords(internalX, internalY);
+    const canMove = isValidMove(display.x, display.y);
 
-    let label = `${String.fromCharCode(65 + x)}${y + 1}`;
+    let label = `${String.fromCharCode(65 + internalX)}${internalY + 1}`;
 
     if (piece) {
       if (piece.owner === gameState.myRole) {
@@ -177,14 +179,12 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
       >
       <div className="grid gap-0.5 sm:gap-1" style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)` }}>
         {Array.from({ length: BOARD_SIZE }).map((_, rowIndex) => {
-          // プレイヤー視点に応じて盤面を反転（自分が常に下に来るように）
-          const displayY = gameState.myRole === 'player1'
-            ? BOARD_SIZE - 1 - rowIndex // player1は反転（下から上へ描画）
-            : rowIndex; // player2は通常の順序（上から下）
+          // 表示座標は常にrowIndexをそのまま使用（上から下に0,1,2...）
+          const displayY = rowIndex;
 
           return Array.from({ length: BOARD_SIZE }).map((_, colIndex) => {
             // 表示座標
-            const displayX = colIndex; // X軸は反転不要
+            const displayX = colIndex;
 
             // 内部座標に変換してデータを取得
             const internal = toInternalCoords(displayX, displayY);

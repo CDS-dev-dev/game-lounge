@@ -46,18 +46,27 @@ export function calculateCpuMove(
   }
 
   if (allMoves.length === 0) {
-    console.error('合法手が見つかりません - デバッグ情報:', {
+    // 各駒の合法手を詳細に出力
+    const debugInfo = myPieces.map(p => {
+      const moves = getValidMoves(state, cpuPlayerId, p.id);
+      return {
+        id: p.id,
+        pos: `(${p.position.x},${p.position.y})`,
+        type: p.type,
+        validMovesCount: moves.length,
+        validMoves: moves.map(m => `(${m.x},${m.y})`),
+      };
+    });
+
+    console.error('合法手が見つかりません - 詳細デバッグ:', {
       cpuRole,
       currentTurn: state.currentTurn,
       status: state.status,
       myPiecesCount: myPieces.length,
-      pieces: myPieces.map(p => ({
-        id: p.id,
-        pos: p.position,
-        type: p.type,
-        captured: p.captured,
-        escaped: p.escaped
-      })),
+      boardState: state.board.map((row, y) =>
+        row.map((cell, x) => cell ? `${cell.owner[6]}${cell.type[0]}` : '  ').join('|')
+      ).join('\n'),
+      piecesDetail: debugInfo,
     });
     throw new Error('合法手が見つかりません');
   }

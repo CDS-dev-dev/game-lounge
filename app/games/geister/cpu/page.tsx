@@ -19,6 +19,7 @@ import type { GeisterState, PieceSetup, Position, GeisterClientState } from '@/l
 import { GeisterBoard } from '@/components/game/GeisterBoard';
 import { SetupBoard } from '@/components/game/SetupBoard';
 import { RulesSummary } from '@/components/game/RulesSummary';
+import { RulesModal } from '@/components/game/RulesModal';
 import { useToast } from '@/components/ui/Toast';
 
 type CpuGamePhase = 'orderSelect' | 'setup' | 'playing' | 'cpuThinking' | 'finished';
@@ -373,39 +374,39 @@ export default function GeisterCpuPage() {
           <>
             <Card className="mb-3 sm:mb-4 bg-white/95">
               <CardContent className="py-2 sm:py-3">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center flex-wrap gap-2">
                   <div>
                     <p className="text-xs sm:text-sm text-slate-600 font-medium">現在のターン</p>
                     <p className="text-base sm:text-xl font-bold text-slate-900">
                       {gameState.currentTurn === playerRole ? 'あなた' : 'CPU'}
                     </p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-center">
                     <p className="text-xs sm:text-sm text-slate-600 font-medium">捕獲した駒</p>
                     <p className="text-sm sm:text-lg font-semibold text-slate-900">
                       {clientState.opponentPiecesCount.captured} / 8
                     </p>
                   </div>
-                </div>
-                {/* 待ったボタン */}
-                {phase === 'playing' && history.length >= 3 && (
-                  <div className="mt-3 text-center">
-                    <Button
-                      variant="secondary"
-                      onClick={handleUndo}
-                      className="text-sm"
-                    >
-                      ↩️ 待った（1手戻す）
-                    </Button>
+                  <div className="flex gap-2 items-center">
+                    {/* ルールボタン */}
+                    <RulesModal gameName="ガイスター">
+                      <RulesSummary />
+                    </RulesModal>
+                    {/* 待ったボタン */}
+                    {phase === 'playing' && history.length >= 3 && (
+                      <Button
+                        variant="secondary"
+                        onClick={handleUndo}
+                        className="text-xs sm:text-sm"
+                        aria-label="1手戻す"
+                      >
+                        ↩️ 待った
+                      </Button>
+                    )}
                   </div>
-                )}
+                </div>
               </CardContent>
             </Card>
-
-            {/* ルール概要 */}
-            <div className="mb-3 sm:mb-4">
-              <RulesSummary />
-            </div>
 
             <div className="flex justify-center">
               <GeisterBoard

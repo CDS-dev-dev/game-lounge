@@ -208,25 +208,31 @@ export function calculateCpuMove(
   cpuRole: PlayerRole,
   difficulty: 'easy' | 'medium' | 'hard' = 'medium'
 ): Position3D {
-  const availablePositions = getAvailablePositions(state);
-
-  if (availablePositions.length === 0) {
-    throw new Error('配置可能な位置がありません');
-  }
-
   const playerId = state.players[cpuRole];
   if (!playerId) {
     throw new Error('CPUプレイヤーが見つかりません');
   }
 
-  // デバッグ: ターンとロールの一致確認
+  // ターンチェック（engineでもチェックされるが、早期にエラーを検出）
   if (state.currentTurn !== cpuRole) {
-    console.error('Turn mismatch:', {
+    console.error('CPUのターンではありません:', {
       currentTurn: state.currentTurn,
       cpuRole,
       players: state.players,
     });
     throw new Error(`CPUのターンではありません（現在: ${state.currentTurn}, CPU: ${cpuRole}）`);
+  }
+
+  const availablePositions = getAvailablePositions(state);
+
+  if (availablePositions.length === 0) {
+    console.error('配置可能な位置がありません:', {
+      status: state.status,
+      currentTurn: state.currentTurn,
+      cpuRole,
+      boardState: state.board.map(layer => layer.map(row => row.map(cell => cell ? '●' : '○'))),
+    });
+    throw new Error('配置可能な位置がありません');
   }
 
   // 難易度に応じた深さ

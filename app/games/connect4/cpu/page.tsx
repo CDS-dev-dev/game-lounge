@@ -19,6 +19,7 @@ import {
 import { calculateCpuMove } from '@/lib/games/connect4/ai';
 import type { Connect4State, Position3D, Connect4ClientState } from '@/lib/games/connect4/types';
 import { Connect4Board3D } from '@/components/game/Connect4Board3D';
+import { RulesModal } from '@/components/game/RulesModal';
 import { useToast } from '@/components/ui/Toast';
 import { PLAYER_COLORS } from '@/lib/games/connect4/constants';
 import { GameHeader } from '@/components/layout/GameHeader';
