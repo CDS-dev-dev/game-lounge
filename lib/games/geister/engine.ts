@@ -366,7 +366,7 @@ export function movePiece(
 
   // 勝者判定
   const winResult = checkWinner(newState);
-  if (winResult.winner !== undefined) {
+  if (winResult.winner !== null) {
     return {
       ...newState,
       winner: winResult.winner,

@@ -17,6 +17,17 @@ export function calculateCpuMove(
   cpuPlayerId: string
 ): CpuMove {
   const cpuRole: PlayerRole = state.players.player1 === cpuPlayerId ? 'player1' : 'player2';
+
+  // ターンの確認
+  if (state.currentTurn !== cpuRole) {
+    console.error('Turn mismatch:', {
+      currentTurn: state.currentTurn,
+      cpuRole,
+      players: state.players,
+    });
+    throw new Error(`CPUのターンではありません（現在: ${state.currentTurn}, CPU: ${cpuRole}）`);
+  }
+
   const myPieces = state.pieces[cpuRole].filter(p => !p.captured && !p.escaped);
 
   // 全ての合法手を生成
@@ -35,6 +46,19 @@ export function calculateCpuMove(
   }
 
   if (allMoves.length === 0) {
+    console.error('合法手が見つかりません - デバッグ情報:', {
+      cpuRole,
+      currentTurn: state.currentTurn,
+      status: state.status,
+      myPiecesCount: myPieces.length,
+      pieces: myPieces.map(p => ({
+        id: p.id,
+        pos: p.position,
+        type: p.type,
+        captured: p.captured,
+        escaped: p.escaped
+      })),
+    });
     throw new Error('合法手が見つかりません');
   }
 
@@ -42,16 +66,7 @@ export function calculateCpuMove(
   allMoves.sort((a, b) => b.score - a.score);
   const bestScore = allMoves[0].score;
   const bestMoves = allMoves.filter(m => m.score === bestScore);
-  const selectedMove = bestMoves[Math.floor(Math.random() * bestMoves.length)];
-
-  console.log('CPU思考:', {
-    totalMoves: allMoves.length,
-    bestScore,
-    bestMovesCount: bestMoves.length,
-    selected: selectedMove,
-  });
-
-  return selectedMove;
+  return bestMoves[Math.floor(Math.random() * bestMoves.length)];
 }
 
 /**
