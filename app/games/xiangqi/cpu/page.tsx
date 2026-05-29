@@ -38,6 +38,7 @@ export default function XiangqiCpuPage() {
   const [gameState, setGameState] = useState<XiangqiState | null>(null);
   const [selectedPiece, setSelectedPiece] = useState<Position | null>(null);
   const [validMoves, setValidMoves] = useState<Position[]>([]);
+  const [history, setHistory] = useState<XiangqiState[]>([]); // 履歴保存
 
   // 難易度選択
   const handleDifficultySelect = (selectedDifficulty: Difficulty) => {
@@ -70,7 +71,25 @@ export default function XiangqiCpuPage() {
     }
 
     setGameState(newState);
+    setHistory([newState]); // 初期状態を履歴に保存
     setPhase('playing');
+  };
+
+  // 待った機能
+  const handleUndo = () => {
+    if (!gameState || history.length < 3) {
+      showToast('待ったできません', 'error');
+      return;
+    }
+
+    const newHistory = history.slice(0, -2);
+    const previousState = newHistory[newHistory.length - 1];
+
+    setGameState(previousState);
+    setHistory(newHistory);
+    setSelectedPiece(null);
+    setValidMoves([]);
+    showToast('1手戻しました', 'success');
   };
 
   // セルクリック
@@ -91,6 +110,7 @@ export default function XiangqiCpuPage() {
     if (selectedPiece) {
       try {
         let newState = movePiece(gameState, PLAYER_ID, selectedPiece, pos);
+        setHistory([...history, newState]); // 履歴に追加
         setSelectedPiece(null);
         setValidMoves([]);
 
@@ -115,6 +135,7 @@ export default function XiangqiCpuPage() {
         const cpuColor = playerColor === 'red' ? 'black' : 'red';
         const cpuMove = calculateCpuMove(newState, cpuColor, difficulty);
         newState = movePiece(newState, CPU_ID, cpuMove.from, cpuMove.to);
+        setHistory((prev) => [...prev, newState]); // 履歴に追加
 
         // 勝敗判定
         const cpuResult = checkWinner(newState);
@@ -143,6 +164,7 @@ export default function XiangqiCpuPage() {
     setGameState(null);
     setSelectedPiece(null);
     setValidMoves([]);
+    setHistory([]);
   };
 
   const clientState = gameState ? toClientState(gameState, PLAYER_ID) : null;
@@ -301,6 +323,18 @@ export default function XiangqiCpuPage() {
                     </p>
                   </div>
                 </div>
+                {/* 待ったボタン */}
+                {phase === 'playing' && history.length >= 3 && (
+                  <div className="mt-3 text-center">
+                    <Button
+                      variant="secondary"
+                      onClick={handleUndo}
+                      className="text-sm"
+                    >
+                      ↩️ 待った（1手戻す）
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

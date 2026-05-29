@@ -38,6 +38,7 @@ export default function GeisterCpuPage() {
   const [selectedPiece, setSelectedPiece] = useState<string | null>(null);
   const [validMoves, setValidMoves] = useState<Position[]>([]);
   const [playerSetup, setPlayerSetup] = useState<PieceSetup[]>([]);
+  const [history, setHistory] = useState<GeisterState[]>([]); // 履歴保存
 
   // 先攻後攻選択
   const handleOrderSelect = (order: 'first' | 'second') => {
@@ -118,6 +119,24 @@ export default function GeisterCpuPage() {
     }
   };
 
+  // 待った機能
+  const handleUndo = () => {
+    if (history.length < 3) {
+      showToast('待ったできません', 'error');
+      return;
+    }
+
+    // プレイヤーの手とCPUの手の2手戻す
+    const newHistory = history.slice(0, -2);
+    const previousState = newHistory[newHistory.length - 1];
+
+    setGameState(previousState);
+    setHistory(newHistory);
+    setSelectedPiece(null);
+    setValidMoves([]);
+    showToast('1手戻しました', 'success');
+  };
+
   // プレイヤーの駒選択
   const handlePieceClick = (pieceId: string) => {
     const playerRole = playerOrder === 'first' ? 'player1' : 'player2';
@@ -139,6 +158,7 @@ export default function GeisterCpuPage() {
     try {
       // プレイヤーの移動
       let newState = movePiece(gameState, PLAYER_ID, selectedPiece, to);
+      setHistory([...history, newState]); // 履歴に追加
       setSelectedPiece(null);
       setValidMoves([]);
 
@@ -161,6 +181,7 @@ export default function GeisterCpuPage() {
       // CPUが移動
       const cpuMove = calculateCpuMove(newState, CPU_ID);
       newState = movePiece(newState, CPU_ID, cpuMove.pieceId, cpuMove.to);
+      setHistory((prev) => [...prev, newState]); // 履歴に追加
 
       // 勝敗判定
       const cpuWinResult = checkWinner(newState);
@@ -189,6 +210,7 @@ export default function GeisterCpuPage() {
     setSelectedPiece(null);
     setValidMoves([]);
     setPlayerSetup([]);
+    setHistory([]);
   };
 
   // CPU対戦用のクライアント状態を作成
@@ -365,6 +387,18 @@ export default function GeisterCpuPage() {
                     </p>
                   </div>
                 </div>
+                {/* 待ったボタン */}
+                {phase === 'playing' && history.length >= 3 && (
+                  <div className="mt-3 text-center">
+                    <Button
+                      variant="secondary"
+                      onClick={handleUndo}
+                      className="text-sm"
+                    >
+                      ↩️ 待った（1手戻す）
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

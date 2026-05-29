@@ -1,0 +1,53 @@
+--- a/app/games/xiangqi/cpu/page.tsx
++++ b/app/games/xiangqi/cpu/page.tsx
+@@ -75,6 +75,7 @@
+     }
+ 
+     setGameState(newState);
++    setHistory([newState]);
+     setPhase('playing');
+   };
+ 
+@@ -91,6 +92,23 @@
+       return;
+     }
+ 
++  // 待った機能
++  const handleUndo = () => {
++    if (!gameState || history.length < 3) {
++      showToast('待ったできません', 'error');
++      return;
++    }
++
++    const newHistory = history.slice(0, -2);
++    const previousState = newHistory[newHistory.length - 1];
++
++    setGameState(previousState);
++    setHistory(newHistory);
++    setSelectedPiece(null);
++    setValidMoves([]);
++    showToast('1手戻しました', 'success');
++  };
++
+     // 移動
+     if (selectedPiece) {
+       try {
+         let newState = movePiece(gameState, PLAYER_ID, selectedPiece, pos);
++        setHistory([...history, newState]);
+         setSelectedPiece(null);
+         setValidMoves([]);
+ 
+@@ -114,6 +132,7 @@
+         const cpuColor = playerColor === 'red' ? 'black' : 'red';
+         const cpuMove = calculateCpuMove(newState, cpuColor, difficulty);
+         newState = movePiece(newState, CPU_ID, cpuMove.from, cpuMove.to);
++        setHistory((prev) => [...prev, newState]);
+ 
+         // 勝敗判定
+         const cpuResult = checkWinner(newState);
+@@ -144,6 +163,7 @@
+     setGameState(null);
+     setSelectedPiece(null);
+     setValidMoves([]);
++    setHistory([]);
+   };
