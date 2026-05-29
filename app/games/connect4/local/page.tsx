@@ -17,7 +17,7 @@ import {
   getAvailablePositions,
 } from '@/lib/games/connect4/engine';
 import type { Connect4State, Position3D, PlayerRole } from '@/lib/games/connect4/types';
-import { Connect4Board } from '@/components/game/Connect4Board';
+import { Connect4Board3D } from '@/components/game/Connect4Board3D';
 import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
 
@@ -157,7 +157,7 @@ export default function Connect4LocalPage() {
               </p>
             </div>
 
-            <Connect4Board
+            <Connect4Board3D
               gameState={clientState}
               onCellClick={handleCellClick}
               availablePositions={availablePositions}

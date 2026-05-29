@@ -18,7 +18,7 @@ import {
 } from '@/lib/games/connect4/engine';
 import { calculateCpuMove } from '@/lib/games/connect4/ai';
 import type { Connect4State, Position3D, Connect4ClientState } from '@/lib/games/connect4/types';
-import { Connect4Board } from '@/components/game/Connect4Board';
+import { Connect4Board3D } from '@/components/game/Connect4Board3D';
 import { useToast } from '@/components/ui/Toast';
 import { PLAYER_COLORS } from '@/lib/games/connect4/constants';
 import { GameHeader } from '@/components/layout/GameHeader';
@@ -321,7 +321,7 @@ export default function Connect4CpuPage() {
               </p>
             </div>
 
-            <Connect4Board
+            <Connect4Board3D
               gameState={clientState}
               onCellClick={handleCellClick}
               availablePositions={availablePositions}
