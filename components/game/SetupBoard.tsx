@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { PieceSetup, Position, PlayerRole } from '@/lib/games/geister/types';
 import { BOARD_SIZE, SETUP_COLS } from '@/lib/games/geister/constants';
 import { Button } from '@/components/ui/Button';
@@ -27,31 +27,13 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
   const [selectedType, setSelectedType] = useState<'good' | 'bad'>('good');
   const [remainingTime, setRemainingTime] = useState(timeLimit || 0);
   const [isTimedOut, setIsTimedOut] = useState(false);
+  const pieceIdCounter = useRef(0);
 
   const allowedRows = myRole === 'player1' ? [0, 1] : [4, 5];
   const goodCount = setup.filter((s) => s.type === 'good').length;
   const badCount = setup.filter((s) => s.type === 'bad').length;
 
-  // タイマー
-  useEffect(() => {
-    if (!timeLimit || isTimedOut) return;
-
-    setRemainingTime(timeLimit);
-
-    const timer = setInterval(() => {
-      setRemainingTime((prev) => {
-        if (prev <= 1) {
-          handleTimeout();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [timeLimit]);
-
-  const handleTimeout = () => {
+  const handleTimeout = useCallback(() => {
     if (isTimedOut) return;
     setIsTimedOut(true);
 
@@ -64,9 +46,28 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
     setTimeout(() => {
       onComplete(randomSetup);
     }, 1000);
-  };
+  }, [isTimedOut, setup, myRole, onSetupChange, onTimeout, onComplete]);
 
-  const handleCellClick = (x: number, y: number) => {
+  // タイマーカウントダウン
+  useEffect(() => {
+    if (!timeLimit || isTimedOut || remainingTime === 0) return;
+
+    const timer = setInterval(() => {
+      setRemainingTime((prev) => {
+        if (prev <= 1) {
+          handleTimeout();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLimit, isTimedOut, remainingTime, handleTimeout]);
+
+  // eslint-disable-next-line react-hooks/refs
+  const handleCellClick = useCallback((x: number, y: number) => {
     if (isTimedOut) return;
 
     // 配置可能範囲チェック
@@ -97,16 +98,17 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
         return;
       }
 
+      const newPieceId = `${myRole}-${pieceIdCounter.current++}`;
       onSetupChange([
         ...setup,
         {
-          pieceId: `${myRole}-${Date.now()}-${setup.length}`,
+          pieceId: newPieceId,
           position: { x, y },
           type: selectedType,
         },
       ]);
     }
-  };
+  }, [isTimedOut, allowedRows, setup, onSetupChange, selectedType, myRole]);
 
   const handleRandomSetup = () => {
     if (isTimedOut) return;

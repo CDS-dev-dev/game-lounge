@@ -307,53 +307,57 @@ export default function Connect4CpuPage() {
           <>
             <Card className="mb-3 sm:mb-4 bg-white/95">
               <CardContent className="py-2 sm:py-3">
-                <div className="flex justify-between items-center text-xs sm:text-sm">
+                <div className="flex justify-between items-center flex-wrap gap-2">
                   <div>
-                    <p className="text-slate-600 font-medium">ターン</p>
+                    <p className="text-xs sm:text-sm text-slate-600 font-medium">ターン</p>
                     <p className="text-base sm:text-xl font-bold text-slate-900">
                       {gameState!.currentTurn === (playerOrder === 'first' ? 'player1' : 'player2') ? '🔵 あなた' : '🔴 CPU'}
                     </p>
                   </div>
                   <div className="text-center">
-                    <p className="text-slate-600 font-medium">難易度</p>
-                    <p className="text-sm sm:text-lg font-semibold text-slate-900">
+                    <p className="text-xs sm:text-sm text-slate-600 font-medium">難易度</p>
+                    <p className="text-sm sm:text-base font-semibold text-slate-900">
                       {difficulty === 'easy' && '😊 初級'}
                       {difficulty === 'medium' && '🤔 中級'}
                       {difficulty === 'hard' && '🔥 上級'}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-slate-600 font-medium">駒数</p>
-                    <p className="text-sm sm:text-lg font-semibold text-slate-900">
-                      {clientState.myPiecesCount} / {clientState.opponentPiecesCount}
-                    </p>
+                  <div className="flex gap-2 items-center">
+                    {/* ルールボタン */}
+                    <RulesModal gameName="立体四目並べ">
+                      <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 text-sm">
+                        <p className="font-semibold text-indigo-900 mb-2">🎯 勝利条件</p>
+                        <p className="text-indigo-800 mb-3">
+                          • 縦・横・斜め（3次元含む）のいずれかで<span className="font-bold">4つ揃える</span>
+                        </p>
+                        <p className="text-indigo-700 text-xs mb-3">
+                          💡 4つの層（L1〜L4）を俯瞰して戦略を立てよう
+                        </p>
+                        <div className="bg-white/70 rounded p-3 mt-3">
+                          <p className="font-semibold text-indigo-900 mb-2 text-sm">🎮 操作方法</p>
+                          <ul className="text-indigo-800 text-xs space-y-1">
+                            <li>• <strong>マウスドラッグ:</strong> 視点を回転</li>
+                            <li>• <strong>スクロール:</strong> 拡大・縮小</li>
+                            <li>• <strong>青い玉クリック:</strong> 駒を配置</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </RulesModal>
+                    {/* 待ったボタン */}
+                    {phase === 'playing' && history.length >= 3 && (
+                      <Button
+                        variant="secondary"
+                        onClick={handleUndo}
+                        className="text-xs sm:text-sm"
+                        aria-label="1手戻す"
+                      >
+                        ↩️ 待った
+                      </Button>
+                    )}
                   </div>
                 </div>
-                {/* 待ったボタン */}
-                {phase === 'playing' && history.length >= 3 && (
-                  <div className="mt-3 text-center">
-                    <Button
-                      variant="secondary"
-                      onClick={handleUndo}
-                      className="text-sm"
-                    >
-                      ↩️ 待った（1手戻す）
-                    </Button>
-                  </div>
-                )}
               </CardContent>
             </Card>
-
-            {/* ルール概要 */}
-            <div className="mb-3 sm:mb-4 bg-indigo-50 border border-indigo-200 rounded-lg p-2 text-xs sm:text-sm">
-              <p className="font-semibold text-indigo-900 mb-1">🎯 勝利条件</p>
-              <p className="text-indigo-800">
-                • 縦・横・斜め（3次元含む）のいずれかで<span className="font-bold">4つ揃える</span>
-              </p>
-              <p className="text-indigo-700 mt-1 text-[10px] sm:text-xs">
-                💡 4つの層（L1〜L4）を俯瞰して戦略を立てよう
-              </p>
-            </div>
 
             <Connect4Board3D
               gameState={clientState}

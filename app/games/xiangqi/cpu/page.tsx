@@ -19,6 +19,7 @@ import {
 import { calculateCpuMove } from '@/lib/games/xiangqi/ai';
 import type { XiangqiState, Position } from '@/lib/games/xiangqi/types';
 import { XiangqiBoard } from '@/components/game/XiangqiBoard';
+import { RulesModal } from '@/components/game/RulesModal';
 import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
 
@@ -299,52 +300,63 @@ export default function XiangqiCpuPage() {
         {/* ゲームプレイ */}
         {(phase === 'playing' || phase === 'finished' || phase === 'cpuThinking') && clientState && (
           <>
-            <Card className="mb-6 bg-white/95">
-              <CardContent className="py-4">
-                <div className="flex justify-between items-center">
+            <Card className="mb-4 bg-white/95">
+              <CardContent className="py-3">
+                <div className="flex justify-between items-center flex-wrap gap-2">
                   <div>
-                    <p className="text-sm text-slate-600 font-medium">現在のターン</p>
-                    <p className="text-xl font-bold text-slate-900">
+                    <p className="text-xs sm:text-sm text-slate-600 font-medium">ターン</p>
+                    <p className="text-base sm:text-xl font-bold text-slate-900">
                       {gameState!.currentTurn === playerColor ? `あなた（${playerColor === 'red' ? '紅' : '黒'}）` : `CPU（${playerColor === 'red' ? '黒' : '紅'}）`}
                     </p>
                   </div>
                   <div className="text-center">
-                    <p className="text-sm text-slate-600 font-medium">難易度</p>
-                    <p className="text-lg font-semibold text-slate-900">
-                      {difficulty === 'easy' && '初級 😊'}
-                      {difficulty === 'medium' && '中級 🤔'}
-                      {difficulty === 'hard' && '上級 🔥'}
+                    <p className="text-xs sm:text-sm text-slate-600 font-medium">難易度</p>
+                    <p className="text-sm sm:text-base font-semibold text-slate-900">
+                      {difficulty === 'easy' && '😊 初級'}
+                      {difficulty === 'medium' && '🤔 中級'}
+                      {difficulty === 'hard' && '🔥 上級'}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-slate-600 font-medium">残り駒数</p>
-                    <p className="text-lg font-semibold text-slate-900">
-                      あなた: {clientState.myPiecesCount} / CPU: {clientState.opponentPiecesCount}
-                    </p>
+                  <div className="flex gap-2 items-center">
+                    {/* ルールボタン */}
+                    <RulesModal gameName="中国象棋">
+                      <div className="space-y-3">
+                        <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                          <p className="font-semibold text-indigo-900 mb-2">🎯 勝利条件</p>
+                          <p className="text-indigo-800 text-sm">
+                            • 相手の<span className="font-bold">将/帥を取る</span>（チェックメイト）
+                          </p>
+                        </div>
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                          <p className="font-semibold text-amber-900 mb-2">📖 主要な駒</p>
+                          <ul className="text-amber-800 text-sm space-y-1">
+                            <li>• <strong>将/帥:</strong> 九宮内で縦横1マス</li>
+                            <li>• <strong>車:</strong> 縦横に何マスでも（最強）</li>
+                            <li>• <strong>馬:</strong> 日の字型（蹩馬腿あり）</li>
+                            <li>• <strong>炮/砲:</strong> 台を飛び越えて攻撃</li>
+                            <li>• <strong>兵/卒:</strong> 川を渡ると左右にも動ける</li>
+                          </ul>
+                          <p className="text-amber-700 text-xs mt-2">
+                            💡 詳細は<a href="/games/xiangqi/rules" target="_blank" className="underline">ルールページ</a>をご覧ください
+                          </p>
+                        </div>
+                      </div>
+                    </RulesModal>
+                    {/* 待ったボタン */}
+                    {phase === 'playing' && history.length >= 3 && (
+                      <Button
+                        variant="secondary"
+                        onClick={handleUndo}
+                        className="text-xs sm:text-sm"
+                        aria-label="1手戻す"
+                      >
+                        ↩️ 待った
+                      </Button>
+                    )}
                   </div>
                 </div>
-                {/* 待ったボタン */}
-                {phase === 'playing' && history.length >= 3 && (
-                  <div className="mt-3 text-center">
-                    <Button
-                      variant="secondary"
-                      onClick={handleUndo}
-                      className="text-sm"
-                    >
-                      ↩️ 待った（1手戻す）
-                    </Button>
-                  </div>
-                )}
               </CardContent>
             </Card>
-
-            {/* ルール概要 */}
-            <div className="mb-6 bg-indigo-50 border border-indigo-200 rounded-lg p-3 text-sm">
-              <p className="font-semibold text-indigo-900 mb-1">🎯 勝利条件</p>
-              <p className="text-indigo-800">
-                • 相手の<span className="font-bold">将/帥を取る</span>（チェックメイト）
-              </p>
-            </div>
 
             <XiangqiBoard
               gameState={clientState}

@@ -68,7 +68,18 @@ export function calculateCpuMove(
       ).join('\n'),
       piecesDetail: debugInfo,
     });
-    throw new Error('合法手が見つかりません');
+
+    // フォールバック: 最初の駒をそのまま返す（動けない場合は投了扱い）
+    if (myPieces.length > 0) {
+      console.warn('フォールバック: 投了扱いで最初の駒をそのまま返します');
+      return {
+        pieceId: myPieces[0].id,
+        to: myPieces[0].position, // 動けないので同じ位置
+        score: -Infinity,
+      };
+    }
+
+    throw new Error('合法手が見つかりません（駒がありません）');
   }
 
   // 最高評価の手を選択（同点ならランダム）

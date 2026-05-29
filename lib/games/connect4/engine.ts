@@ -121,6 +121,13 @@ export function placePiece(
 
   // 配置可能か
   if (!canPlacePiece(state, pos)) {
+    // より詳細なエラーメッセージ
+    if (state.board[pos.z][pos.y][pos.x] !== null) {
+      throw new Error('その位置には既に駒があります');
+    }
+    if (pos.z > 0 && state.board[pos.z - 1][pos.y][pos.x] === null) {
+      throw new Error('下に駒がないため配置できません');
+    }
     throw new Error('その位置には配置できません');
   }
 

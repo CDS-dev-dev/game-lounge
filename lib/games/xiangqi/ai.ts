@@ -87,6 +87,10 @@ function getAllPossibleMoves(state: XiangqiState, role: PlayerRole): Move[] {
   return moves;
 }
 
+// タイムアウト管理用のグローバル変数
+let minimaxStartTime = 0;
+const MINIMAX_TIMEOUT_MS = 5000; // 5秒
+
 /**
  * ミニマックス法（アルファベータ枝刈り付き）
  */
@@ -98,6 +102,11 @@ function minimax(
   isMaximizing: boolean,
   aiRole: PlayerRole
 ): number {
+  // タイムアウトチェック
+  if (Date.now() - minimaxStartTime > MINIMAX_TIMEOUT_MS) {
+    return evaluateBoard(state, aiRole); // 時間切れ、現在の評価値を返す
+  }
+
   // 終了条件
   const { winner } = checkWinner(state);
   if (winner !== null || depth === 0) {
@@ -176,6 +185,9 @@ export function calculateCpuMove(
   if (possibleMoves.length === 0) {
     throw new Error('合法手がありません');
   }
+
+  // タイムアウトタイマー開始
+  minimaxStartTime = Date.now();
 
   // 難易度に応じた深さ
   const depths = {

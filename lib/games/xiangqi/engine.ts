@@ -214,11 +214,37 @@ export function movePiece(
   from: Position,
   to: Position
 ): XiangqiState {
+  const piece = state.board[from.row][from.col];
+
   if (!isValidMove(state, playerId, from, to)) {
-    throw new Error('不正な移動です');
+    // より詳細なエラーメッセージ
+    if (!piece) {
+      throw new Error('その位置に駒がありません');
+    }
+
+    const role: PlayerRole | null =
+      state.players.red === playerId ? 'red' : state.players.black === playerId ? 'black' : null;
+
+    if (role && state.currentTurn !== role) {
+      throw new Error('あなたのターンではありません');
+    }
+
+    if (role && piece.owner !== role) {
+      throw new Error('相手の駒は動かせません');
+    }
+
+    const targetPiece = state.board[to.row][to.col];
+    if (targetPiece && targetPiece.owner === role) {
+      throw new Error('自分の駒がいる場所には移動できません');
+    }
+
+    throw new Error('その駒はそこには移動できません');
   }
 
-  const piece = state.board[from.row][from.col]!;
+  if (!piece) {
+    throw new Error('その位置に駒がありません');
+  }
+
   const capturedPiece = state.board[to.row][to.col];
 
   // 盤面更新

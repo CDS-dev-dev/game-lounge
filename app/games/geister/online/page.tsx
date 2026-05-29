@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
@@ -22,36 +22,7 @@ export default function GeisterOnlinePage() {
   const [matchingStatus, setMatchingStatus] = useState<MatchingStatus>('searching');
   const [gameId, setGameId] = useState<string | null>(null);
 
-  useEffect(() => {
-    // ページを開いたら自動的にマッチング開始
-    startMatching();
-  }, []);
-
-  // ゲーム状態の監視
-  useEffect(() => {
-    if (!gameId) return;
-
-    let isMounted = true;
-
-    // ゲーム状態をリアルタイム監視
-    const unsubscribe = subscribeToGameSession(gameId, (state) => {
-      if (!isMounted) return;
-      console.log('Game state updated:', state.status);
-
-      // setupフェーズになったら配置画面へ遷移
-      if (state.status === 'setup') {
-        setMatchingStatus('matched');
-        router.push(`/setup/${gameId}`);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-      unsubscribe();
-    };
-  }, [gameId, router]);
-
-  const startMatching = async () => {
+  const startMatching = useCallback(async () => {
     setMatchingStatus('searching');
     try {
       const playerId = await getOrCreatePlayerId();
@@ -80,7 +51,36 @@ export default function GeisterOnlinePage() {
       showToast('マッチングに失敗しました。もう一度お試しください', 'error');
       setMatchingStatus('searching');
     }
-  };
+  }, [router, showToast]);
+
+  useEffect(() => {
+    // ページを開いたら自動的にマッチング開始
+    void startMatching();
+  }, [startMatching]);
+
+  // ゲーム状態の監視
+  useEffect(() => {
+    if (!gameId) return;
+
+    let isMounted = true;
+
+    // ゲーム状態をリアルタイム監視
+    const unsubscribe = subscribeToGameSession(gameId, (state) => {
+      if (!isMounted) return;
+      console.log('Game state updated:', state.status);
+
+      // setupフェーズになったら配置画面へ遷移
+      if (state.status === 'setup') {
+        setMatchingStatus('matched');
+        router.push(`/setup/${gameId}`);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [gameId, router]);
 
   return (
     <>

@@ -290,14 +290,27 @@ export function movePiece(
   pieceId: string,
   to: Position
 ): GeisterState {
-  if (!canMovePiece(state, playerId, pieceId, to)) {
-    throw new Error('無効な移動です');
-  }
-
   const allPieces = [...state.pieces.player1, ...state.pieces.player2];
   const piece = allPieces.find((p) => p.id === pieceId);
   if (!piece) {
     throw new Error('駒が見つかりません');
+  }
+
+  if (!canMovePiece(state, playerId, pieceId, to)) {
+    // より詳細なエラーメッセージ
+    if (state.currentTurn !== piece.owner) {
+      throw new Error('あなたのターンではありません');
+    }
+    const targetPiece = isValidPosition(to) ? state.board[to.y][to.x] : null;
+    if (targetPiece && targetPiece.owner === piece.owner) {
+      throw new Error('自分の駒がいる場所には移動できません');
+    }
+    const dx = Math.abs(to.x - piece.position.x);
+    const dy = Math.abs(to.y - piece.position.y);
+    if (dx + dy !== 1) {
+      throw new Error('隣接するマスにのみ移動できます');
+    }
+    throw new Error('その位置には移動できません');
   }
 
   const newPieces = {
