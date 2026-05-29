@@ -179,14 +179,12 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
         {Array.from({ length: BOARD_SIZE }).map((_, rowIndex) => {
           // プレイヤー視点に応じて盤面を反転（自分が常に下に来るように）
           const displayY = gameState.myRole === 'player1'
-            ? rowIndex // player1は通常の順序（上から下）
-            : BOARD_SIZE - 1 - rowIndex; // player2は反転（下から上）
+            ? BOARD_SIZE - 1 - rowIndex // player1は反転（下から上へ描画）
+            : rowIndex; // player2は通常の順序（上から下）
 
           return Array.from({ length: BOARD_SIZE }).map((_, colIndex) => {
-            // 表示座標（player2は反転済み）
-            const displayX = gameState.myRole === 'player1'
-              ? colIndex
-              : BOARD_SIZE - 1 - colIndex;
+            // 表示座標
+            const displayX = colIndex; // X軸は反転不要
 
             // 内部座標に変換してデータを取得
             const internal = toInternalCoords(displayX, displayY);

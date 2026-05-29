@@ -37,6 +37,7 @@ export default function Connect4CpuPage() {
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [playerOrder, setPlayerOrder] = useState<'first' | 'second' | null>(null);
   const [gameState, setGameState] = useState<Connect4State | null>(null);
+  const [history, setHistory] = useState<Connect4State[]>([]); // 履歴保存
 
   // 難易度選択
   const handleDifficultySelect = (selectedDifficulty: Difficulty) => {
@@ -69,7 +70,24 @@ export default function Connect4CpuPage() {
     }
 
     setGameState(newState);
+    setHistory([newState]); // 初期状態を履歴に保存
     setPhase('playing');
+  };
+
+  // 待った機能
+  const handleUndo = () => {
+    if (history.length < 3) {
+      showToast('待ったできません', 'error');
+      return;
+    }
+
+    // プレイヤーの手とCPUの手の2手戻す
+    const newHistory = history.slice(0, -2);
+    const previousState = newHistory[newHistory.length - 1];
+
+    setGameState(previousState);
+    setHistory(newHistory);
+    showToast('1手戻しました', 'success');
   };
 
   // プレイヤーの手
@@ -82,6 +100,7 @@ export default function Connect4CpuPage() {
     try {
       // プレイヤーの配置
       let newState = placePiece(gameState, PLAYER_ID, pos);
+      setHistory([...history, newState]); // 履歴に追加
 
       // 勝敗判定（最適化：最後に置いた位置のみチェック）
       const result = checkWinner(newState, pos);
@@ -113,6 +132,7 @@ export default function Connect4CpuPage() {
       const cpuRole = playerOrder === 'first' ? 'player2' : 'player1';
       const cpuMove = calculateCpuMove(newState, cpuRole, difficulty);
       newState = placePiece(newState, CPU_ID, cpuMove);
+      setHistory((prev) => [...prev, newState]); // 履歴に追加
 
       // 勝敗判定（最適化：最後に置いた位置のみチェック）
       const cpuResult = checkWinner(newState, cpuMove);
@@ -145,6 +165,7 @@ export default function Connect4CpuPage() {
     setPhase('difficulty-select');
     setPlayerOrder(null);
     setGameState(null);
+    setHistory([]);
   };
 
   const clientState: Connect4ClientState | null = gameState
@@ -307,6 +328,18 @@ export default function Connect4CpuPage() {
                     </p>
                   </div>
                 </div>
+                {/* 待ったボタン */}
+                {phase === 'playing' && history.length >= 3 && (
+                  <div className="mt-3 text-center">
+                    <Button
+                      variant="secondary"
+                      onClick={handleUndo}
+                      className="text-sm"
+                    >
+                      ↩️ 待った（1手戻す）
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
 

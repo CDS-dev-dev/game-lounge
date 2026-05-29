@@ -221,10 +221,10 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
         <div className="inline-block bg-amber-100 p-2 sm:p-4 rounded-lg shadow-lg max-w-full">
           <div className="grid gap-0.5 sm:gap-1" style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)` }}>
             {Array.from({ length: BOARD_SIZE }).map((_, rowIndex) => {
-              // player1は通常の順序（上から下）、player2は反転（自分が常に下に来るように）
+              // player1は反転（下から上へ描画）、player2は通常の順序（自分が常に下に来るように）
               const y = myRole === 'player1'
-                ? rowIndex // player1は通常の順序（上から下）
-                : BOARD_SIZE - 1 - rowIndex; // player2は反転（下から上）
+                ? BOARD_SIZE - 1 - rowIndex // player1は反転（下から上）
+                : rowIndex; // player2は通常の順序（上から下）
 
               return Array.from({ length: BOARD_SIZE }).map((_, x) => {
                 const piece = getPieceAtPosition(x, y);

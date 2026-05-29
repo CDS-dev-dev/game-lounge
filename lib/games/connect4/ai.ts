@@ -207,6 +207,11 @@ export function calculateCpuMove(
     throw new Error('配置可能な位置がありません');
   }
 
+  const playerId = state.players[cpuRole];
+  if (!playerId) {
+    throw new Error('CPUプレイヤーが見つかりません');
+  }
+
   // 難易度に応じた深さ
   const depths = {
     easy: 1,
@@ -226,9 +231,6 @@ export function calculateCpuMove(
 
   for (const pos of availablePositions) {
     try {
-      const playerId = state.players[cpuRole];
-      if (!playerId) continue;
-
       const newState = placePiece(state, playerId, pos);
       const score = minimax(newState, depth, -Infinity, Infinity, false, cpuRole);
 
@@ -236,7 +238,8 @@ export function calculateCpuMove(
         bestScore = score;
         bestMove = pos;
       }
-    } catch {
+    } catch (error) {
+      console.error('Move evaluation error:', error);
       continue;
     }
   }

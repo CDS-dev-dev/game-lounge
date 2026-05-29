@@ -130,6 +130,38 @@ function Board3D({
     }
   }
 
+  // 勝利ラインの串を描画
+  const renderWinningLine = () => {
+    if (!gameState.winningLine || gameState.winningLine.length !== 4) return null;
+
+    const points = gameState.winningLine.map((pos) => {
+      const x = pos.x - (BOARD_SIZE - 1) / 2;
+      const y = pos.y - (BOARD_SIZE - 1) / 2;
+      const z = pos.z - (BOARD_SIZE - 1) / 2;
+      return new THREE.Vector3(x, z, y);
+    });
+
+    // 両端を少し延長
+    const dir = new THREE.Vector3().subVectors(points[3], points[0]).normalize();
+    const start = points[0].clone().sub(dir.multiplyScalar(0.5));
+    const end = points[3].clone().add(dir.multiplyScalar(0.5));
+
+    const curve = new THREE.CatmullRomCurve3([start, ...points, end]);
+    const tubeGeometry = new THREE.TubeGeometry(curve, 64, 0.08, 8, false);
+
+    return (
+      <mesh geometry={tubeGeometry}>
+        <meshStandardMaterial
+          color="#fbbf24"
+          emissive="#fbbf24"
+          emissiveIntensity={0.8}
+          metalness={0.6}
+          roughness={0.2}
+        />
+      </mesh>
+    );
+  };
+
   return (
     <>
       {/* 環境光 */}
@@ -143,6 +175,9 @@ function Board3D({
 
       {/* セル群 */}
       {cells}
+
+      {/* 勝利ラインの串 */}
+      {renderWinningLine()}
     </>
   );
 }
