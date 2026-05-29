@@ -23,7 +23,7 @@ import { useToast } from '@/components/ui/Toast';
 import { PLAYER_COLORS } from '@/lib/games/connect4/constants';
 import { GameHeader } from '@/components/layout/GameHeader';
 
-type CpuGamePhase = 'difficulty-select' | 'playing' | 'cpuThinking' | 'finished';
+type CpuGamePhase = 'difficulty-select' | 'order-select' | 'playing' | 'cpuThinking' | 'finished';
 type Difficulty = 'easy' | 'medium' | 'hard';
 
 const PLAYER_ID = 'player-human';
@@ -35,13 +35,39 @@ export default function Connect4CpuPage() {
   const { showToast } = useToast();
   const [phase, setPhase] = useState<CpuGamePhase>('difficulty-select');
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
+  const [playerOrder, setPlayerOrder] = useState<'first' | 'second' | null>(null);
   const [gameState, setGameState] = useState<Connect4State | null>(null);
 
-  // 難易度選択してゲーム開始
-  const startGame = (selectedDifficulty: Difficulty) => {
+  // 難易度選択
+  const handleDifficultySelect = (selectedDifficulty: Difficulty) => {
     setDifficulty(selectedDifficulty);
-    let newState = createInitialState(GAME_ID, PLAYER_ID);
-    newState = joinPlayer2(newState, CPU_ID);
+    setPhase('order-select');
+  };
+
+  // 先攻後攻選択してゲーム開始
+  const startGame = async (order: 'first' | 'second') => {
+    setPlayerOrder(order);
+
+    let newState: Connect4State;
+    if (order === 'first') {
+      // プレイヤーが先攻
+      newState = createInitialState(GAME_ID, PLAYER_ID);
+      newState = joinPlayer2(newState, CPU_ID);
+    } else {
+      // CPUが先攻
+      newState = createInitialState(GAME_ID, CPU_ID);
+      newState = joinPlayer2(newState, PLAYER_ID);
+
+      // CPUが先に動く
+      setPhase('cpuThinking');
+      setGameState(newState);
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const cpuMove = calculateCpuMove(newState, 'player1', difficulty);
+      newState = placePiece(newState, CPU_ID, cpuMove);
+    }
+
     setGameState(newState);
     setPhase('playing');
   };
@@ -49,6 +75,9 @@ export default function Connect4CpuPage() {
   // プレイヤーの手
   const handleCellClick = async (pos: Position3D) => {
     if (!gameState || phase !== 'playing') return;
+
+    const playerRole = playerOrder === 'first' ? 'player1' : 'player2';
+    if (gameState.currentTurn !== playerRole) return;
 
     try {
       // プレイヤーの配置
@@ -81,7 +110,8 @@ export default function Connect4CpuPage() {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // CPUが配置
-      const cpuMove = calculateCpuMove(newState, 'player2', difficulty);
+      const cpuRole = playerOrder === 'first' ? 'player2' : 'player1';
+      const cpuMove = calculateCpuMove(newState, cpuRole, difficulty);
       newState = placePiece(newState, CPU_ID, cpuMove);
 
       // 勝敗判定（最適化：最後に置いた位置のみチェック）
@@ -113,6 +143,7 @@ export default function Connect4CpuPage() {
   // リプレイ
   const handleReplay = () => {
     setPhase('difficulty-select');
+    setPlayerOrder(null);
     setGameState(null);
   };
 
@@ -148,7 +179,7 @@ export default function Connect4CpuPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Button
                     variant="primary"
-                    onClick={() => startGame('easy')}
+                    onClick={() => handleDifficultySelect('easy')}
                     className="py-8 text-lg"
                   >
                     <div>
@@ -159,7 +190,7 @@ export default function Connect4CpuPage() {
                   </Button>
                   <Button
                     variant="primary"
-                    onClick={() => startGame('medium')}
+                    onClick={() => handleDifficultySelect('medium')}
                     className="py-8 text-lg"
                   >
                     <div>
@@ -170,7 +201,7 @@ export default function Connect4CpuPage() {
                   </Button>
                   <Button
                     variant="primary"
-                    onClick={() => startGame('hard')}
+                    onClick={() => handleDifficultySelect('hard')}
                     className="py-8 text-lg"
                   >
                     <div>
@@ -188,6 +219,51 @@ export default function Connect4CpuPage() {
               </Link>
             </div>
           </>
+        )}
+
+        {/* 先攻後攻選択 */}
+        {phase === 'order-select' && (
+          <Card className="bg-white/95 max-w-2xl mx-auto">
+            <CardHeader>
+              <h2 className="text-2xl font-bold text-slate-900 text-center">先攻・後攻を選択</h2>
+              <p className="text-sm text-slate-600 mt-2 text-center">
+                難易度: {difficulty === 'easy' && '😊 初級'}{difficulty === 'medium' && '🤔 中級'}{difficulty === 'hard' && '🔥 上級'}
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  onClick={() => startGame('first')}
+                  className="p-6 sm:p-8 rounded-xl border-4 border-blue-500 bg-blue-50 hover:bg-blue-100 transition-all hover:scale-105"
+                >
+                  <div className="text-4xl sm:text-6xl mb-3">🔵</div>
+                  <div className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">先攻</div>
+                  <div className="text-sm sm:text-base text-slate-600">
+                    あなたが先に置きます
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => startGame('second')}
+                  className="p-6 sm:p-8 rounded-xl border-4 border-red-500 bg-red-50 hover:bg-red-100 transition-all hover:scale-105"
+                >
+                  <div className="text-4xl sm:text-6xl mb-3">🔴</div>
+                  <div className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">後攻</div>
+                  <div className="text-sm sm:text-base text-slate-600">
+                    CPUが先に置きます
+                  </div>
+                </button>
+              </div>
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => setPhase('difficulty-select')}
+                  className="text-slate-600 hover:text-slate-900 underline text-sm"
+                >
+                  難易度を変更
+                </button>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* CPU思考中インジケーター（固定配置） */}
@@ -213,7 +289,7 @@ export default function Connect4CpuPage() {
                   <div>
                     <p className="text-slate-600 font-medium">ターン</p>
                     <p className="text-base sm:text-xl font-bold text-slate-900">
-                      {gameState!.currentTurn === 'player1' ? '🔵 あなた' : '🔴 CPU'}
+                      {gameState!.currentTurn === (playerOrder === 'first' ? 'player1' : 'player2') ? '🔵 あなた' : '🔴 CPU'}
                     </p>
                   </div>
                   <div className="text-center">
@@ -255,8 +331,8 @@ export default function Connect4CpuPage() {
               <Card className="mt-6 bg-white/95">
                 <CardHeader>
                   <h2 className="text-3xl font-bold text-center text-slate-900">
-                    {gameState!.winner === 'player1' && '🎉 あなたの勝ち！'}
-                    {gameState!.winner === 'player2' && '😢 CPUの勝ち'}
+                    {gameState!.winner === (playerOrder === 'first' ? 'player1' : 'player2') && '🎉 あなたの勝ち！'}
+                    {gameState!.winner && gameState!.winner !== (playerOrder === 'first' ? 'player1' : 'player2') && '😢 CPUの勝ち'}
                     {gameState!.winner === null && '🤝 引き分け'}
                   </h2>
                 </CardHeader>
