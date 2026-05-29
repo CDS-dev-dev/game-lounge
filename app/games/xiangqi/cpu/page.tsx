@@ -354,24 +354,26 @@ export default function XiangqiCpuPage() {
             />
 
             {phase === 'finished' && (
-              <Card className="mt-6 bg-white/95">
-                <CardHeader>
-                  <h2 className="text-3xl font-bold text-center text-slate-900">
-                    {gameState!.winner === playerColor && '🎉 あなたの勝ち！'}
-                    {gameState!.winner && gameState!.winner !== playerColor && '😢 CPUの勝ち'}
-                  </h2>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <div className="flex gap-4 justify-center mt-6">
-                    <Button variant="primary" onClick={handleReplay}>
-                      もう一度プレイ
-                    </Button>
-                    <Button variant="secondary" onClick={() => router.push('/games/xiangqi')}>
-                      モード選択に戻る
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <div role="alert" aria-live="assertive">
+                <Card className="mt-6 bg-white/95">
+                  <CardHeader>
+                    <h2 className="text-3xl font-bold text-center text-slate-900">
+                      {gameState!.winner === playerColor && '🎉 あなたの勝ち！'}
+                      {gameState!.winner && gameState!.winner !== playerColor && '😢 CPUの勝ち'}
+                    </h2>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <div className="flex gap-4 justify-center mt-6">
+                      <Button variant="primary" onClick={handleReplay}>
+                        もう一度プレイ
+                      </Button>
+                      <Button variant="secondary" onClick={() => router.push('/games/xiangqi')}>
+                        モード選択に戻る
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             )}
           </>
         )}

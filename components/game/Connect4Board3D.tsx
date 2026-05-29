@@ -4,7 +4,7 @@
 
 import React, { useRef, useState, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import type { Connect4ClientState, Position3D } from '@/lib/games/connect4/types';
 import { BOARD_SIZE, PLAYER_COLORS } from '@/lib/games/connect4/constants';
@@ -203,7 +203,16 @@ export const Connect4Board3D: React.FC<Connect4Board3DProps> = (props) => {
           target={[0, 0, 0]} // 中心を固定
         />
 
-        <Suspense fallback={null}>
+        <Suspense fallback={
+          <Html center>
+            <div className="bg-white/90 backdrop-blur-sm px-6 py-4 rounded-lg shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                <p className="text-slate-700 font-medium">3Dボードを読み込み中...</p>
+              </div>
+            </div>
+          </Html>
+        }>
           <Board3D {...props} />
         </Suspense>
       </Canvas>

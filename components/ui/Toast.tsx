@@ -48,6 +48,9 @@ export const Toast: React.FC<ToastProps> = ({
 
   return (
     <div
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
       className={`${baseClasses} ${typeClasses[type]} ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
       }`}

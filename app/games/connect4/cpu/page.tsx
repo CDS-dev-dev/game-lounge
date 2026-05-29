@@ -362,25 +362,27 @@ export default function Connect4CpuPage() {
             />
 
             {phase === 'finished' && (
-              <Card className="mt-6 bg-white/95">
-                <CardHeader>
-                  <h2 className="text-3xl font-bold text-center text-slate-900">
-                    {gameState!.winner === (playerOrder === 'first' ? 'player1' : 'player2') && '🎉 あなたの勝ち！'}
-                    {gameState!.winner && gameState!.winner !== (playerOrder === 'first' ? 'player1' : 'player2') && '😢 CPUの勝ち'}
-                    {gameState!.winner === null && '🤝 引き分け'}
-                  </h2>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <div className="flex gap-4 justify-center mt-6">
-                    <Button variant="primary" onClick={handleReplay}>
-                      もう一度プレイ
-                    </Button>
-                    <Button variant="secondary" onClick={() => router.push('/games/connect4')}>
-                      モード選択に戻る
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <div role="alert" aria-live="assertive">
+                <Card className="mt-6 bg-white/95">
+                  <CardHeader>
+                    <h2 className="text-3xl font-bold text-center text-slate-900">
+                      {gameState!.winner === (playerOrder === 'first' ? 'player1' : 'player2') && '🎉 あなたの勝ち！'}
+                      {gameState!.winner && gameState!.winner !== (playerOrder === 'first' ? 'player1' : 'player2') && '😢 CPUの勝ち'}
+                      {gameState!.winner === null && '🤝 引き分け'}
+                    </h2>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <div className="flex gap-4 justify-center mt-6">
+                      <Button variant="primary" onClick={handleReplay}>
+                        もう一度プレイ
+                      </Button>
+                      <Button variant="secondary" onClick={() => router.push('/games/connect4')}>
+                        モード選択に戻る
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             )}
           </>
         )}
