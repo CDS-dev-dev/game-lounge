@@ -40,26 +40,6 @@ function generateBoard(pieces: GeisterPiece[]): (GeisterPiece | null)[][] {
   return board;
 }
 
-// 視点変換：player2から見た場合、盤面を180度回転
-function rotateBoardForPlayer2(board: (GeisterPiece | null)[][]): (GeisterPiece | null)[][] {
-  const rotated = createEmptyBoard();
-  for (let y = 0; y < BOARD_SIZE; y++) {
-    for (let x = 0; x < BOARD_SIZE; x++) {
-      const piece = board[y][x];
-      if (piece) {
-        // 座標を180度回転
-        const newY = BOARD_SIZE - 1 - y;
-        const newX = BOARD_SIZE - 1 - x;
-        rotated[newY][newX] = {
-          ...piece,
-          position: { x: newX, y: newY },
-        };
-      }
-    }
-  }
-  return rotated;
-}
-
 // 初期状態作成
 export function createInitialState(gameId: string, player1Id: string): GeisterState {
   return {
@@ -477,14 +457,9 @@ export function toClientState(
 
   const opponentRole = myRole === 'player1' ? 'player2' : 'player1';
 
-  // 盤面を視点変換
-  let viewBoard = state.board;
-  if (myRole === 'player2') {
-    viewBoard = rotateBoardForPlayer2(state.board);
-  }
-
   // 盤面を変換（相手の駒のtypeを隠す）
-  const clientBoard = viewBoard.map((row) =>
+  // 視点変換は描画側（GeisterBoard）で行うため、ここでは座標変換しない
+  const clientBoard = state.board.map((row) =>
     row.map((piece) => {
       if (!piece) return null;
       return {
@@ -571,15 +546,8 @@ export function getValidMoves(
     };
 
     if (canMovePiece(state, playerId, pieceId, newPos)) {
-      // player2の場合は表示座標に変換
-      if (myRole === 'player2') {
-        validMoves.push({
-          x: BOARD_SIZE - 1 - newPos.x,
-          y: BOARD_SIZE - 1 - newPos.y,
-        });
-      } else {
-        validMoves.push(newPos);
-      }
+      // 座標変換は描画側で行うため、ここでは内部座標のまま返す
+      validMoves.push(newPos);
     }
   }
 
@@ -591,21 +559,12 @@ export function getValidMoves(
     if (piece.owner === 'player1') {
       const escapePos = { x: piece.position.x, y: BOARD_SIZE };
       if (canMovePiece(state, playerId, pieceId, escapePos)) {
-        // player2の視点では上方向への脱出に見える
-        validMoves.push(
-          myRole === 'player2'
-            ? { x: BOARD_SIZE - 1 - escapePos.x, y: -1 }
-            : escapePos
-        );
+        validMoves.push(escapePos);
       }
     } else {
       const escapePos = { x: piece.position.x, y: -1 };
       if (canMovePiece(state, playerId, pieceId, escapePos)) {
-        validMoves.push(
-          myRole === 'player2'
-            ? { x: BOARD_SIZE - 1 - escapePos.x, y: BOARD_SIZE }
-            : escapePos
-        );
+        validMoves.push(escapePos);
       }
     }
   }

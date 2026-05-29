@@ -23,6 +23,28 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
   const [focusedCell, setFocusedCell] = useState<Position | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
 
+  // 表示座標→内部座標の変換（player2は反転が必要）
+  const toInternalCoords = (displayX: number, displayY: number): Position => {
+    if (gameState.myRole === 'player2') {
+      return {
+        x: BOARD_SIZE - 1 - displayX,
+        y: BOARD_SIZE - 1 - displayY,
+      };
+    }
+    return { x: displayX, y: displayY };
+  };
+
+  // 内部座標→表示座標の変換（player2は反転が必要）
+  const toDisplayCoords = (internalX: number, internalY: number): Position => {
+    if (gameState.myRole === 'player2') {
+      return {
+        x: BOARD_SIZE - 1 - internalX,
+        y: BOARD_SIZE - 1 - internalY,
+      };
+    }
+    return { x: internalX, y: internalY };
+  };
+
   const isEscapePosition = (x: number, y: number) => {
     return (
       PLAYER1_ESCAPE_POSITIONS.some((pos) => pos.x === x && pos.y === y) ||
@@ -30,18 +52,24 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
     );
   };
 
-  const isValidMove = (x: number, y: number) => {
-    return validMoves.some((pos) => pos.x === x && pos.y === y);
+  const isValidMove = (displayX: number, displayY: number) => {
+    // validMovesは内部座標なので、表示座標を内部座標に変換して比較
+    const internal = toInternalCoords(displayX, displayY);
+    return validMoves.some((pos) => pos.x === internal.x && pos.y === internal.y);
   };
 
-  const handleCellClick = (x: number, y: number) => {
-    const piece = gameState.board[y][x];
+  const handleCellClick = (displayX: number, displayY: number) => {
+    // 表示座標を内部座標に変換
+    const internal = toInternalCoords(displayX, displayY);
+    const piece = gameState.board[internal.y][internal.x];
+
     if (piece && piece.owner === gameState.myRole && !piece.captured && !piece.escaped) {
       // 自分の駒をクリック
       onPieceClick?.(piece.id);
     } else if (selectedPieceId) {
       // 駒を選択中の状態でセルをクリック（移動先）
-      onCellClick?.({ x, y });
+      // 内部座標で渡す
+      onCellClick?.(internal);
     }
   };
 
@@ -62,23 +90,28 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
       switch (e.key) {
         case 'ArrowUp':
           e.preventDefault();
+          // 画面上で上に移動（displayY を減らす）
           newY = Math.max(0, focusedCell.y - 1);
           break;
         case 'ArrowDown':
           e.preventDefault();
+          // 画面上で下に移動（displayY を増やす）
           newY = Math.min(BOARD_SIZE - 1, focusedCell.y + 1);
           break;
         case 'ArrowLeft':
           e.preventDefault();
+          // 画面上で左に移動（displayX を減らす）
           newX = Math.max(0, focusedCell.x - 1);
           break;
         case 'ArrowRight':
           e.preventDefault();
+          // 画面上で右に移動（displayX を増やす）
           newX = Math.min(BOARD_SIZE - 1, focusedCell.x + 1);
           break;
         case 'Enter':
         case ' ':
           e.preventDefault();
+          // 表示座標でクリック処理
           handleCellClick(focusedCell.x, focusedCell.y);
           return;
       }
@@ -145,25 +178,32 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
       <div className="grid gap-0.5 sm:gap-1" style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)` }}>
         {Array.from({ length: BOARD_SIZE }).map((_, rowIndex) => {
           // プレイヤー視点に応じて盤面を反転（自分が常に下に来るように）
-          const y = gameState.myRole === 'player1'
+          const displayY = gameState.myRole === 'player1'
             ? rowIndex // player1は通常の順序（上から下）
             : BOARD_SIZE - 1 - rowIndex; // player2は反転（下から上）
 
-          return Array.from({ length: BOARD_SIZE }).map((_, x) => {
-            const piece = gameState.board[y][x];
-            const isSelected = piece?.id === selectedPieceId;
-            const isEscape = isEscapePosition(x, y);
-            const canMove = isValidMove(x, y);
+          return Array.from({ length: BOARD_SIZE }).map((_, colIndex) => {
+            // 表示座標（player2は反転済み）
+            const displayX = gameState.myRole === 'player1'
+              ? colIndex
+              : BOARD_SIZE - 1 - colIndex;
 
-            const isFocused = focusedCell && focusedCell.x === x && focusedCell.y === y;
+            // 内部座標に変換してデータを取得
+            const internal = toInternalCoords(displayX, displayY);
+            const piece = gameState.board[internal.y][internal.x];
+            const isSelected = piece?.id === selectedPieceId;
+            const isEscape = isEscapePosition(internal.x, internal.y);
+            const canMove = isValidMove(displayX, displayY);
+
+            const isFocused = focusedCell && focusedCell.x === displayX && focusedCell.y === displayY;
 
             return (
               <div
-                key={`${x}-${y}`}
+                key={`${displayX}-${displayY}`}
                 role="gridcell"
-                aria-label={getCellAriaLabel(x, y)}
-                onClick={() => handleCellClick(x, y)}
-                onFocus={() => setFocusedCell({ x, y })}
+                aria-label={getCellAriaLabel(internal.x, internal.y)}
+                onClick={() => handleCellClick(displayX, displayY)}
+                onFocus={() => setFocusedCell({ x: displayX, y: displayY })}
                 tabIndex={isFocused ? 0 : -1}
                 className={`
                   w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center border-2 cursor-pointer transition-all
