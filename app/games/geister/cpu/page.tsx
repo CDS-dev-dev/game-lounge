@@ -21,7 +21,7 @@ import { SetupBoard } from '@/components/game/SetupBoard';
 import { RulesSummary } from '@/components/game/RulesSummary';
 import { useToast } from '@/components/ui/Toast';
 
-type CpuGamePhase = 'setup' | 'playing' | 'cpuThinking' | 'finished';
+type CpuGamePhase = 'orderSelect' | 'setup' | 'playing' | 'cpuThinking' | 'finished';
 
 const PLAYER_ID = 'player-human';
 const CPU_ID = 'player-cpu';
@@ -30,7 +30,8 @@ const GAME_ID = 'cpu-game';
 export default function GeisterCpuPage() {
   const router = useRouter();
   const { showToast } = useToast();
-  const [phase, setPhase] = useState<CpuGamePhase>('setup');
+  const [phase, setPhase] = useState<CpuGamePhase>('orderSelect');
+  const [playerOrder, setPlayerOrder] = useState<'first' | 'second' | null>(null);
   const [gameState, setGameState] = useState<GeisterState>(() =>
     createInitialState(GAME_ID, PLAYER_ID)
   );
@@ -38,29 +39,50 @@ export default function GeisterCpuPage() {
   const [validMoves, setValidMoves] = useState<Position[]>([]);
   const [playerSetup, setPlayerSetup] = useState<PieceSetup[]>([]);
 
-  // CPU自動参加（ゲーム開始時）
-  useEffect(() => {
-    if (!gameState.players.player2) {
-      // Player2としてCPUを参加させる
-      const newState: GeisterState = {
-        ...gameState,
+  // 先攻後攻選択
+  const handleOrderSelect = (order: 'first' | 'second') => {
+    setPlayerOrder(order);
+
+    // ゲーム状態を初期化
+    let newState: GeisterState;
+    if (order === 'first') {
+      // プレイヤーが先攻（player1）
+      newState = createInitialState(GAME_ID, PLAYER_ID);
+      newState = {
+        ...newState,
         status: 'setup',
         players: {
-          ...gameState.players,
+          player1: PLAYER_ID,
           player2: CPU_ID,
         },
       };
-      setGameState(newState);
+    } else {
+      // プレイヤーが後攻（player2）、CPUが先攻（player1）
+      newState = createInitialState(GAME_ID, CPU_ID);
+      newState = {
+        ...newState,
+        status: 'setup',
+        players: {
+          player1: CPU_ID,
+          player2: PLAYER_ID,
+        },
+      };
     }
-  }, []);
+
+    setGameState(newState);
+    setPhase('setup');
+  };
 
   // プレイヤーの配置完了
-  const handlePlayerSetupComplete = (setup: PieceSetup[]) => {
+  const handlePlayerSetupComplete = async (setup: PieceSetup[]) => {
     try {
+      const playerRole = playerOrder === 'first' ? 'player1' : 'player2';
+      const cpuRole = playerOrder === 'first' ? 'player2' : 'player1';
+
       let newState = setupPieces(gameState, PLAYER_ID, setup);
 
       // CPUの配置を自動生成
-      const cpuSetup = generateCpuSetup('player2');
+      const cpuSetup = generateCpuSetup(cpuRole);
       const cpuPieceSetup: PieceSetup[] = cpuSetup.map((s, i) => ({
         pieceId: `cpu-piece-${i}`,
         type: s.type,
@@ -70,6 +92,25 @@ export default function GeisterCpuPage() {
       newState = setupPieces(newState, CPU_ID, cpuPieceSetup);
 
       setGameState(newState);
+
+      // 後攻の場合、CPUが先に動く
+      if (playerOrder === 'second') {
+        setPhase('cpuThinking');
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        const cpuMove = calculateCpuMove(newState, CPU_ID);
+        newState = movePiece(newState, CPU_ID, cpuMove.pieceId, cpuMove.to);
+
+        const cpuWinResult = checkWinner(newState);
+        if (cpuWinResult.winner) {
+          setGameState(newState);
+          setPhase('finished');
+          return;
+        }
+
+        setGameState(newState);
+      }
+
       setPhase('playing');
     } catch (error) {
       console.error('Setup error:', error);
@@ -79,7 +120,8 @@ export default function GeisterCpuPage() {
 
   // プレイヤーの駒選択
   const handlePieceClick = (pieceId: string) => {
-    if (phase !== 'playing' || gameState.currentTurn !== 'player1') {
+    const playerRole = playerOrder === 'first' ? 'player1' : 'player2';
+    if (phase !== 'playing' || gameState.currentTurn !== playerRole) {
       return;
     }
 
@@ -141,16 +183,18 @@ export default function GeisterCpuPage() {
 
   // リプレイ
   const handleReplay = () => {
-    setPhase('setup');
+    setPhase('orderSelect');
+    setPlayerOrder(null);
     setGameState(createInitialState(GAME_ID, PLAYER_ID));
     setSelectedPiece(null);
     setValidMoves([]);
+    setPlayerSetup([]);
   };
 
   // CPU対戦用のクライアント状態を作成
   const createCpuClientState = (state: GeisterState): GeisterClientState => {
-    const myRole = 'player1';
-    const opponentRole = 'player2';
+    const myRole = playerOrder === 'first' ? 'player1' : 'player2';
+    const opponentRole = playerOrder === 'first' ? 'player2' : 'player1';
 
     // 盤面を変換（相手の駒のtypeを隠す）
     const clientBoard = state.board.map((row) =>
@@ -204,9 +248,10 @@ export default function GeisterCpuPage() {
     };
   };
 
-  // setup状態の時はclientStateを作らない
-  const clientState = phase === 'setup' ? null : createCpuClientState(gameState);
-  const isPlayerTurn = phase === 'playing' && gameState.currentTurn === 'player1';
+  // orderSelect/setup状態の時はclientStateを作らない
+  const clientState = (phase === 'orderSelect' || phase === 'setup') ? null : createCpuClientState(gameState);
+  const playerRole = playerOrder === 'first' ? 'player1' : 'player2';
+  const isPlayerTurn = phase === 'playing' && gameState.currentTurn === playerRole;
 
   return (
     <>
@@ -223,6 +268,43 @@ export default function GeisterCpuPage() {
             <p className="text-sm sm:text-base text-gray-200">あなた vs コンピュータ</p>
           </div>
 
+        {/* 先攻後攻選択 */}
+        {phase === 'orderSelect' && (
+          <Card className="bg-white/95">
+            <CardHeader>
+              <h2 className="text-2xl font-bold text-slate-900 text-center">先攻・後攻を選択</h2>
+              <p className="text-sm text-slate-600 mt-2 text-center">
+                どちらで対戦しますか？
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  onClick={() => handleOrderSelect('first')}
+                  className="p-6 sm:p-8 rounded-xl border-4 border-blue-500 bg-blue-50 hover:bg-blue-100 transition-all hover:scale-105"
+                >
+                  <div className="text-4xl sm:text-6xl mb-3">⚡</div>
+                  <div className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">先攻</div>
+                  <div className="text-sm sm:text-base text-slate-600">
+                    あなたが先に動きます
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => handleOrderSelect('second')}
+                  className="p-6 sm:p-8 rounded-xl border-4 border-purple-500 bg-purple-50 hover:bg-purple-100 transition-all hover:scale-105"
+                >
+                  <div className="text-4xl sm:text-6xl mb-3">🛡️</div>
+                  <div className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">後攻</div>
+                  <div className="text-sm sm:text-base text-slate-600">
+                    CPUが先に動きます
+                  </div>
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* 配置フェーズ */}
         {phase === 'setup' && (
           <>
@@ -235,7 +317,7 @@ export default function GeisterCpuPage() {
               </CardHeader>
               <CardContent>
                 <SetupBoard
-                  myRole="player1"
+                  myRole={playerOrder === 'first' ? 'player1' : 'player2'}
                   setup={playerSetup}
                   onSetupChange={setPlayerSetup}
                   onComplete={handlePlayerSetupComplete}
@@ -273,7 +355,7 @@ export default function GeisterCpuPage() {
                   <div>
                     <p className="text-xs sm:text-sm text-slate-600 font-medium">現在のターン</p>
                     <p className="text-base sm:text-xl font-bold text-slate-900">
-                      {gameState.currentTurn === 'player1' ? 'あなた' : 'CPU'}
+                      {gameState.currentTurn === playerRole ? 'あなた' : 'CPU'}
                     </p>
                   </div>
                   <div className="text-right">
@@ -306,7 +388,7 @@ export default function GeisterCpuPage() {
                 <Card className="mt-6 bg-white/95 animate-[fadeIn_0.5s_ease-in]">
                   <CardHeader>
                     <h2 className="text-2xl sm:text-3xl font-bold text-center text-slate-900 animate-[bounce_1s_ease-in-out]">
-                      {gameState.winner === 'player1' ? '🎉 あなたの勝ち！' : gameState.winner === 'player2' ? '😢 CPUの勝ち' : '🤝 引き分け'}
+                      {gameState.winner === playerRole ? '🎉 あなたの勝ち！' : gameState.winner ? '😢 CPUの勝ち' : '🤝 引き分け'}
                     </h2>
                   </CardHeader>
                 <CardContent className="text-center">
