@@ -22,7 +22,7 @@ import { XiangqiBoard } from '@/components/game/XiangqiBoard';
 import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
 
-type CpuGamePhase = 'difficulty-select' | 'playing' | 'cpuThinking' | 'finished';
+type CpuGamePhase = 'difficulty-select' | 'order-select' | 'playing' | 'cpuThinking' | 'finished';
 type Difficulty = 'easy' | 'medium' | 'hard';
 
 const PLAYER_ID = 'player-human';
@@ -34,27 +34,53 @@ export default function XiangqiCpuPage() {
   const { showToast } = useToast();
   const [phase, setPhase] = useState<CpuGamePhase>('difficulty-select');
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
+  const [playerColor, setPlayerColor] = useState<'red' | 'black' | null>(null);
   const [gameState, setGameState] = useState<XiangqiState | null>(null);
   const [selectedPiece, setSelectedPiece] = useState<Position | null>(null);
   const [validMoves, setValidMoves] = useState<Position[]>([]);
 
-  // 難易度選択してゲーム開始
-  const startGame = (selectedDifficulty: Difficulty) => {
+  // 難易度選択
+  const handleDifficultySelect = (selectedDifficulty: Difficulty) => {
     setDifficulty(selectedDifficulty);
-    let newState = createInitialState(GAME_ID, PLAYER_ID);
-    newState = joinBlackPlayer(newState, CPU_ID);
+    setPhase('order-select');
+  };
+
+  // 先攻後攻選択してゲーム開始
+  const startGame = async (color: 'red' | 'black') => {
+    setPlayerColor(color);
+
+    let newState: XiangqiState;
+    if (color === 'red') {
+      // プレイヤーが紅（先攻）
+      newState = createInitialState(GAME_ID, PLAYER_ID);
+      newState = joinBlackPlayer(newState, CPU_ID);
+    } else {
+      // プレイヤーが黒（後攻）、CPUが紅（先攻）
+      newState = createInitialState(GAME_ID, CPU_ID);
+      newState = joinBlackPlayer(newState, PLAYER_ID);
+
+      // CPUが先に動く
+      setPhase('cpuThinking');
+      setGameState(newState);
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const cpuMove = calculateCpuMove(newState, 'red', difficulty);
+      newState = movePiece(newState, CPU_ID, cpuMove.from, cpuMove.to);
+    }
+
     setGameState(newState);
     setPhase('playing');
   };
 
   // セルクリック
   const handleCellClick = async (pos: Position) => {
-    if (!gameState || phase !== 'playing') return;
+    if (!gameState || phase !== 'playing' || gameState.currentTurn !== playerColor) return;
 
     const clickedPiece = gameState.board[pos.row][pos.col];
 
     // 駒を選択
-    if (clickedPiece && clickedPiece.owner === 'red') {
+    if (clickedPiece && clickedPiece.owner === playerColor) {
       setSelectedPiece(pos);
       const moves = getValidMoves(gameState, PLAYER_ID, clickedPiece.id);
       setValidMoves(moves);
@@ -86,7 +112,8 @@ export default function XiangqiCpuPage() {
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
         // CPUが移動
-        const cpuMove = calculateCpuMove(newState, 'black', difficulty);
+        const cpuColor = playerColor === 'red' ? 'black' : 'red';
+        const cpuMove = calculateCpuMove(newState, cpuColor, difficulty);
         newState = movePiece(newState, CPU_ID, cpuMove.from, cpuMove.to);
 
         // 勝敗判定
@@ -112,6 +139,7 @@ export default function XiangqiCpuPage() {
   // リプレイ
   const handleReplay = () => {
     setPhase('difficulty-select');
+    setPlayerColor(null);
     setGameState(null);
     setSelectedPiece(null);
     setValidMoves([]);
@@ -145,7 +173,7 @@ export default function XiangqiCpuPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Button
                     variant="primary"
-                    onClick={() => startGame('easy')}
+                    onClick={() => handleDifficultySelect('easy')}
                     className="py-8 text-lg"
                   >
                     <div>
@@ -156,7 +184,7 @@ export default function XiangqiCpuPage() {
                   </Button>
                   <Button
                     variant="primary"
-                    onClick={() => startGame('medium')}
+                    onClick={() => handleDifficultySelect('medium')}
                     className="py-8 text-lg"
                   >
                     <div>
@@ -167,7 +195,7 @@ export default function XiangqiCpuPage() {
                   </Button>
                   <Button
                     variant="primary"
-                    onClick={() => startGame('hard')}
+                    onClick={() => handleDifficultySelect('hard')}
                     className="py-8 text-lg"
                   >
                     <div>
@@ -185,6 +213,51 @@ export default function XiangqiCpuPage() {
               </Link>
             </div>
           </>
+        )}
+
+        {/* 先攻後攻選択 */}
+        {phase === 'order-select' && (
+          <Card className="bg-white/95 max-w-2xl mx-auto">
+            <CardHeader>
+              <h2 className="text-2xl font-bold text-slate-900 text-center">紅・黒を選択</h2>
+              <p className="text-sm text-slate-600 mt-2 text-center">
+                難易度: {difficulty === 'easy' && '😊 初級'}{difficulty === 'medium' && '🤔 中級'}{difficulty === 'hard' && '🔥 上級'}
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  onClick={() => startGame('red')}
+                  className="p-6 sm:p-8 rounded-xl border-4 border-red-500 bg-red-50 hover:bg-red-100 transition-all hover:scale-105"
+                >
+                  <div className="text-4xl sm:text-6xl mb-3">🔴</div>
+                  <div className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">紅（先攻）</div>
+                  <div className="text-sm sm:text-base text-slate-600">
+                    あなたが先に動きます
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => startGame('black')}
+                  className="p-6 sm:p-8 rounded-xl border-4 border-slate-700 bg-slate-50 hover:bg-slate-100 transition-all hover:scale-105"
+                >
+                  <div className="text-4xl sm:text-6xl mb-3">⚫</div>
+                  <div className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">黒（後攻）</div>
+                  <div className="text-sm sm:text-base text-slate-600">
+                    CPUが先に動きます
+                  </div>
+                </button>
+              </div>
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => setPhase('difficulty-select')}
+                  className="text-slate-600 hover:text-slate-900 underline text-sm"
+                >
+                  難易度を変更
+                </button>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* CPU思考中インジケーター（固定オーバーレイ） */}
@@ -210,7 +283,7 @@ export default function XiangqiCpuPage() {
                   <div>
                     <p className="text-sm text-slate-600 font-medium">現在のターン</p>
                     <p className="text-xl font-bold text-slate-900">
-                      {gameState!.currentTurn === 'red' ? 'あなた（紅）' : 'CPU（黒）'}
+                      {gameState!.currentTurn === playerColor ? `あなた（${playerColor === 'red' ? '紅' : '黒'}）` : `CPU（${playerColor === 'red' ? '黒' : '紅'}）`}
                     </p>
                   </div>
                   <div className="text-center">
@@ -250,8 +323,8 @@ export default function XiangqiCpuPage() {
               <Card className="mt-6 bg-white/95">
                 <CardHeader>
                   <h2 className="text-3xl font-bold text-center text-slate-900">
-                    {gameState!.winner === 'red' && '🎉 あなたの勝ち！'}
-                    {gameState!.winner === 'black' && '😢 CPUの勝ち'}
+                    {gameState!.winner === playerColor && '🎉 あなたの勝ち！'}
+                    {gameState!.winner && gameState!.winner !== playerColor && '😢 CPUの勝ち'}
                   </h2>
                 </CardHeader>
                 <CardContent className="text-center">
