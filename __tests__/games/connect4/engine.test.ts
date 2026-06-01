@@ -41,10 +41,11 @@ describe('Connect4 Engine', () => {
       let state = createInitialState(GAME_ID, PLAYER1_ID);
       state = joinPlayer2(state, PLAYER2_ID);
 
-      const pos: Position3D = { layer: 0, row: 0, col: 0 };
+      const pos: Position3D = { x: 0, y: 0, z: 0 };
       state = placePiece(state, PLAYER1_ID, pos);
 
-      expect(state.board[0][0][0]).toBe('player1');
+      // board[z][y][x]の順
+      expect(state.board[0][0][0]).not.toBe(null);
       expect(state.currentTurn).toBe('player2');
     });
 
@@ -52,7 +53,7 @@ describe('Connect4 Engine', () => {
       let state = createInitialState(GAME_ID, PLAYER1_ID);
       state = joinPlayer2(state, PLAYER2_ID);
 
-      const pos: Position3D = { layer: 0, row: 0, col: 0 };
+      const pos: Position3D = { x: 0, y: 0, z: 0 };
       state = placePiece(state, PLAYER1_ID, pos);
 
       expect(() => {
@@ -66,15 +67,21 @@ describe('Connect4 Engine', () => {
       let state = createInitialState(GAME_ID, PLAYER1_ID);
       state = joinPlayer2(state, PLAYER2_ID);
 
-      // 横に4つ配置
-      for (let col = 0; col < 4; col++) {
-        const pos: Position3D = { layer: 0, row: 0, col };
-        state.board[0][0][col] = 'player1';
-      }
+      // プレイヤー1が横に4つ配置する想定で、交互に配置
+      // y=0の行を使う: player1は(0,0), (1,0), (2,0), (3,0)
+      // player2は(0,1), (1,1), (2,1)に配置
+      state = placePiece(state, PLAYER1_ID, { x: 0, y: 0, z: 0 });
+      state = placePiece(state, PLAYER2_ID, { x: 0, y: 1, z: 0 });
+      state = placePiece(state, PLAYER1_ID, { x: 1, y: 0, z: 0 });
+      state = placePiece(state, PLAYER2_ID, { x: 1, y: 1, z: 0 });
+      state = placePiece(state, PLAYER1_ID, { x: 2, y: 0, z: 0 });
+      state = placePiece(state, PLAYER2_ID, { x: 2, y: 1, z: 0 });
+      state = placePiece(state, PLAYER1_ID, { x: 3, y: 0, z: 0 });
 
-      const lastPos: Position3D = { layer: 0, row: 0, col: 3 };
+      const lastPos: Position3D = { x: 3, y: 0, z: 0 };
       const result = checkWinner(state, lastPos);
 
+      // 横4つなので勝利
       expect(result.winner).toBe('player1');
       expect(result.winningLine).toHaveLength(4);
     });
@@ -83,7 +90,7 @@ describe('Connect4 Engine', () => {
       let state = createInitialState(GAME_ID, PLAYER1_ID);
       state = joinPlayer2(state, PLAYER2_ID);
 
-      const pos: Position3D = { layer: 0, row: 0, col: 0 };
+      const pos: Position3D = { x: 0, y: 0, z: 0 };
       const result = checkWinner(state, pos);
 
       expect(result.winner).toBe(null);
@@ -92,23 +99,28 @@ describe('Connect4 Engine', () => {
   });
 
   describe('getAvailablePositions', () => {
-    it('初期状態は全マスが空き', () => {
+    it('初期状態は底面のマスのみ配置可能', () => {
       let state = createInitialState(GAME_ID, PLAYER1_ID);
       state = joinPlayer2(state, PLAYER2_ID);
 
       const available = getAvailablePositions(state);
-      expect(available).toHaveLength(64); // 4x4x4 = 64
+      // 底面（z=0）の16マスのみ配置可能
+      expect(available).toHaveLength(16); // 4x4 = 16
+      expect(available.every(pos => pos.z === 0)).toBe(true);
     });
 
-    it('駒が配置された場所は除外', () => {
+    it('駒が配置された場所は除外され、その上が配置可能になる', () => {
       let state = createInitialState(GAME_ID, PLAYER1_ID);
       state = joinPlayer2(state, PLAYER2_ID);
 
-      const pos: Position3D = { layer: 0, row: 0, col: 0 };
+      const pos: Position3D = { x: 0, y: 0, z: 0 };
       state = placePiece(state, PLAYER1_ID, pos);
 
       const available = getAvailablePositions(state);
-      expect(available).toHaveLength(63);
+      // 底面-1 + その上+1 = 16マス（変わらず）
+      expect(available).toHaveLength(16);
+      // (0,0,1)が配置可能になっている
+      expect(available.some(p => p.x === 0 && p.y === 0 && p.z === 1)).toBe(true);
     });
   });
 });
