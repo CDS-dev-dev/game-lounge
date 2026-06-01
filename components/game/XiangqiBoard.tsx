@@ -30,6 +30,17 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
     return selectedPiece && selectedPiece.col === pos.col && selectedPiece.row === pos.row;
   };
 
+  // 最後の移動元/移動先かチェック
+  const isLastMoveFrom = (pos: Position) => {
+    if (!gameState.lastMove) return false;
+    return gameState.lastMove.from.col === pos.col && gameState.lastMove.from.row === pos.row;
+  };
+
+  const isLastMoveTo = (pos: Position) => {
+    if (!gameState.lastMove) return false;
+    return gameState.lastMove.to.col === pos.col && gameState.lastMove.to.row === pos.row;
+  };
+
   const handleCellClick = (pos: Position) => {
     if (onCellClick) {
       onCellClick(pos);
@@ -102,6 +113,12 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
       label += `, 移動可能`;
     }
 
+    if (isLastMoveFrom(pos)) {
+      label += `, 最後に移動した元の位置`;
+    } else if (isLastMoveTo(pos)) {
+      label += `, 最後に移動した先の位置`;
+    }
+
     return label;
   };
 
@@ -139,6 +156,8 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
                   const piece = gameState.board[row][col];
                   const selected = isSelected(pos);
                   const valid = isValidMove(pos);
+                  const isLastFrom = isLastMoveFrom(pos);
+                  const isLastTo = isLastMoveTo(pos);
                   const isFocused = focusedCell && focusedCell.col === col && focusedCell.row === row;
 
                   return (
@@ -154,6 +173,8 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
                         cursor-pointer transition-all duration-150
                         ${selected ? 'bg-yellow-200' : ''}
                         ${valid ? 'bg-green-100' : ''}
+                        ${isLastFrom ? 'bg-blue-100' : ''}
+                        ${isLastTo ? 'ring-2 ring-blue-500' : ''}
                         ${isFocused ? 'ring-2 ring-blue-400' : ''}
                         hover:bg-yellow-50
                       `}

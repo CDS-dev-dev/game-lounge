@@ -37,6 +37,7 @@ export function createInitialState(gameId: string, player1Id: string): Connect4S
     },
     winner: null,
     winningLine: null,
+    lastMove: null, // 初期状態では最後の手はなし
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
@@ -165,6 +166,7 @@ export function placePiece(
     board: newBoard,
     pieces: newPieces,
     currentTurn: nextTurn,
+    lastMove: pos, // 最後に配置された位置を記録
     updatedAt: Date.now(),
   };
 }
@@ -311,6 +313,7 @@ export function toClientState(
     opponentPiecesCount: state.pieces[opponentRole].length,
     winner: state.winner,
     winningLine: state.winningLine,
+    lastMove: state.lastMove, // 最後の手を含める
   };
 }
 

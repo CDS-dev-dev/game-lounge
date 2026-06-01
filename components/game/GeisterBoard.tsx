@@ -58,6 +58,17 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
     return validMoves.some((pos) => pos.x === internal.x && pos.y === internal.y);
   };
 
+  // 最後の移動元/移動先かチェック（内部座標で判定）
+  const isLastMoveFrom = (internalX: number, internalY: number) => {
+    if (!gameState.lastMove) return false;
+    return gameState.lastMove.from.x === internalX && gameState.lastMove.from.y === internalY;
+  };
+
+  const isLastMoveTo = (internalX: number, internalY: number) => {
+    if (!gameState.lastMove) return false;
+    return gameState.lastMove.to.x === internalX && gameState.lastMove.to.y === internalY;
+  };
+
   const handleCellClick = (displayX: number, displayY: number) => {
     // 表示座標を内部座標に変換
     const internal = toInternalCoords(displayX, displayY);
@@ -158,6 +169,12 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
       label += `, 移動可能`;
     }
 
+    if (isLastMoveFrom(internalX, internalY)) {
+      label += `, 最後に移動した元の位置`;
+    } else if (isLastMoveTo(internalX, internalY)) {
+      label += `, 最後に移動した先の位置`;
+    }
+
     return label;
   };
 
@@ -192,6 +209,8 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
             const isSelected = piece?.id === selectedPieceId;
             const isEscape = isEscapePosition(internal.x, internal.y);
             const canMove = isValidMove(displayX, displayY);
+            const isLastFrom = isLastMoveFrom(internal.x, internal.y);
+            const isLastTo = isLastMoveTo(internal.x, internal.y);
 
             const isFocused = focusedCell && focusedCell.x === displayX && focusedCell.y === displayY;
 
@@ -206,10 +225,12 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
                 className={`
                   w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center border-2 cursor-pointer transition-all
                   ${isEscape ? 'bg-yellow-200 border-yellow-400' : 'bg-amber-50 border-amber-300'}
+                  ${isLastFrom ? 'bg-yellow-100 border-yellow-300' : ''}
+                  ${isLastTo ? 'ring-2 ring-yellow-500' : ''}
                   ${isSelected ? 'ring-2 sm:ring-4 ring-indigo-500' : ''}
                   ${canMove ? 'bg-green-200 ring-2 ring-green-400' : ''}
                   ${isFocused ? 'ring-2 ring-blue-400' : ''}
-                  ${!isSelected && !canMove ? 'hover:bg-amber-100' : ''}
+                  ${!isSelected && !canMove && !isLastFrom ? 'hover:bg-amber-100' : ''}
                 `}
               >
                 {piece && !piece.captured && !piece.escaped && (

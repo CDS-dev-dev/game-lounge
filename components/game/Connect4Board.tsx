@@ -29,6 +29,16 @@ export const Connect4Board: React.FC<Connect4BoardProps> = ({
     return gameState.winningLine.some((p) => p.x === pos.x && p.y === pos.y && p.z === pos.z);
   };
 
+  // 最後に配置された駒かチェック
+  const isLastMove = (pos: Position3D) => {
+    if (!gameState.lastMove) return false;
+    return (
+      gameState.lastMove.x === pos.x &&
+      gameState.lastMove.y === pos.y &&
+      gameState.lastMove.z === pos.z
+    );
+  };
+
   // キーボード操作
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -98,6 +108,9 @@ export const Connect4Board: React.FC<Connect4BoardProps> = ({
     if (piece) {
       const playerColor = PLAYER_COLORS[piece.owner];
       label += `, ${playerColor.name}の駒`;
+      if (isLastMove(pos)) {
+        label += `, 最後に配置された駒`;
+      }
     } else if (isAvailable(pos)) {
       label += `, 配置可能`;
     }
@@ -141,6 +154,7 @@ export const Connect4Board: React.FC<Connect4BoardProps> = ({
                       const piece = gameState.board[z][y][x];
                       const available = isAvailable(pos);
                       const isWinning = isWinningPiece(pos);
+                      const isLast = isLastMove(pos);
                       const isFocused =
                         focusedCell &&
                         focusedCell.x === x &&
@@ -161,7 +175,11 @@ export const Connect4Board: React.FC<Connect4BoardProps> = ({
                             ${
                               piece
                                 ? `bg-slate-600 border-slate-500 ${
-                                    isWinning ? 'ring-4 ring-yellow-400 animate-pulse' : ''
+                                    isWinning
+                                      ? 'ring-4 ring-yellow-400 animate-pulse'
+                                      : isLast
+                                      ? 'ring-4 ring-purple-400 animate-pulse'
+                                      : ''
                                   }`
                                 : available
                                 ? 'bg-blue-600/70 border-blue-500 hover:bg-blue-500 cursor-pointer hover:scale-110 hover:shadow-lg'

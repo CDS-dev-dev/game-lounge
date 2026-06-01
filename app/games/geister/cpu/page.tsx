@@ -242,6 +242,15 @@ export default function GeisterCpuPage() {
     const opponentCapturedGood = opponentPieces.filter((p) => p.type === 'good' && p.captured).length;
     const opponentCapturedBad = opponentPieces.filter((p) => p.type === 'bad' && p.captured).length;
 
+    // lastMoveをクライアント用に変換
+    let clientLastMove: { from: Position; to: Position } | null = null;
+    if (state.lastMove) {
+      clientLastMove = {
+        from: state.lastMove.from,
+        to: state.lastMove.to,
+      };
+    }
+
     return {
       gameId: state.gameId,
       status: state.status,
@@ -268,6 +277,7 @@ export default function GeisterCpuPage() {
       },
       winner: state.winner,
       winReason: state.winReason,
+      lastMove: clientLastMove, // 最後の手を含める
     };
   };
 

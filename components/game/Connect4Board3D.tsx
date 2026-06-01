@@ -21,12 +21,14 @@ function Cell({
   piece,
   isAvailable,
   isWinning,
+  isLastMove,
   onClick,
 }: {
   position: Position3D;
   piece: { owner: 'player1' | 'player2' } | null;
   isAvailable: boolean;
   isWinning: boolean;
+  isLastMove: boolean;
   onClick: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
@@ -55,8 +57,20 @@ function Cell({
           <sphereGeometry args={[0.35, 32, 32]} />
           <meshStandardMaterial
             color={piece.owner === 'player1' ? '#3b82f6' : '#ef4444'}
-            emissive={isWinning ? '#fbbf24' : '#000000'}
-            emissiveIntensity={isWinning ? 0.5 : 0}
+            emissive={isWinning ? '#fbbf24' : isLastMove ? '#a855f7' : '#000000'}
+            emissiveIntensity={isWinning ? 0.5 : isLastMove ? 0.6 : 0}
+          />
+        </mesh>
+      )}
+
+      {/* 最後の手のリング */}
+      {piece && isLastMove && !isWinning && (
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.45, 0.04, 16, 32]} />
+          <meshStandardMaterial
+            color="#a855f7"
+            emissive="#a855f7"
+            emissiveIntensity={0.8}
           />
         </mesh>
       )}
@@ -105,7 +119,43 @@ function Board3D({
     return gameState.winningLine.some((p) => p.x === pos.x && p.y === pos.y && p.z === pos.z);
   };
 
+  // 最後に配置された駒かチェック
+  const isLastMove = (pos: Position3D) => {
+    if (!gameState.lastMove) return false;
+    return (
+      gameState.lastMove.x === pos.x &&
+      gameState.lastMove.y === pos.y &&
+      gameState.lastMove.z === pos.z
+    );
+  };
+
   const cells: React.ReactElement[] = [];
+  const rods: React.ReactElement[] = [];
+
+  // 縦の串（16本）を生成
+  for (let y = 0; y < BOARD_SIZE; y++) {
+    for (let x = 0; x < BOARD_SIZE; x++) {
+      const rodX = x - (BOARD_SIZE - 1) / 2;
+      const rodY = y - (BOARD_SIZE - 1) / 2;
+      const rodHeight = BOARD_SIZE; // z方向の高さ
+
+      rods.push(
+        <mesh
+          key={`rod-${x}-${y}`}
+          position={[rodX, 0, rodY]}
+        >
+          <cylinderGeometry args={[0.02, 0.02, rodHeight, 8]} />
+          <meshStandardMaterial
+            color="#555555"
+            metalness={0.8}
+            roughness={0.2}
+            transparent
+            opacity={0.4}
+          />
+        </mesh>
+      );
+    }
+  }
 
   // 全セルを生成
   for (let z = 0; z < BOARD_SIZE; z++) {
@@ -115,6 +165,7 @@ function Board3D({
         const piece = gameState.board[z][y][x];
         const available = isAvailable(pos);
         const isWinning = isWinningPiece(pos);
+        const isLast = isLastMove(pos);
 
         cells.push(
           <Cell
@@ -123,6 +174,7 @@ function Board3D({
             piece={piece}
             isAvailable={available}
             isWinning={isWinning}
+            isLastMove={isLast}
             onClick={() => onCellClick?.(pos)}
           />
         );
@@ -172,6 +224,9 @@ function Board3D({
 
       {/* グリッド参考線 */}
       <gridHelper args={[8, 8, '#444444', '#222222']} position={[0, -2, 0]} />
+
+      {/* 縦の串 */}
+      {rods}
 
       {/* セル群 */}
       {cells}

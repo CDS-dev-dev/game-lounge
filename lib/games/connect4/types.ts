@@ -33,6 +33,7 @@ export interface Connect4State {
   };
   winner: PlayerRole | null;
   winningLine: Position3D[] | null; // 勝利ライン
+  lastMove: Position3D | null; // 最後に配置された駒の位置
   createdAt: number;
   updatedAt: number;
 }
@@ -51,6 +52,7 @@ export interface Connect4ClientState {
   opponentPiecesCount: number;
   winner: PlayerRole | null;
   winningLine: Position3D[] | null;
+  lastMove: Position3D | null; // 最後に配置された駒の位置
 }
 
 // 勝利パターンの方向

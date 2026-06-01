@@ -40,6 +40,7 @@ export interface GeisterState {
   winner: PlayerRole | null;
   winReason: WinReason | null;
   moveCount: number; // 手数カウント（引き分け判定用）
+  lastMove: MoveData | null; // 最後の移動（pieceId, to）
   createdAt: number;
   updatedAt: number;
 }
@@ -80,6 +81,7 @@ export interface GeisterClientState {
   };
   winner: PlayerRole | null;
   winReason: WinReason | null;
+  lastMove: { from: Position; to: Position } | null; // 最後の移動（from, to）
 }
 
 export interface PieceSetup {
@@ -90,5 +92,6 @@ export interface PieceSetup {
 
 export interface MoveData {
   pieceId: string;
-  to: Position;
+  from: Position; // 移動元
+  to: Position; // 移動先
 }

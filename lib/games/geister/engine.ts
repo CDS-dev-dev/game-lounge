@@ -62,6 +62,7 @@ export function createInitialState(gameId: string, player1Id: string): GeisterSt
     winner: null,
     winReason: null,
     moveCount: 0,
+    lastMove: null, // 初期状態では最後の手はなし
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
@@ -296,6 +297,9 @@ export function movePiece(
     throw new Error('駒が見つかりません');
   }
 
+  // 移動元の位置を保存
+  const fromPosition = { ...piece.position };
+
   if (!canMovePiece(state, playerId, pieceId, to)) {
     // より詳細なエラーメッセージ
     if (state.currentTurn !== piece.owner) {
@@ -332,6 +336,7 @@ export function movePiece(
       ...state,
       board: newBoard,
       pieces: newPieces,
+      lastMove: { pieceId, from: fromPosition, to }, // 最後の移動を記録
       updatedAt: Date.now(),
     };
 
@@ -374,6 +379,7 @@ export function movePiece(
     board: newBoard,
     pieces: newPieces,
     moveCount: state.moveCount + 1,
+    lastMove: { pieceId, from: fromPosition, to }, // 最後の移動を記録
     updatedAt: Date.now(),
   };
 
@@ -503,6 +509,15 @@ export function toClientState(
   const isMyTurn = state.currentTurn === myRole;
   const canOperate = state.status === 'playing' && isMyTurn;
 
+  // lastMoveをクライアント用に変換
+  let clientLastMove: { from: Position; to: Position } | null = null;
+  if (state.lastMove) {
+    clientLastMove = {
+      from: state.lastMove.from,
+      to: state.lastMove.to,
+    };
+  }
+
   return {
     gameId: state.gameId,
     status: state.status,
@@ -526,6 +541,7 @@ export function toClientState(
     setupReady: state.setupReady,
     winner: state.winner,
     winReason: state.winReason,
+    lastMove: clientLastMove, // 最後の手を含める
   };
 }
 
