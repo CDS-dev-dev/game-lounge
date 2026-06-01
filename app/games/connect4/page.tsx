@@ -4,6 +4,7 @@
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Script from 'next/script';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
@@ -11,8 +12,29 @@ import { GameHeader } from '@/components/layout/GameHeader';
 export default function Connect4ModePage() {
   const router = useRouter();
 
+  // 構造化データ（Game）
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Game',
+    name: '立体四目並べ',
+    alternateName: '3D Connect Four',
+    description: '3次元空間で展開される四目並べ。縦・横・斜め全てのラインで4つ揃えを目指す立体パズルゲーム。',
+    url: 'https://game-lounge-pi.vercel.app/games/connect4',
+    gamePlatform: 'Web Browser',
+    numberOfPlayers: 2,
+    gameItem: {
+      '@type': 'Thing',
+      name: '4x4x4の立体グリッド',
+    },
+  };
+
   return (
     <>
+      <Script
+        id="connect4-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <GameHeader title="立体四目並べ" />
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-6 sm:pb-12 px-3 sm:px-4">
         <div className="max-w-4xl mx-auto">

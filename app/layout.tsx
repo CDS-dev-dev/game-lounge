@@ -52,8 +52,30 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // 構造化データ（WebSite）
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'ゲームラウンジ',
+    alternateName: 'Game Lounge',
+    url: 'https://game-lounge-pi.vercel.app',
+    description: '大人のためのオンラインボードゲームプラットフォーム。ガイスター、中国象棋、立体四目並べを無料でプレイ。',
+    inLanguage: 'ja',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: 'https://game-lounge-pi.vercel.app/games?q={search_term_string}',
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
     <html lang="ja" className="h-full antialiased">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         <ToastProvider>
           <Header />

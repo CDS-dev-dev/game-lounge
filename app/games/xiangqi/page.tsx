@@ -4,6 +4,7 @@
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Script from 'next/script';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
@@ -11,8 +12,29 @@ import { GameHeader } from '@/components/layout/GameHeader';
 export default function XiangqiModePage() {
   const router = useRouter();
 
+  // 構造化データ（Game）
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Game',
+    name: '中国象棋',
+    alternateName: 'Xiangqi',
+    description: '中国伝統の将棋ゲーム。将棋とチェスの要素を併せ持つ奥深い戦略ゲーム。',
+    url: 'https://game-lounge-pi.vercel.app/games/xiangqi',
+    gamePlatform: 'Web Browser',
+    numberOfPlayers: 2,
+    gameItem: {
+      '@type': 'Thing',
+      name: '将・車・馬・炮・象・士・兵',
+    },
+  };
+
   return (
     <>
+      <Script
+        id="xiangqi-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <GameHeader title="中国象棋" />
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-6 sm:pb-12 px-3 sm:px-4">
         <div className="max-w-4xl mx-auto">

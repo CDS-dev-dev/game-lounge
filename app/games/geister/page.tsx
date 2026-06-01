@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Script from 'next/script';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
@@ -9,8 +10,29 @@ import { GameHeader } from '@/components/layout/GameHeader';
 export default function GeisterModePage() {
   const router = useRouter();
 
+  // 構造化データ（Game）
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Game',
+    name: 'ガイスター',
+    alternateName: 'Geister',
+    description: 'ドイツ生まれの心理戦ボードゲーム。青いお化けと赤い悪魔を使った頭脳戦。',
+    url: 'https://game-lounge-pi.vercel.app/games/geister',
+    gamePlatform: 'Web Browser',
+    numberOfPlayers: 2,
+    gameItem: {
+      '@type': 'Thing',
+      name: '青いお化けと赤い悪魔',
+    },
+  };
+
   return (
     <>
+      <Script
+        id="geister-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <GameHeader title="ガイスター" />
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-6 sm:pb-12 px-3 sm:px-4">
         <div className="max-w-4xl mx-auto">
