@@ -161,6 +161,9 @@ export const Connect4Board: React.FC<Connect4BoardProps> = ({
                         focusedCell.y === y &&
                         focusedCell.z === z;
 
+                      // 最後の手のリング色を陣営色に
+                      const lastMoveRingColor = piece?.owner === 'player1' ? 'ring-blue-400' : 'ring-red-400';
+
                       return (
                         <div
                           key={`${x}-${y}-${z}`}
@@ -178,7 +181,7 @@ export const Connect4Board: React.FC<Connect4BoardProps> = ({
                                     isWinning
                                       ? 'ring-4 ring-yellow-400 animate-pulse'
                                       : isLast
-                                      ? 'ring-4 ring-purple-400 animate-pulse'
+                                      ? `ring-4 ${lastMoveRingColor} animate-pulse`
                                       : ''
                                   }`
                                 : available

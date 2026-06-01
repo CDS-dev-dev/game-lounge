@@ -57,8 +57,8 @@ function Cell({
           <sphereGeometry args={[0.35, 32, 32]} />
           <meshStandardMaterial
             color={piece.owner === 'player1' ? '#3b82f6' : '#ef4444'}
-            emissive={isWinning ? '#fbbf24' : isLastMove ? '#a855f7' : '#000000'}
-            emissiveIntensity={isWinning ? 0.5 : isLastMove ? 0.6 : 0}
+            emissive={isWinning ? '#fbbf24' : isLastMove ? (piece.owner === 'player1' ? '#60a5fa' : '#f87171') : '#000000'}
+            emissiveIntensity={isWinning ? 0.5 : isLastMove ? 0.4 : 0}
           />
         </mesh>
       )}
@@ -66,10 +66,10 @@ function Cell({
       {/* 最後の手のリング */}
       {piece && isLastMove && !isWinning && (
         <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.45, 0.04, 16, 32]} />
+          <torusGeometry args={[0.45, 0.05, 16, 32]} />
           <meshStandardMaterial
-            color="#a855f7"
-            emissive="#a855f7"
+            color={piece.owner === 'player1' ? '#60a5fa' : '#f87171'}
+            emissive={piece.owner === 'player1' ? '#60a5fa' : '#f87171'}
             emissiveIntensity={0.8}
           />
         </mesh>
@@ -144,13 +144,13 @@ function Board3D({
           key={`rod-${x}-${y}`}
           position={[rodX, 0, rodY]}
         >
-          <cylinderGeometry args={[0.02, 0.02, rodHeight, 8]} />
+          <cylinderGeometry args={[0.04, 0.04, rodHeight, 16]} />
           <meshStandardMaterial
-            color="#555555"
-            metalness={0.8}
-            roughness={0.2}
-            transparent
-            opacity={0.4}
+            color="#d4d4d4"
+            metalness={0.9}
+            roughness={0.1}
+            emissive="#888888"
+            emissiveIntensity={0.3}
           />
         </mesh>
       );
