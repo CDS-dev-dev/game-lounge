@@ -22,6 +22,8 @@ import { XiangqiBoard } from '@/components/game/XiangqiBoard';
 import { RulesModal } from '@/components/game/RulesModal';
 import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
+import { formatGameError } from '@/lib/utils/error-handler';
+import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
 
 type CpuGamePhase = 'difficulty-select' | 'order-select' | 'playing' | 'cpuThinking' | 'finished';
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -33,6 +35,7 @@ const GAME_ID = 'cpu-game';
 export default function XiangqiCpuPage() {
   const router = useRouter();
   const { showToast } = useToast();
+  const { setSafeTimeout } = useSafeTimeout();
   const [phase, setPhase] = useState<CpuGamePhase>('difficulty-select');
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [playerColor, setPlayerColor] = useState<'red' | 'black' | null>(null);
@@ -65,7 +68,7 @@ export default function XiangqiCpuPage() {
       setPhase('cpuThinking');
       setGameState(newState);
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setSafeTimeout(() => resolve(undefined), 1000));
 
       const cpuMove = calculateCpuMove(newState, 'red', difficulty);
       newState = movePiece(newState, CPU_ID, cpuMove.from, cpuMove.to);
@@ -130,7 +133,7 @@ export default function XiangqiCpuPage() {
         setPhase('cpuThinking');
 
         // 少し待機（思考演出）
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setSafeTimeout(() => resolve(undefined), 1000));
 
         // CPUが移動
         const cpuColor = playerColor === 'red' ? 'black' : 'red';
@@ -151,7 +154,7 @@ export default function XiangqiCpuPage() {
         setPhase('playing');
       } catch (error) {
         console.error('Move error:', error);
-        showToast((error as Error).message, 'error');
+        showToast(formatGameError(error), 'error');
         setSelectedPiece(null);
         setValidMoves([]);
       }
@@ -332,7 +335,7 @@ export default function XiangqiCpuPage() {
                   <div className="text-center">
                     <p className="text-xs sm:text-sm text-slate-600 font-medium">ターン</p>
                     <p className="text-base sm:text-xl font-bold text-slate-900">
-                      {gameState!.currentTurn === playerColor ? 'あなた' : 'CPU'}
+                      {gameState && gameState.currentTurn === playerColor ? 'あなた' : 'CPU'}
                     </p>
                     <p className="text-[10px] sm:text-xs text-slate-500">
                       {difficulty === 'easy' && '😊 初級'}
@@ -414,13 +417,13 @@ export default function XiangqiCpuPage() {
               validMoves={validMoves}
             />
 
-            {phase === 'finished' && (
+            {phase === 'finished' && gameState && (
               <div role="alert" aria-live="assertive">
                 <Card className="mt-6 bg-white/95">
                   <CardHeader>
                     <h2 className="text-3xl font-bold text-center text-slate-900">
-                      {gameState!.winner === playerColor && '🎉 あなたの勝ち！'}
-                      {gameState!.winner && gameState!.winner !== playerColor && '😢 CPUの勝ち'}
+                      {gameState.winner === playerColor && '🎉 あなたの勝ち！'}
+                      {gameState.winner && gameState.winner !== playerColor && '😢 CPUの勝ち'}
                     </h2>
                   </CardHeader>
                   <CardContent className="text-center">

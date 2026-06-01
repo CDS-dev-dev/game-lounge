@@ -19,6 +19,7 @@ import { SetupBoard } from '@/components/game/SetupBoard';
 import { RulesSummary } from '@/components/game/RulesSummary';
 import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
+import { formatGameError } from '@/lib/utils/error-handler';
 
 type LocalGamePhase = 'setup-p1' | 'setup-p2-interstitial' | 'setup-p2' | 'playing' | 'turnChange' | 'finished';
 
@@ -56,7 +57,7 @@ export default function GeisterLocalPage() {
       setPhase('setup-p2-interstitial');
     } catch (error) {
       console.error('Setup error:', error);
-      showToast((error as Error).message, 'error');
+      showToast(formatGameError(error), 'error');
     }
   };
 
@@ -69,7 +70,7 @@ export default function GeisterLocalPage() {
       setCurrentPlayer('player1');
     } catch (error) {
       console.error('Setup error:', error);
-      showToast((error as Error).message, 'error');
+      showToast(formatGameError(error), 'error');
     }
   };
 
@@ -127,7 +128,7 @@ export default function GeisterLocalPage() {
       setPhase('turnChange');
     } catch (error) {
       console.error('Move error:', error);
-      showToast((error as Error).message, 'error');
+      showToast(formatGameError(error), 'error');
       setSelectedPiece(null);
       setValidMoves([]);
     }

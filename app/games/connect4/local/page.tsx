@@ -20,6 +20,7 @@ import type { Connect4State, Position3D, PlayerRole } from '@/lib/games/connect4
 import { Connect4Board3D } from '@/components/game/Connect4Board3D';
 import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
+import { formatGameError } from '@/lib/utils/error-handler';
 
 type LocalGamePhase = 'playing' | 'turnChange' | 'finished';
 
@@ -76,7 +77,7 @@ export default function Connect4LocalPage() {
       setPhase('turnChange');
     } catch (error) {
       console.error('Move error:', error);
-      showToast((error as Error).message, 'error');
+      showToast(formatGameError(error), 'error');
     }
   };
 

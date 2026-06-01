@@ -23,6 +23,8 @@ import { RulesModal } from '@/components/game/RulesModal';
 import { useToast } from '@/components/ui/Toast';
 import { PLAYER_COLORS } from '@/lib/games/connect4/constants';
 import { GameHeader } from '@/components/layout/GameHeader';
+import { formatGameError } from '@/lib/utils/error-handler';
+import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
 
 type CpuGamePhase = 'difficulty-select' | 'order-select' | 'playing' | 'cpuThinking' | 'finished';
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -34,6 +36,7 @@ const GAME_ID = 'cpu-game';
 export default function Connect4CpuPage() {
   const router = useRouter();
   const { showToast } = useToast();
+  const { setSafeTimeout } = useSafeTimeout();
   const [phase, setPhase] = useState<CpuGamePhase>('difficulty-select');
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [playerOrder, setPlayerOrder] = useState<'first' | 'second' | null>(null);
@@ -64,7 +67,7 @@ export default function Connect4CpuPage() {
       setPhase('cpuThinking');
       setGameState(newState);
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setSafeTimeout(() => resolve(undefined), 1000));
 
       const cpuMove = calculateCpuMove(newState, 'player1', difficulty);
       newState = placePiece(newState, CPU_ID, cpuMove);
@@ -127,7 +130,7 @@ export default function Connect4CpuPage() {
       setPhase('cpuThinking');
 
       // 少し待機（思考演出）
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setSafeTimeout(() => resolve(undefined), 1000));
 
       // CPUが配置
       const cpuRole = playerOrder === 'first' ? 'player2' : 'player1';
@@ -156,8 +159,7 @@ export default function Connect4CpuPage() {
       setGameState(newState);
       setPhase('playing');
     } catch (error) {
-      console.error('Move error:', error);
-      showToast((error as Error).message, 'error');
+      showToast(formatGameError(error), 'error');
     }
   };
 
@@ -311,7 +313,7 @@ export default function Connect4CpuPage() {
                   <div>
                     <p className="text-xs sm:text-sm text-slate-600 font-medium">ターン</p>
                     <p className="text-base sm:text-xl font-bold text-slate-900">
-                      {gameState!.currentTurn === (playerOrder === 'first' ? 'player1' : 'player2') ? '🔵 あなた' : '🔴 CPU'}
+                      {gameState && gameState.currentTurn === (playerOrder === 'first' ? 'player1' : 'player2') ? '🔵 あなた' : '🔴 CPU'}
                     </p>
                   </div>
                   <div className="text-center">
@@ -365,14 +367,14 @@ export default function Connect4CpuPage() {
               availablePositions={availablePositions}
             />
 
-            {phase === 'finished' && (
+            {phase === 'finished' && gameState && (
               <div role="alert" aria-live="assertive">
                 <Card className="mt-6 bg-white/95">
                   <CardHeader>
                     <h2 className="text-3xl font-bold text-center text-slate-900">
-                      {gameState!.winner === (playerOrder === 'first' ? 'player1' : 'player2') && '🎉 あなたの勝ち！'}
-                      {gameState!.winner && gameState!.winner !== (playerOrder === 'first' ? 'player1' : 'player2') && '😢 CPUの勝ち'}
-                      {gameState!.winner === null && '🤝 引き分け'}
+                      {gameState.winner === (playerOrder === 'first' ? 'player1' : 'player2') && '🎉 あなたの勝ち！'}
+                      {gameState.winner && gameState.winner !== (playerOrder === 'first' ? 'player1' : 'player2') && '😢 CPUの勝ち'}
+                      {gameState.winner === null && '🤝 引き分け'}
                     </h2>
                   </CardHeader>
                   <CardContent className="text-center">

@@ -20,6 +20,7 @@ import type { XiangqiState, Position, PlayerRole } from '@/lib/games/xiangqi/typ
 import { XiangqiBoard } from '@/components/game/XiangqiBoard';
 import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
+import { formatGameError } from '@/lib/utils/error-handler';
 
 type LocalGamePhase = 'playing' | 'turnChange' | 'finished';
 
@@ -82,7 +83,7 @@ export default function XiangqiLocalPage() {
         setPhase('turnChange');
       } catch (error) {
         console.error('Move error:', error);
-        showToast((error as Error).message, 'error');
+        showToast(formatGameError(error), 'error');
         setSelectedPiece(null);
         setValidMoves([]);
       }

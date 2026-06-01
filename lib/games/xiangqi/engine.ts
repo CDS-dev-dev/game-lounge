@@ -20,6 +20,7 @@ import {
   RIVER_ROW_TOP,
   RIVER_ROW_BOTTOM,
 } from './constants';
+import { isValidPieceMove, getAllValidMoves } from './piece-rules';
 
 // 空の盤面を作成
 function createEmptyBoard(): (Piece | null)[][] {
@@ -204,7 +205,6 @@ export function isValidMove(
   if (targetPiece && targetPiece.owner === role) return false;
 
   // 各駒の移動ルール詳細チェック
-  const { isValidPieceMove } = require('./piece-rules');
   return isValidPieceMove(state, from, to, piece.type, role, piece.hasCrossedRiver);
 }
 
@@ -409,6 +409,5 @@ export function getValidMoves(
     state.players.red === playerId ? 'red' : state.players.black === playerId ? 'black' : null;
   if (!role || piece.owner !== role || state.currentTurn !== role) return [];
 
-  const { getAllValidMoves } = require('./piece-rules');
   return getAllValidMoves(state, piece.position);
 }

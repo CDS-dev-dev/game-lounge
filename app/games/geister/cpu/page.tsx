@@ -21,6 +21,8 @@ import { SetupBoard } from '@/components/game/SetupBoard';
 import { RulesSummary } from '@/components/game/RulesSummary';
 import { RulesModal } from '@/components/game/RulesModal';
 import { useToast } from '@/components/ui/Toast';
+import { formatGameError } from '@/lib/utils/error-handler';
+import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
 
 type CpuGamePhase = 'orderSelect' | 'setup' | 'playing' | 'cpuThinking' | 'finished';
 
@@ -31,6 +33,7 @@ const GAME_ID = 'cpu-game';
 export default function GeisterCpuPage() {
   const router = useRouter();
   const { showToast } = useToast();
+  const { setSafeTimeout } = useSafeTimeout();
   const [phase, setPhase] = useState<CpuGamePhase>('orderSelect');
   const [playerOrder, setPlayerOrder] = useState<'first' | 'second' | null>(null);
   const [gameState, setGameState] = useState<GeisterState>(() =>
@@ -98,7 +101,7 @@ export default function GeisterCpuPage() {
       // 後攻の場合、CPUが先に動く
       if (playerOrder === 'second') {
         setPhase('cpuThinking');
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setSafeTimeout(() => resolve(undefined), 1000));
 
         const cpuMove = calculateCpuMove(newState, CPU_ID);
         newState = movePiece(newState, CPU_ID, cpuMove.pieceId, cpuMove.to);
@@ -116,7 +119,7 @@ export default function GeisterCpuPage() {
       setPhase('playing');
     } catch (error) {
       console.error('Setup error:', error);
-      showToast((error as Error).message, 'error');
+      showToast(formatGameError(error), 'error');
     }
   };
 
@@ -177,7 +180,7 @@ export default function GeisterCpuPage() {
       setPhase('cpuThinking');
 
       // 1秒待機（思考演出）
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setSafeTimeout(() => resolve(undefined), 1000));
 
       // CPUが移動
       const cpuMove = calculateCpuMove(newState, CPU_ID);
@@ -196,7 +199,7 @@ export default function GeisterCpuPage() {
       setPhase('playing');
     } catch (error) {
       console.error('Move error:', error);
-      showToast((error as Error).message, 'error');
+      showToast(formatGameError(error), 'error');
       setSelectedPiece(null);
       setValidMoves([]);
       setPhase('playing');
