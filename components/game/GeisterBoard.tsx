@@ -23,26 +23,15 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
   const [focusedCell, setFocusedCell] = useState<Position | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
 
-  // 表示座標→内部座標の変換（player2は反転が必要）
-  const toInternalCoords = (displayX: number, displayY: number): Position => {
-    if (gameState.myRole === 'player2') {
-      return {
-        x: BOARD_SIZE - 1 - displayX,
-        y: BOARD_SIZE - 1 - displayY,
-      };
-    }
-    return { x: displayX, y: displayY };
-  };
-
-  // 内部座標→表示座標の変換（player2は反転が必要）
-  const toDisplayCoords = (internalX: number, internalY: number): Position => {
-    if (gameState.myRole === 'player2') {
-      return {
-        x: BOARD_SIZE - 1 - internalX,
-        y: BOARD_SIZE - 1 - internalY,
-      };
-    }
-    return { x: internalX, y: internalY };
+  // どちらのプレイヤーも常に自分が下側に表示されるようにする
+  // SetupBoardと同じロジック：描画順序で調整し、座標変換は不要
+  // 表示インデックス → 内部座標
+  const toInternalCoords = (displayIndex: number): number => {
+    // player1: 上から下（displayIndex 0→内部0, 1→内部1, ...）
+    // player2: 下から上（displayIndex 0→内部5, 1→内部4, ...）
+    return gameState.myRole === 'player2'
+      ? BOARD_SIZE - 1 - displayIndex
+      : displayIndex;
   };
 
   const isEscapePosition = (x: number, y: number) => {
@@ -52,10 +41,8 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
     );
   };
 
-  const isValidMove = (displayX: number, displayY: number) => {
-    // validMovesは内部座標なので、表示座標を内部座標に変換して比較
-    const internal = toInternalCoords(displayX, displayY);
-    return validMoves.some((pos) => pos.x === internal.x && pos.y === internal.y);
+  const isValidMove = (internalX: number, internalY: number) => {
+    return validMoves.some((pos) => pos.x === internalX && pos.y === internalY);
   };
 
   // 最後の移動元/移動先かチェック（内部座標で判定）
@@ -69,29 +56,27 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
     return gameState.lastMove.to.x === internalX && gameState.lastMove.to.y === internalY;
   };
 
-  const handleCellClick = (displayX: number, displayY: number) => {
-    // 表示座標を内部座標に変換
-    const internal = toInternalCoords(displayX, displayY);
-    const piece = gameState.board[internal.y][internal.x];
+  const handleCellClick = (internalX: number, internalY: number) => {
+    const piece = gameState.board[internalY][internalX];
 
     if (piece && piece.owner === gameState.myRole && !piece.captured && !piece.escaped) {
       // 自分の駒をクリック
       onPieceClick?.(piece.id);
     } else if (selectedPieceId) {
       // 駒を選択中の状態でセルをクリック（移動先）
-      // 内部座標で渡す
-      onCellClick?.(internal);
+      onCellClick?.({ x: internalX, y: internalY });
     }
   };
 
-  // キーボード操作
+  // キーボード操作（内部座標で管理）
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!gameState.canOperate || !boardRef.current) return;
 
-      // フォーカスがない場合は中央にセット
+      // フォーカスがない場合は中央にセット（内部座標）
       if (!focusedCell) {
-        setFocusedCell({ x: Math.floor(BOARD_SIZE / 2), y: Math.floor(BOARD_SIZE / 2) });
+        const centerInternal = Math.floor(BOARD_SIZE / 2);
+        setFocusedCell({ x: centerInternal, y: centerInternal });
         return;
       }
 
@@ -101,28 +86,28 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
       switch (e.key) {
         case 'ArrowUp':
           e.preventDefault();
-          // 画面上で上に移動（displayY を減らす）
+          // 内部座標で上に移動
           newY = Math.max(0, focusedCell.y - 1);
           break;
         case 'ArrowDown':
           e.preventDefault();
-          // 画面上で下に移動（displayY を増やす）
+          // 内部座標で下に移動
           newY = Math.min(BOARD_SIZE - 1, focusedCell.y + 1);
           break;
         case 'ArrowLeft':
           e.preventDefault();
-          // 画面上で左に移動（displayX を減らす）
+          // 内部座標で左に移動
           newX = Math.max(0, focusedCell.x - 1);
           break;
         case 'ArrowRight':
           e.preventDefault();
-          // 画面上で右に移動（displayX を増やす）
+          // 内部座標で右に移動
           newX = Math.min(BOARD_SIZE - 1, focusedCell.x + 1);
           break;
         case 'Enter':
         case ' ':
           e.preventDefault();
-          // 表示座標でクリック処理
+          // 内部座標でクリック処理
           handleCellClick(focusedCell.x, focusedCell.y);
           return;
       }
@@ -149,9 +134,7 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
   const getCellAriaLabel = (internalX: number, internalY: number): string => {
     const piece = gameState.board[internalY][internalX];
     const isEscape = isEscapePosition(internalX, internalY);
-    // canMoveは表示座標で判定する必要があるため、内部→表示に変換
-    const display = toDisplayCoords(internalX, internalY);
-    const canMove = isValidMove(display.x, display.y);
+    const canMove = isValidMove(internalX, internalY);
 
     let label = `${String.fromCharCode(65 + internalX)}${internalY + 1}`;
 
@@ -196,31 +179,31 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
       >
       <div className="grid gap-0.5 sm:gap-1" style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)` }}>
         {Array.from({ length: BOARD_SIZE }).map((_, rowIndex) => {
-          // 表示座標は常にrowIndexをそのまま使用（上から下に0,1,2...）
-          const displayY = rowIndex;
+          // どちらのプレイヤーも自分が下側に来るように描画順序を調整
+          // player1: 上から下（rowIndex 0→内部Y=0, 1→内部Y=1, ...）
+          // player2: 下から上（rowIndex 0→内部Y=5, 1→内部Y=4, ...）
+          const internalY = toInternalCoords(rowIndex);
 
           return Array.from({ length: BOARD_SIZE }).map((_, colIndex) => {
-            // 表示座標
-            const displayX = colIndex;
+            // X座標も同様
+            const internalX = toInternalCoords(colIndex);
 
-            // 内部座標に変換してデータを取得
-            const internal = toInternalCoords(displayX, displayY);
-            const piece = gameState.board[internal.y][internal.x];
+            const piece = gameState.board[internalY][internalX];
             const isSelected = piece?.id === selectedPieceId;
-            const isEscape = isEscapePosition(internal.x, internal.y);
-            const canMove = isValidMove(displayX, displayY);
-            const isLastFrom = isLastMoveFrom(internal.x, internal.y);
-            const isLastTo = isLastMoveTo(internal.x, internal.y);
+            const isEscape = isEscapePosition(internalX, internalY);
+            const canMove = isValidMove(internalX, internalY);
+            const isLastFrom = isLastMoveFrom(internalX, internalY);
+            const isLastTo = isLastMoveTo(internalX, internalY);
 
-            const isFocused = focusedCell && focusedCell.x === displayX && focusedCell.y === displayY;
+            const isFocused = focusedCell && focusedCell.x === internalX && focusedCell.y === internalY;
 
             return (
               <div
-                key={`${displayX}-${displayY}`}
+                key={`${internalX}-${internalY}`}
                 role="gridcell"
-                aria-label={getCellAriaLabel(internal.x, internal.y)}
-                onClick={() => handleCellClick(displayX, displayY)}
-                onFocus={() => setFocusedCell({ x: displayX, y: displayY })}
+                aria-label={getCellAriaLabel(internalX, internalY)}
+                onClick={() => handleCellClick(internalX, internalY)}
+                onFocus={() => setFocusedCell({ x: internalX, y: internalY })}
                 tabIndex={isFocused ? 0 : -1}
                 className={`
                   w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center border-2 cursor-pointer transition-all
