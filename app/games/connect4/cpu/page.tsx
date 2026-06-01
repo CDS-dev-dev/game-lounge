@@ -25,6 +25,7 @@ import { PLAYER_COLORS } from '@/lib/games/connect4/constants';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
+import { useGameHistory } from '@/lib/hooks/useGameHistory';
 
 type CpuGamePhase = 'difficulty-select' | 'order-select' | 'playing' | 'cpuThinking' | 'finished';
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -37,11 +38,11 @@ export default function Connect4CpuPage() {
   const router = useRouter();
   const { showToast } = useToast();
   const { setSafeTimeout } = useSafeTimeout();
+  const gameHistory = useGameHistory<Connect4State>(2); // CPU対戦は2手戻すため最小履歴3
   const [phase, setPhase] = useState<CpuGamePhase>('difficulty-select');
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [playerOrder, setPlayerOrder] = useState<'first' | 'second' | null>(null);
   const [gameState, setGameState] = useState<Connect4State | null>(null);
-  const [history, setHistory] = useState<Connect4State[]>([]); // 履歴保存
 
   // 難易度選択
   const handleDifficultySelect = (selectedDifficulty: Difficulty) => {
@@ -74,23 +75,19 @@ export default function Connect4CpuPage() {
     }
 
     setGameState(newState);
-    setHistory([newState]); // 初期状態を履歴に保存
+    gameHistory.addHistory(newState); // 初期状態を履歴に保存
     setPhase('playing');
   };
 
-  // 待った機能
+  // 待った機能（プレイヤーの手とCPUの手の2手戻す）
   const handleUndo = () => {
-    if (history.length < 3) {
+    const previousState = gameHistory.undo(2);
+    if (!previousState) {
       showToast('待ったできません', 'error');
       return;
     }
 
-    // プレイヤーの手とCPUの手の2手戻す
-    const newHistory = history.slice(0, -2);
-    const previousState = newHistory[newHistory.length - 1];
-
     setGameState(previousState);
-    setHistory(newHistory);
     showToast('1手戻しました', 'success');
   };
 
@@ -104,7 +101,7 @@ export default function Connect4CpuPage() {
     try {
       // プレイヤーの配置
       let newState = placePiece(gameState, PLAYER_ID, pos);
-      setHistory([...history, newState]); // 履歴に追加
+      gameHistory.addHistory(newState); // 履歴に追加
 
       // 勝敗判定（最適化：最後に置いた位置のみチェック）
       const result = checkWinner(newState, pos);
@@ -136,7 +133,7 @@ export default function Connect4CpuPage() {
       const cpuRole = playerOrder === 'first' ? 'player2' : 'player1';
       const cpuMove = calculateCpuMove(newState, cpuRole, difficulty);
       newState = placePiece(newState, CPU_ID, cpuMove);
-      setHistory((prev) => [...prev, newState]); // 履歴に追加
+      gameHistory.addHistory(newState); // 履歴に追加
 
       // 勝敗判定（最適化：最後に置いた位置のみチェック）
       const cpuResult = checkWinner(newState, cpuMove);
@@ -168,7 +165,7 @@ export default function Connect4CpuPage() {
     setPhase('difficulty-select');
     setPlayerOrder(null);
     setGameState(null);
-    setHistory([]);
+    gameHistory.clearHistory();
   };
 
   const clientState: Connect4ClientState | null = gameState
@@ -346,7 +343,7 @@ export default function Connect4CpuPage() {
                       </div>
                     </RulesModal>
                     {/* 待ったボタン */}
-                    {phase === 'playing' && history.length >= 3 && (
+                    {phase === 'playing' && gameHistory.canUndo() && (
                       <Button
                         variant="secondary"
                         onClick={handleUndo}

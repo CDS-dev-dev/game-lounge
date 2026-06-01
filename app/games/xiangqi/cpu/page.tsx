@@ -24,6 +24,7 @@ import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
+import { useGameHistory } from '@/lib/hooks/useGameHistory';
 
 type CpuGamePhase = 'difficulty-select' | 'order-select' | 'playing' | 'cpuThinking' | 'finished';
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -36,13 +37,13 @@ export default function XiangqiCpuPage() {
   const router = useRouter();
   const { showToast } = useToast();
   const { setSafeTimeout } = useSafeTimeout();
+  const gameHistory = useGameHistory<XiangqiState>(2); // CPU対戦は2手戻すため最小履歴3
   const [phase, setPhase] = useState<CpuGamePhase>('difficulty-select');
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [playerColor, setPlayerColor] = useState<'red' | 'black' | null>(null);
   const [gameState, setGameState] = useState<XiangqiState | null>(null);
   const [selectedPiece, setSelectedPiece] = useState<Position | null>(null);
   const [validMoves, setValidMoves] = useState<Position[]>([]);
-  const [history, setHistory] = useState<XiangqiState[]>([]); // 履歴保存
 
   // 難易度選択
   const handleDifficultySelect = (selectedDifficulty: Difficulty) => {
@@ -75,22 +76,19 @@ export default function XiangqiCpuPage() {
     }
 
     setGameState(newState);
-    setHistory([newState]); // 初期状態を履歴に保存
+    gameHistory.addHistory(newState); // 初期状態を履歴に保存
     setPhase('playing');
   };
 
-  // 待った機能
+  // 待った機能（プレイヤーの手とCPUの手の2手戻す）
   const handleUndo = () => {
-    if (!gameState || history.length < 3) {
+    const previousState = gameHistory.undo(2);
+    if (!previousState) {
       showToast('待ったできません', 'error');
       return;
     }
 
-    const newHistory = history.slice(0, -2);
-    const previousState = newHistory[newHistory.length - 1];
-
     setGameState(previousState);
-    setHistory(newHistory);
     setSelectedPiece(null);
     setValidMoves([]);
     showToast('1手戻しました', 'success');
@@ -114,7 +112,7 @@ export default function XiangqiCpuPage() {
     if (selectedPiece) {
       try {
         let newState = movePiece(gameState, PLAYER_ID, selectedPiece, pos);
-        setHistory([...history, newState]); // 履歴に追加
+        gameHistory.addHistory(newState); // 履歴に追加
         setSelectedPiece(null);
         setValidMoves([]);
 
@@ -139,7 +137,7 @@ export default function XiangqiCpuPage() {
         const cpuColor = playerColor === 'red' ? 'black' : 'red';
         const cpuMove = calculateCpuMove(newState, cpuColor, difficulty);
         newState = movePiece(newState, CPU_ID, cpuMove.from, cpuMove.to);
-        setHistory((prev) => [...prev, newState]); // 履歴に追加
+        gameHistory.addHistory(newState); // 履歴に追加
 
         // 勝敗判定
         const cpuResult = checkWinner(newState);
@@ -168,7 +166,7 @@ export default function XiangqiCpuPage() {
     setGameState(null);
     setSelectedPiece(null);
     setValidMoves([]);
-    setHistory([]);
+    gameHistory.clearHistory();
   };
 
   const clientState = gameState ? toClientState(gameState, PLAYER_ID) : null;
@@ -396,7 +394,7 @@ export default function XiangqiCpuPage() {
                     </div>
                   </RulesModal>
                   {/* 待ったボタン */}
-                  {phase === 'playing' && history.length >= 3 && (
+                  {phase === 'playing' && gameHistory.canUndo() && (
                     <Button
                       variant="secondary"
                       onClick={handleUndo}

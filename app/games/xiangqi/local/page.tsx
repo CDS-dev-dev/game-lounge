@@ -21,6 +21,7 @@ import { XiangqiBoard } from '@/components/game/XiangqiBoard';
 import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { formatGameError } from '@/lib/utils/error-handler';
+import { useGameHistory } from '@/lib/hooks/useGameHistory';
 
 type LocalGamePhase = 'playing' | 'turnChange' | 'finished';
 
@@ -40,7 +41,7 @@ export default function XiangqiLocalPage() {
   });
   const [selectedPiece, setSelectedPiece] = useState<Position | null>(null);
   const [validMoves, setValidMoves] = useState<Position[]>([]);
-  const [history, setHistory] = useState<Array<{ state: XiangqiState; player: PlayerRole; selectedPiece: Position | null }>>([]);
+  const gameHistory = useGameHistory<{ state: XiangqiState; player: PlayerRole; selectedPiece: Position | null }>();
 
   // セルクリック
   const handleCellClick = (pos: Position) => {
@@ -61,7 +62,7 @@ export default function XiangqiLocalPage() {
     if (selectedPiece) {
       try {
         // 履歴に現在の状態を保存
-        setHistory([...history, { state: gameState, player: currentPlayer, selectedPiece }]);
+        gameHistory.addHistory({ state: gameState, player: currentPlayer, selectedPiece });
 
         let newState = movePiece(gameState, playerId, selectedPiece, pos);
         setSelectedPiece(null);
@@ -97,17 +98,16 @@ export default function XiangqiLocalPage() {
 
   // 待った（1手戻す）
   const handleUndo = () => {
-    if (history.length === 0) {
+    const previousEntry = gameHistory.undo();
+    if (!previousEntry) {
       showToast('これ以上戻せません', 'error');
       return;
     }
 
-    const lastEntry = history[history.length - 1];
-    setGameState(lastEntry.state);
-    setCurrentPlayer(lastEntry.player);
+    setGameState(previousEntry.state);
+    setCurrentPlayer(previousEntry.player);
     setSelectedPiece(null);
     setValidMoves([]);
-    setHistory(history.slice(0, -1));
     setPhase('playing');
     showToast('1手戻しました', 'info');
   };
@@ -121,7 +121,7 @@ export default function XiangqiLocalPage() {
     setPhase('playing');
     setSelectedPiece(null);
     setValidMoves([]);
-    setHistory([]);
+    gameHistory.clearHistory();
   };
 
   const playerId = currentPlayer === 'red' ? PLAYER_RED_ID : PLAYER_BLACK_ID;
@@ -227,7 +227,7 @@ export default function XiangqiLocalPage() {
                 </div>
                 <div className="flex gap-2 justify-center">
                   {/* 待ったボタン */}
-                  {history.length > 0 && (
+                  {gameHistory.canUndo() && (
                     <Button
                       variant="secondary"
                       onClick={handleUndo}

@@ -20,6 +20,7 @@ import { RulesSummary } from '@/components/game/RulesSummary';
 import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { formatGameError } from '@/lib/utils/error-handler';
+import { useGameHistory } from '@/lib/hooks/useGameHistory';
 
 type LocalGamePhase = 'setup-p1' | 'setup-p2-interstitial' | 'setup-p2' | 'playing' | 'turnChange' | 'finished';
 
@@ -47,7 +48,7 @@ export default function GeisterLocalPage() {
   const [validMoves, setValidMoves] = useState<Position[]>([]);
   const [player1Setup, setPlayer1Setup] = useState<PieceSetup[]>([]);
   const [player2Setup, setPlayer2Setup] = useState<PieceSetup[]>([]);
-  const [history, setHistory] = useState<Array<{ state: GeisterState; player: PlayerRole; selectedPiece: string | null }>>([]);
+  const gameHistory = useGameHistory<{ state: GeisterState; player: PlayerRole; selectedPiece: string | null }>();
 
   // Player1の配置完了
   const handlePlayer1SetupComplete = (setup: PieceSetup[]) => {
@@ -106,7 +107,7 @@ export default function GeisterLocalPage() {
       const playerId = currentPlayer === 'player1' ? PLAYER1_ID : PLAYER2_ID;
 
       // 履歴に現在の状態を保存
-      setHistory([...history, { state: gameState, player: currentPlayer, selectedPiece }]);
+      gameHistory.addHistory({ state: gameState, player: currentPlayer, selectedPiece });
 
       const newState = movePiece(gameState, playerId, selectedPiece, to);
 
@@ -136,17 +137,16 @@ export default function GeisterLocalPage() {
 
   // 待った（1手戻す）
   const handleUndo = () => {
-    if (history.length === 0) {
+    const previousEntry = gameHistory.undo();
+    if (!previousEntry) {
       showToast('これ以上戻せません', 'error');
       return;
     }
 
-    const lastEntry = history[history.length - 1];
-    setGameState(lastEntry.state);
-    setCurrentPlayer(lastEntry.player);
+    setGameState(previousEntry.state);
+    setCurrentPlayer(previousEntry.player);
     setSelectedPiece(null);
     setValidMoves([]);
-    setHistory(history.slice(0, -1));
     setPhase('playing');
     showToast('1手戻しました', 'info');
   };
@@ -168,7 +168,7 @@ export default function GeisterLocalPage() {
     setValidMoves([]);
     setPlayer1Setup([]);
     setPlayer2Setup([]);
-    setHistory([]);
+    gameHistory.clearHistory();
   };
 
   const playerId = currentPlayer === 'player1' ? PLAYER1_ID : PLAYER2_ID;
@@ -308,7 +308,7 @@ export default function GeisterLocalPage() {
                 </div>
                 <div className="flex gap-2 justify-center mt-3">
                   {/* 待ったボタン */}
-                  {history.length > 0 && (
+                  {gameHistory.canUndo() && (
                     <Button
                       variant="secondary"
                       onClick={handleUndo}

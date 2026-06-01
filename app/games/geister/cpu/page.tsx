@@ -23,6 +23,7 @@ import { RulesModal } from '@/components/game/RulesModal';
 import { useToast } from '@/components/ui/Toast';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
+import { useGameHistory } from '@/lib/hooks/useGameHistory';
 
 type CpuGamePhase = 'orderSelect' | 'setup' | 'playing' | 'cpuThinking' | 'finished';
 
@@ -34,6 +35,7 @@ export default function GeisterCpuPage() {
   const router = useRouter();
   const { showToast } = useToast();
   const { setSafeTimeout } = useSafeTimeout();
+  const gameHistory = useGameHistory<GeisterState>(2); // CPU対戦は2手戻すため最小履歴3
   const [phase, setPhase] = useState<CpuGamePhase>('orderSelect');
   const [playerOrder, setPlayerOrder] = useState<'first' | 'second' | null>(null);
   const [gameState, setGameState] = useState<GeisterState>(() =>
@@ -42,7 +44,6 @@ export default function GeisterCpuPage() {
   const [selectedPiece, setSelectedPiece] = useState<string | null>(null);
   const [validMoves, setValidMoves] = useState<Position[]>([]);
   const [playerSetup, setPlayerSetup] = useState<PieceSetup[]>([]);
-  const [history, setHistory] = useState<GeisterState[]>([]); // 履歴保存
 
   // 先攻後攻選択
   const handleOrderSelect = (order: 'first' | 'second') => {
@@ -123,19 +124,15 @@ export default function GeisterCpuPage() {
     }
   };
 
-  // 待った機能
+  // 待った機能（プレイヤーの手とCPUの手の2手戻す）
   const handleUndo = () => {
-    if (history.length < 3) {
+    const previousState = gameHistory.undo(2);
+    if (!previousState) {
       showToast('待ったできません', 'error');
       return;
     }
 
-    // プレイヤーの手とCPUの手の2手戻す
-    const newHistory = history.slice(0, -2);
-    const previousState = newHistory[newHistory.length - 1];
-
     setGameState(previousState);
-    setHistory(newHistory);
     setSelectedPiece(null);
     setValidMoves([]);
     showToast('1手戻しました', 'success');
@@ -162,7 +159,7 @@ export default function GeisterCpuPage() {
     try {
       // プレイヤーの移動
       let newState = movePiece(gameState, PLAYER_ID, selectedPiece, to);
-      setHistory([...history, newState]); // 履歴に追加
+      gameHistory.addHistory(newState); // 履歴に追加
       setSelectedPiece(null);
       setValidMoves([]);
 
@@ -185,7 +182,7 @@ export default function GeisterCpuPage() {
       // CPUが移動
       const cpuMove = calculateCpuMove(newState, CPU_ID);
       newState = movePiece(newState, CPU_ID, cpuMove.pieceId, cpuMove.to);
-      setHistory((prev) => [...prev, newState]); // 履歴に追加
+      gameHistory.addHistory(newState); // 履歴に追加
 
       // 勝敗判定
       const cpuWinResult = checkWinner(newState);
@@ -214,7 +211,7 @@ export default function GeisterCpuPage() {
     setSelectedPiece(null);
     setValidMoves([]);
     setPlayerSetup([]);
-    setHistory([]);
+    gameHistory.clearHistory();
   };
 
   // CPU対戦用のクライアント状態を作成
@@ -429,7 +426,7 @@ export default function GeisterCpuPage() {
                     <RulesSummary />
                   </RulesModal>
                   {/* 待ったボタン */}
-                  {phase === 'playing' && history.length >= 3 && (
+                  {phase === 'playing' && gameHistory.canUndo() && (
                     <Button
                       variant="secondary"
                       onClick={handleUndo}

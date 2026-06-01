@@ -21,6 +21,7 @@ import { Connect4Board3D } from '@/components/game/Connect4Board3D';
 import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { formatGameError } from '@/lib/utils/error-handler';
+import { useGameHistory } from '@/lib/hooks/useGameHistory';
 
 type LocalGamePhase = 'playing' | 'turnChange' | 'finished';
 
@@ -38,7 +39,7 @@ export default function Connect4LocalPage() {
     state = joinPlayer2(state, PLAYER2_ID);
     return state;
   });
-  const [history, setHistory] = useState<Array<{ state: Connect4State; player: PlayerRole }>>([]);
+  const gameHistory = useGameHistory<{ state: Connect4State; player: PlayerRole }>();
 
   // 駒を配置
   const handleCellClick = (pos: Position3D) => {
@@ -48,7 +49,7 @@ export default function Connect4LocalPage() {
       const playerId = currentPlayer === 'player1' ? PLAYER1_ID : PLAYER2_ID;
 
       // 履歴に現在の状態を保存
-      setHistory([...history, { state: gameState, player: currentPlayer }]);
+      gameHistory.addHistory({ state: gameState, player: currentPlayer });
 
       let newState = placePiece(gameState, playerId, pos);
 
@@ -83,15 +84,14 @@ export default function Connect4LocalPage() {
 
   // 待った（1手戻す）
   const handleUndo = () => {
-    if (history.length === 0) {
+    const previousEntry = gameHistory.undo();
+    if (!previousEntry) {
       showToast('これ以上戻せません', 'error');
       return;
     }
 
-    const lastEntry = history[history.length - 1];
-    setGameState(lastEntry.state);
-    setCurrentPlayer(lastEntry.player);
-    setHistory(history.slice(0, -1));
+    setGameState(previousEntry.state);
+    setCurrentPlayer(previousEntry.player);
     setPhase('playing');
     showToast('1手戻しました', 'info');
   };
@@ -108,7 +108,7 @@ export default function Connect4LocalPage() {
     setGameState(state);
     setCurrentPlayer('player1');
     setPhase('playing');
-    setHistory([]);
+    gameHistory.clearHistory();
   };
 
   const playerId = currentPlayer === 'player1' ? PLAYER1_ID : PLAYER2_ID;
@@ -168,7 +168,7 @@ export default function Connect4LocalPage() {
                     </p>
                   </div>
                   {/* 待ったボタン */}
-                  {history.length > 0 && (
+                  {gameHistory.canUndo() && (
                     <Button
                       variant="secondary"
                       onClick={handleUndo}
