@@ -164,20 +164,67 @@ export default function XiangqiLocalPage() {
           <>
             <Card className="mb-6 bg-white/95">
               <CardContent className="py-4">
-                <div className="flex justify-between items-center flex-wrap gap-2">
-                  <div>
+                <div className="grid grid-cols-3 gap-2 items-center mb-3">
+                  <div className="text-center">
+                    <p className="text-[10px] sm:text-xs text-slate-600 font-medium mb-0.5">捕獲した駒</p>
+                    <p className="text-xs sm:text-sm font-semibold text-slate-900">
+                      {Object.values(clientState.myCapturedPieces).reduce((a, b) => a + b, 0)} / 16
+                    </p>
+                    <div className="flex flex-wrap gap-0.5 justify-center mt-1 text-[9px] sm:text-[10px]">
+                      {clientState.myCapturedPieces.chariot > 0 && (
+                        <span className="bg-red-100 text-red-800 px-1 py-0.5 rounded">車{clientState.myCapturedPieces.chariot}</span>
+                      )}
+                      {clientState.myCapturedPieces.horse > 0 && (
+                        <span className="bg-orange-100 text-orange-800 px-1 py-0.5 rounded">馬{clientState.myCapturedPieces.horse}</span>
+                      )}
+                      {clientState.myCapturedPieces.cannon > 0 && (
+                        <span className="bg-yellow-100 text-yellow-800 px-1 py-0.5 rounded">炮{clientState.myCapturedPieces.cannon}</span>
+                      )}
+                      {clientState.myCapturedPieces.elephant > 0 && (
+                        <span className="bg-green-100 text-green-800 px-1 py-0.5 rounded">象{clientState.myCapturedPieces.elephant}</span>
+                      )}
+                      {clientState.myCapturedPieces.advisor > 0 && (
+                        <span className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded">士{clientState.myCapturedPieces.advisor}</span>
+                      )}
+                      {clientState.myCapturedPieces.soldier > 0 && (
+                        <span className="bg-purple-100 text-purple-800 px-1 py-0.5 rounded">兵{clientState.myCapturedPieces.soldier}</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-center">
                     <p className="text-sm text-slate-600 font-medium">現在のターン</p>
                     <p className="text-xl font-bold text-slate-900">
                       {currentPlayer === 'red' ? '紅（赤）' : '黒'}
                     </p>
                   </div>
                   <div className="text-center">
-                    <p className="text-sm text-slate-600 font-medium">残り駒数</p>
-                    <p className="text-lg font-semibold text-slate-900">
-                      紅: {clientState.myRole === 'red' ? clientState.myPiecesCount : clientState.opponentPiecesCount} /
-                      黒: {clientState.myRole === 'black' ? clientState.myPiecesCount : clientState.opponentPiecesCount}
+                    <p className="text-[10px] sm:text-xs text-slate-600 font-medium mb-0.5">取られた駒</p>
+                    <p className="text-xs sm:text-sm font-semibold text-slate-900">
+                      {Object.values(clientState.opponentCapturedPieces).reduce((a, b) => a + b, 0)} / 16
                     </p>
+                    <div className="flex flex-wrap gap-0.5 justify-center mt-1 text-[9px] sm:text-[10px]">
+                      {clientState.opponentCapturedPieces.chariot > 0 && (
+                        <span className="bg-red-100 text-red-800 px-1 py-0.5 rounded">車{clientState.opponentCapturedPieces.chariot}</span>
+                      )}
+                      {clientState.opponentCapturedPieces.horse > 0 && (
+                        <span className="bg-orange-100 text-orange-800 px-1 py-0.5 rounded">馬{clientState.opponentCapturedPieces.horse}</span>
+                      )}
+                      {clientState.opponentCapturedPieces.cannon > 0 && (
+                        <span className="bg-yellow-100 text-yellow-800 px-1 py-0.5 rounded">炮{clientState.opponentCapturedPieces.cannon}</span>
+                      )}
+                      {clientState.opponentCapturedPieces.elephant > 0 && (
+                        <span className="bg-green-100 text-green-800 px-1 py-0.5 rounded">象{clientState.opponentCapturedPieces.elephant}</span>
+                      )}
+                      {clientState.opponentCapturedPieces.advisor > 0 && (
+                        <span className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded">士{clientState.opponentCapturedPieces.advisor}</span>
+                      )}
+                      {clientState.opponentCapturedPieces.soldier > 0 && (
+                        <span className="bg-purple-100 text-purple-800 px-1 py-0.5 rounded">兵{clientState.opponentCapturedPieces.soldier}</span>
+                      )}
+                    </div>
                   </div>
+                </div>
+                <div className="flex gap-2 justify-center">
                   {/* 待ったボタン */}
                   {history.length > 0 && (
                     <Button

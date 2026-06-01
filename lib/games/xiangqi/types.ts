@@ -59,6 +59,17 @@ export interface XiangqiState {
   updatedAt: number;
 }
 
+// 取った駒の内訳
+export interface CapturedPieceCounts {
+  king: number;
+  advisor: number;
+  elephant: number;
+  horse: number;
+  chariot: number;
+  cannon: number;
+  soldier: number;
+}
+
 // クライアント用状態
 export interface XiangqiClientState {
   gameId: string;
@@ -74,4 +85,6 @@ export interface XiangqiClientState {
   winner: PlayerRole | null;
   inCheck: PlayerRole | null;
   lastMove: Move | null;
+  myCapturedPieces: CapturedPieceCounts;
+  opponentCapturedPieces: CapturedPieceCounts;
 }

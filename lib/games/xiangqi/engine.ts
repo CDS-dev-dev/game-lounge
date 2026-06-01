@@ -8,6 +8,7 @@ import type {
   PlayerRole,
   PieceType,
   Move,
+  CapturedPieceCounts,
 } from './types';
 import {
   BOARD_COLS,
@@ -353,6 +354,28 @@ export function toClientState(
   const isMyTurn = state.currentTurn === myRole;
   const canOperate = state.status === 'playing' && isMyTurn;
 
+  // 取った駒の内訳を計算
+  const calculateCapturedPieces = (capturedBy: PlayerRole): CapturedPieceCounts => {
+    const counts: CapturedPieceCounts = {
+      king: 0,
+      advisor: 0,
+      elephant: 0,
+      horse: 0,
+      chariot: 0,
+      cannon: 0,
+      soldier: 0,
+    };
+
+    // moveHistoryから取られた駒を集計
+    for (const move of state.moveHistory) {
+      if (move.capturedPiece && move.capturedPiece.owner !== capturedBy) {
+        counts[move.capturedPiece.type]++;
+      }
+    }
+
+    return counts;
+  };
+
   return {
     gameId: state.gameId,
     status: state.status,
@@ -367,6 +390,8 @@ export function toClientState(
     winner: state.winner,
     inCheck: state.inCheck,
     lastMove: state.moveHistory[state.moveHistory.length - 1] || null,
+    myCapturedPieces: calculateCapturedPieces(myRole),
+    opponentCapturedPieces: calculateCapturedPieces(opponentRole),
   };
 }
 

@@ -302,58 +302,107 @@ export default function XiangqiCpuPage() {
           <>
             <Card className="mb-4 bg-white/95">
               <CardContent className="py-3">
-                <div className="flex justify-between items-center flex-wrap gap-2">
-                  <div>
-                    <p className="text-xs sm:text-sm text-slate-600 font-medium">ターン</p>
-                    <p className="text-base sm:text-xl font-bold text-slate-900">
-                      {gameState!.currentTurn === playerColor ? `あなた（${playerColor === 'red' ? '紅' : '黒'}）` : `CPU（${playerColor === 'red' ? '黒' : '紅'}）`}
+                <div className="grid grid-cols-3 gap-2 items-center mb-3">
+                  <div className="text-center">
+                    <p className="text-[10px] sm:text-xs text-slate-600 font-medium mb-0.5">捕獲した駒</p>
+                    <p className="text-xs sm:text-sm font-semibold text-slate-900">
+                      {Object.values(clientState.myCapturedPieces).reduce((a, b) => a + b, 0)} / 16
                     </p>
+                    <div className="flex flex-wrap gap-0.5 justify-center mt-1 text-[9px] sm:text-[10px]">
+                      {clientState.myCapturedPieces.chariot > 0 && (
+                        <span className="bg-red-100 text-red-800 px-1 py-0.5 rounded">車{clientState.myCapturedPieces.chariot}</span>
+                      )}
+                      {clientState.myCapturedPieces.horse > 0 && (
+                        <span className="bg-orange-100 text-orange-800 px-1 py-0.5 rounded">馬{clientState.myCapturedPieces.horse}</span>
+                      )}
+                      {clientState.myCapturedPieces.cannon > 0 && (
+                        <span className="bg-yellow-100 text-yellow-800 px-1 py-0.5 rounded">炮{clientState.myCapturedPieces.cannon}</span>
+                      )}
+                      {clientState.myCapturedPieces.elephant > 0 && (
+                        <span className="bg-green-100 text-green-800 px-1 py-0.5 rounded">象{clientState.myCapturedPieces.elephant}</span>
+                      )}
+                      {clientState.myCapturedPieces.advisor > 0 && (
+                        <span className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded">士{clientState.myCapturedPieces.advisor}</span>
+                      )}
+                      {clientState.myCapturedPieces.soldier > 0 && (
+                        <span className="bg-purple-100 text-purple-800 px-1 py-0.5 rounded">兵{clientState.myCapturedPieces.soldier}</span>
+                      )}
+                    </div>
                   </div>
                   <div className="text-center">
-                    <p className="text-xs sm:text-sm text-slate-600 font-medium">難易度</p>
-                    <p className="text-sm sm:text-base font-semibold text-slate-900">
+                    <p className="text-xs sm:text-sm text-slate-600 font-medium">ターン</p>
+                    <p className="text-base sm:text-xl font-bold text-slate-900">
+                      {gameState!.currentTurn === playerColor ? 'あなた' : 'CPU'}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-slate-500">
                       {difficulty === 'easy' && '😊 初級'}
                       {difficulty === 'medium' && '🤔 中級'}
                       {difficulty === 'hard' && '🔥 上級'}
                     </p>
                   </div>
-                  <div className="flex gap-2 items-center">
-                    {/* ルールボタン */}
-                    <RulesModal gameName="中国象棋">
-                      <div className="space-y-3">
-                        <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-                          <p className="font-semibold text-indigo-900 mb-2">🎯 勝利条件</p>
-                          <p className="text-indigo-800 text-sm">
-                            • 相手の<span className="font-bold">将/帥を取る</span>（チェックメイト）
-                          </p>
-                        </div>
-                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                          <p className="font-semibold text-amber-900 mb-2">📖 主要な駒</p>
-                          <ul className="text-amber-800 text-sm space-y-1">
-                            <li>• <strong>将/帥:</strong> 九宮内で縦横1マス</li>
-                            <li>• <strong>車:</strong> 縦横に何マスでも（最強）</li>
-                            <li>• <strong>馬:</strong> 日の字型（蹩馬腿あり）</li>
-                            <li>• <strong>炮/砲:</strong> 台を飛び越えて攻撃</li>
-                            <li>• <strong>兵/卒:</strong> 川を渡ると左右にも動ける</li>
-                          </ul>
-                          <p className="text-amber-700 text-xs mt-2">
-                            💡 詳細は<a href="/games/xiangqi/rules" target="_blank" className="underline">ルールページ</a>をご覧ください
-                          </p>
-                        </div>
-                      </div>
-                    </RulesModal>
-                    {/* 待ったボタン */}
-                    {phase === 'playing' && history.length >= 3 && (
-                      <Button
-                        variant="secondary"
-                        onClick={handleUndo}
-                        className="text-xs sm:text-sm"
-                        aria-label="1手戻す"
-                      >
-                        ↩️ 待った
-                      </Button>
-                    )}
+                  <div className="text-center">
+                    <p className="text-[10px] sm:text-xs text-slate-600 font-medium mb-0.5">取られた駒</p>
+                    <p className="text-xs sm:text-sm font-semibold text-slate-900">
+                      {Object.values(clientState.opponentCapturedPieces).reduce((a, b) => a + b, 0)} / 16
+                    </p>
+                    <div className="flex flex-wrap gap-0.5 justify-center mt-1 text-[9px] sm:text-[10px]">
+                      {clientState.opponentCapturedPieces.chariot > 0 && (
+                        <span className="bg-red-100 text-red-800 px-1 py-0.5 rounded">車{clientState.opponentCapturedPieces.chariot}</span>
+                      )}
+                      {clientState.opponentCapturedPieces.horse > 0 && (
+                        <span className="bg-orange-100 text-orange-800 px-1 py-0.5 rounded">馬{clientState.opponentCapturedPieces.horse}</span>
+                      )}
+                      {clientState.opponentCapturedPieces.cannon > 0 && (
+                        <span className="bg-yellow-100 text-yellow-800 px-1 py-0.5 rounded">炮{clientState.opponentCapturedPieces.cannon}</span>
+                      )}
+                      {clientState.opponentCapturedPieces.elephant > 0 && (
+                        <span className="bg-green-100 text-green-800 px-1 py-0.5 rounded">象{clientState.opponentCapturedPieces.elephant}</span>
+                      )}
+                      {clientState.opponentCapturedPieces.advisor > 0 && (
+                        <span className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded">士{clientState.opponentCapturedPieces.advisor}</span>
+                      )}
+                      {clientState.opponentCapturedPieces.soldier > 0 && (
+                        <span className="bg-purple-100 text-purple-800 px-1 py-0.5 rounded">兵{clientState.opponentCapturedPieces.soldier}</span>
+                      )}
+                    </div>
                   </div>
+                </div>
+                <div className="flex gap-2 justify-center">
+                  {/* ルールボタン */}
+                  <RulesModal gameName="中国象棋">
+                    <div className="space-y-3">
+                      <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                        <p className="font-semibold text-indigo-900 mb-2">🎯 勝利条件</p>
+                        <p className="text-indigo-800 text-sm">
+                          • 相手の<span className="font-bold">将/帥を取る</span>（チェックメイト）
+                        </p>
+                      </div>
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                        <p className="font-semibold text-amber-900 mb-2">📖 主要な駒</p>
+                        <ul className="text-amber-800 text-sm space-y-1">
+                          <li>• <strong>将/帥:</strong> 九宮内で縦横1マス</li>
+                          <li>• <strong>車:</strong> 縦横に何マスでも（最強）</li>
+                          <li>• <strong>馬:</strong> 日の字型（蹩馬腿あり）</li>
+                          <li>• <strong>炮/砲:</strong> 台を飛び越えて攻撃</li>
+                          <li>• <strong>兵/卒:</strong> 川を渡ると左右にも動ける</li>
+                        </ul>
+                        <p className="text-amber-700 text-xs mt-2">
+                          💡 詳細は<a href="/games/xiangqi/rules" target="_blank" className="underline">ルールページ</a>をご覧ください
+                        </p>
+                      </div>
+                    </div>
+                  </RulesModal>
+                  {/* 待ったボタン */}
+                  {phase === 'playing' && history.length >= 3 && (
+                    <Button
+                      variant="secondary"
+                      onClick={handleUndo}
+                      className="text-xs sm:text-sm"
+                      aria-label="1手戻す"
+                    >
+                      ↩️ 待った
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
