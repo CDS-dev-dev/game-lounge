@@ -21,16 +21,18 @@ export default function GeisterRulesPage() {
             <h2 className="text-2xl font-bold mt-6 mb-4 text-slate-900">ゲーム概要</h2>
             <p className="text-slate-700 font-medium leading-relaxed">
               ガイスター（Geister）はドイツ生まれの2人対戦ボードゲームです。
-              青いお化け👻（Good駒）と赤い悪魔😈（Bad駒）を使い、相手の駒を取ったり脱出させたりして勝利を目指します。
-              相手には自分の駒の色が見えないため、心理戦が重要です。
+              各プレイヤーは青いオバケ👻4体・赤いオバケ😈4体の計8体を持ちます。
+              <strong className="text-indigo-700">青/赤の種類は自分だけが見えるようにし、相手には見えません。</strong>
+              この秘匿情報を活かした心理戦が勝利の鍵です。
             </p>
 
             <h2 className="text-2xl font-bold mt-8 mb-4 text-slate-900">盤面構成</h2>
             <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-6 my-6">
               <ul className="list-disc pl-6 text-slate-700 font-medium space-y-2">
-                <li><strong>サイズ</strong>: 6列 × 6行</li>
-                <li><strong>脱出口</strong>: 盤面の四隅（各プレイヤーの陣地側の角）</li>
-                <li><strong>初期配置</strong>: 各プレイヤーは中央4列×2行に8個の駒を配置</li>
+                <li><strong>サイズ</strong>: 6列 × 6行（合計36マス）</li>
+                <li><strong>脱出口🚪</strong>: 各プレイヤーの陣地側の左右端（相手側の出口から脱出）</li>
+                <li><strong>初期配置エリア</strong>: 自陣側の中央4列×2行（8マス）に8個の駒を自由に配置</li>
+                <li><strong>移動</strong>: 上下左右に1マスずつ（斜め移動は不可）</li>
               </ul>
             </div>
 
@@ -54,10 +56,11 @@ export default function GeisterRulesPage() {
                   </div>
                 </div>
                 <ul className="list-disc pl-6 text-blue-800 font-medium space-y-2">
-                  <li>各プレイヤー4個ずつ</li>
-                  <li>縦横1マス移動可能</li>
-                  <li>脱出させると勝利</li>
-                  <li>全て取られると敗北</li>
+                  <li>各プレイヤー4体ずつ保有</li>
+                  <li>上下左右1マス移動可能（斜め不可）</li>
+                  <li><strong>1体でも脱出させると即座に勝利</strong></li>
+                  <li>4体全て取られると敗北</li>
+                  <li>自分だけが色を知っている</li>
                 </ul>
               </div>
 
@@ -78,10 +81,11 @@ export default function GeisterRulesPage() {
                   </div>
                 </div>
                 <ul className="list-disc pl-6 text-red-800 font-medium space-y-2">
-                  <li>各プレイヤー4個ずつ</li>
-                  <li>縦横1マス移動可能</li>
-                  <li>相手に全て取らせると勝利</li>
-                  <li>これを脱出させても勝利にならない</li>
+                  <li>各プレイヤー4体ずつ保有</li>
+                  <li>上下左右1マス移動可能（斜め不可）</li>
+                  <li><strong>4体全て相手に取らせると勝利</strong></li>
+                  <li>脱出させても勝利にならない（脱出不可扱い）</li>
+                  <li>自分だけが色を知っている</li>
                 </ul>
               </div>
             </div>
@@ -90,21 +94,24 @@ export default function GeisterRulesPage() {
             <div className="bg-indigo-50 border-2 border-indigo-300 rounded-lg p-6 my-6">
               <div className="space-y-4">
                 <div className="bg-white rounded-lg p-4">
-                  <h3 className="font-bold text-lg text-indigo-900 mb-2">🎯 勝利パターン1: 青いお化けの脱出</h3>
+                  <h3 className="font-bold text-lg text-indigo-900 mb-2">🎯 勝利条件1: 青いオバケを脱出させる</h3>
                   <p className="text-indigo-800 font-medium">
-                    自分の👻（Good駒）を相手側の脱出口（盤面の角）から脱出させる
+                    自分の👻（青いオバケ）1体を<strong>相手陣地側の左右端にある出口🚪から盤外へ移動</strong>させる
+                  </p>
+                  <p className="text-xs text-indigo-600 mt-2">
+                    ※出口マスから、さらに盤外方向へ1マス移動することで脱出
                   </p>
                 </div>
                 <div className="bg-white rounded-lg p-4">
-                  <h3 className="font-bold text-lg text-indigo-900 mb-2">🎯 勝利パターン2: 相手の青いお化けを全て捕獲</h3>
+                  <h3 className="font-bold text-lg text-indigo-900 mb-2">🎯 勝利条件2: 相手の青いオバケを4体すべて取る</h3>
                   <p className="text-indigo-800 font-medium">
-                    相手の👻（Good駒）を4個全て取る
+                    相手の👻（青いオバケ）を4体全て捕獲する
                   </p>
                 </div>
                 <div className="bg-white rounded-lg p-4">
-                  <h3 className="font-bold text-lg text-indigo-900 mb-2">🎯 勝利パターン3: 自分の赤い悪魔を全て取らせる</h3>
+                  <h3 className="font-bold text-lg text-indigo-900 mb-2">🎯 勝利条件3: 自分の赤いオバケを4体すべて取らせる</h3>
                   <p className="text-indigo-800 font-medium">
-                    相手に自分の😈（Bad駒）を4個全て取らせる
+                    相手に自分の😈（赤いオバケ）を4体全て取らせる（逆転戦術）
                   </p>
                 </div>
               </div>
@@ -114,28 +121,33 @@ export default function GeisterRulesPage() {
             <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6 my-6">
               <ol className="list-decimal pl-6 text-green-900 font-medium space-y-3">
                 <li>
-                  <strong>初期配置</strong>: 各プレイヤーは中央4列×2行に👻4個と😈4個を配置
+                  <strong>初期配置フェーズ</strong>: 各プレイヤーは自陣側の指定8マスに👻4体と😈4体を自由に配置
                   <ul className="list-disc pl-6 mt-2 space-y-1 text-sm">
-                    <li>相手には駒の色が見えない</li>
-                    <li>配置戦略が重要</li>
+                    <li>相手には各コマの色が分からない</li>
+                    <li>配置戦略が勝敗を左右する</li>
                   </ul>
                 </li>
                 <li>
-                  <strong>交互に移動</strong>: 先手から順番に1マスずつ駒を移動
+                  <strong>手番</strong>: プレイヤーは交互に1手ずつ行う
                   <ul className="list-disc pl-6 mt-2 space-y-1 text-sm">
-                    <li>縦横1マス（斜め不可）</li>
+                    <li>自分のオバケ1体を上下左右のいずれかに1マス移動（斜め不可）</li>
+                    <li>自分のコマがあるマスには移動できない</li>
                     <li>他の駒を飛び越えられない</li>
                   </ul>
                 </li>
                 <li>
-                  <strong>駒の捕獲</strong>: 相手の駒がいるマスに移動すると捕獲
+                  <strong>駒の捕獲</strong>: 相手のコマがあるマスに移動すると、その相手コマを取る
                   <ul className="list-disc pl-6 mt-2 space-y-1 text-sm">
-                    <li>取った駒の色が初めて見える</li>
-                    <li>相手の駒の配置を推理する</li>
+                    <li><strong>取ったコマの色は公開される</strong>（初めて見える）</li>
+                    <li>取った駒の色から相手の配置を推理する</li>
                   </ul>
                 </li>
                 <li>
-                  <strong>脱出</strong>: 自分の👻を相手側の角（脱出口）に移動させると即座に勝利
+                  <strong>脱出</strong>: 自分の👻を相手側の出口から盤外へ移動させると即座に勝利
+                  <ul className="list-disc pl-6 mt-2 space-y-1 text-sm">
+                    <li>脱出できるのは青いオバケ👻のみ</li>
+                    <li>😈は脱出しても勝利にならないため脱出できない扱い</li>
+                  </ul>
                 </li>
               </ol>
             </div>

@@ -384,36 +384,58 @@ export default function GeisterCpuPage() {
           <>
             <Card className="mb-3 sm:mb-4 bg-white/95">
               <CardContent className="py-2 sm:py-3">
-                <div className="flex justify-between items-center flex-wrap gap-2">
-                  <div>
+                <div className="grid grid-cols-3 gap-2 items-center mb-2">
+                  <div className="text-center">
+                    <p className="text-[10px] sm:text-xs text-slate-600 font-medium mb-0.5">取られた駒</p>
+                    <p className="text-xs sm:text-sm font-semibold text-slate-900">
+                      {clientState.capturedCounts.myGood + clientState.capturedCounts.myBad} / 8
+                    </p>
+                    <div className="flex gap-1 justify-center mt-0.5 text-[10px] sm:text-xs">
+                      <span className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded">
+                        👻 {clientState.capturedCounts.myGood}
+                      </span>
+                      <span className="bg-red-100 text-red-800 px-1 py-0.5 rounded">
+                        😈 {clientState.capturedCounts.myBad}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-center">
                     <p className="text-xs sm:text-sm text-slate-600 font-medium">現在のターン</p>
                     <p className="text-base sm:text-xl font-bold text-slate-900">
                       {gameState.currentTurn === playerRole ? 'あなた' : 'CPU'}
                     </p>
                   </div>
                   <div className="text-center">
-                    <p className="text-xs sm:text-sm text-slate-600 font-medium">捕獲した駒</p>
-                    <p className="text-sm sm:text-lg font-semibold text-slate-900">
+                    <p className="text-[10px] sm:text-xs text-slate-600 font-medium mb-0.5">捕獲した駒</p>
+                    <p className="text-xs sm:text-sm font-semibold text-slate-900">
                       {clientState.opponentPiecesCount.captured} / 8
                     </p>
+                    <div className="flex gap-1 justify-center mt-0.5 text-[10px] sm:text-xs">
+                      <span className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded">
+                        👻 {clientState.capturedCounts.opponentGood}
+                      </span>
+                      <span className="bg-red-100 text-red-800 px-1 py-0.5 rounded">
+                        😈 {clientState.capturedCounts.opponentBad}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex gap-2 items-center">
-                    {/* ルールボタン */}
-                    <RulesModal gameName="ガイスター">
-                      <RulesSummary />
-                    </RulesModal>
-                    {/* 待ったボタン */}
-                    {phase === 'playing' && history.length >= 3 && (
-                      <Button
-                        variant="secondary"
-                        onClick={handleUndo}
-                        className="text-xs sm:text-sm"
-                        aria-label="1手戻す"
-                      >
-                        ↩️ 待った
-                      </Button>
-                    )}
-                  </div>
+                </div>
+                <div className="flex gap-2 justify-center mt-3 sm:mt-4">
+                  {/* ルールボタン */}
+                  <RulesModal gameName="ガイスター">
+                    <RulesSummary />
+                  </RulesModal>
+                  {/* 待ったボタン */}
+                  {phase === 'playing' && history.length >= 3 && (
+                    <Button
+                      variant="secondary"
+                      onClick={handleUndo}
+                      className="text-xs sm:text-sm"
+                      aria-label="1手戻す"
+                    >
+                      ↩️ 待った
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
