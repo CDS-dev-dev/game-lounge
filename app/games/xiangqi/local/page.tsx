@@ -39,6 +39,7 @@ export default function XiangqiLocalPage() {
   });
   const [selectedPiece, setSelectedPiece] = useState<Position | null>(null);
   const [validMoves, setValidMoves] = useState<Position[]>([]);
+  const [history, setHistory] = useState<Array<{ state: XiangqiState; player: PlayerRole; selectedPiece: Position | null }>>([]);
 
   // セルクリック
   const handleCellClick = (pos: Position) => {
@@ -58,6 +59,9 @@ export default function XiangqiLocalPage() {
     // 移動
     if (selectedPiece) {
       try {
+        // 履歴に現在の状態を保存
+        setHistory([...history, { state: gameState, player: currentPlayer, selectedPiece }]);
+
         let newState = movePiece(gameState, playerId, selectedPiece, pos);
         setSelectedPiece(null);
         setValidMoves([]);
@@ -90,6 +94,23 @@ export default function XiangqiLocalPage() {
     setPhase('playing');
   };
 
+  // 待った（1手戻す）
+  const handleUndo = () => {
+    if (history.length === 0) {
+      showToast('これ以上戻せません', 'error');
+      return;
+    }
+
+    const lastEntry = history[history.length - 1];
+    setGameState(lastEntry.state);
+    setCurrentPlayer(lastEntry.player);
+    setSelectedPiece(null);
+    setValidMoves([]);
+    setHistory(history.slice(0, -1));
+    setPhase('playing');
+    showToast('1手戻しました', 'info');
+  };
+
   // リプレイ
   const handleReplay = () => {
     let state = createInitialState(GAME_ID, PLAYER_RED_ID);
@@ -99,6 +120,7 @@ export default function XiangqiLocalPage() {
     setPhase('playing');
     setSelectedPiece(null);
     setValidMoves([]);
+    setHistory([]);
   };
 
   const playerId = currentPlayer === 'red' ? PLAYER_RED_ID : PLAYER_BLACK_ID;
@@ -142,20 +164,31 @@ export default function XiangqiLocalPage() {
           <>
             <Card className="mb-6 bg-white/95">
               <CardContent className="py-4">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-slate-600 font-medium">現在のターン</p>
                     <p className="text-xl font-bold text-slate-900">
                       {currentPlayer === 'red' ? '紅（赤）' : '黒'}
                     </p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-center">
                     <p className="text-sm text-slate-600 font-medium">残り駒数</p>
                     <p className="text-lg font-semibold text-slate-900">
                       紅: {clientState.myRole === 'red' ? clientState.myPiecesCount : clientState.opponentPiecesCount} /
                       黒: {clientState.myRole === 'black' ? clientState.myPiecesCount : clientState.opponentPiecesCount}
                     </p>
                   </div>
+                  {/* 待ったボタン */}
+                  {history.length > 0 && (
+                    <Button
+                      variant="secondary"
+                      onClick={handleUndo}
+                      className="text-xs sm:text-sm"
+                      aria-label="1手戻す"
+                    >
+                      ↩️ 待った
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>

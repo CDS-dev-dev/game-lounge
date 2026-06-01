@@ -37,6 +37,7 @@ export default function Connect4LocalPage() {
     state = joinPlayer2(state, PLAYER2_ID);
     return state;
   });
+  const [history, setHistory] = useState<Array<{ state: Connect4State; player: PlayerRole }>>([]);
 
   // 駒を配置
   const handleCellClick = (pos: Position3D) => {
@@ -44,6 +45,10 @@ export default function Connect4LocalPage() {
 
     try {
       const playerId = currentPlayer === 'player1' ? PLAYER1_ID : PLAYER2_ID;
+
+      // 履歴に現在の状態を保存
+      setHistory([...history, { state: gameState, player: currentPlayer }]);
+
       let newState = placePiece(gameState, playerId, pos);
 
       // 勝敗判定（最適化：最後に置いた位置のみチェック）
@@ -75,6 +80,21 @@ export default function Connect4LocalPage() {
     }
   };
 
+  // 待った（1手戻す）
+  const handleUndo = () => {
+    if (history.length === 0) {
+      showToast('これ以上戻せません', 'error');
+      return;
+    }
+
+    const lastEntry = history[history.length - 1];
+    setGameState(lastEntry.state);
+    setCurrentPlayer(lastEntry.player);
+    setHistory(history.slice(0, -1));
+    setPhase('playing');
+    showToast('1手戻しました', 'info');
+  };
+
   // ターン交代画面から戻る
   const handleReadyForTurn = () => {
     setPhase('playing');
@@ -87,6 +107,7 @@ export default function Connect4LocalPage() {
     setGameState(state);
     setCurrentPlayer('player1');
     setPhase('playing');
+    setHistory([]);
   };
 
   const playerId = currentPlayer === 'player1' ? PLAYER1_ID : PLAYER2_ID;
@@ -113,10 +134,10 @@ export default function Connect4LocalPage() {
           <Card className="bg-white/95">
             <CardContent className="py-12 text-center">
               <h2 className="text-3xl font-bold text-slate-900 mb-6">
-                Player {currentPlayer === 'player1' ? '1' : '2'} の番です
+                Player {currentPlayer === 'player1' ? '1 🔵' : '2 🔴'} の番です
               </h2>
               <p className="text-slate-700 mb-8">
-                端末を Player {currentPlayer === 'player1' ? '1' : '2'} に渡してください。<br />
+                端末を Player {currentPlayer === 'player1' ? '1 🔵' : '2 🔴'} に渡してください。<br />
                 準備ができたらボタンを押してください。
               </p>
               <Button variant="primary" onClick={handleReadyForTurn}>
@@ -131,20 +152,31 @@ export default function Connect4LocalPage() {
           <>
             <Card className="mb-6 bg-white/95">
               <CardContent className="py-4">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center flex-wrap gap-2">
                   <div>
                     <p className="text-sm text-slate-600 font-medium">現在のターン</p>
                     <p className="text-xl font-bold text-slate-900">
                       Player {currentPlayer === 'player1' ? '1 🔵' : '2 🔴'}
                     </p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-center">
                     <p className="text-sm text-slate-600 font-medium">配置した駒</p>
                     <p className="text-lg font-semibold text-slate-900">
-                      P1: {clientState.myRole === 'player1' ? clientState.myPiecesCount : clientState.opponentPiecesCount} /
-                      P2: {clientState.myRole === 'player2' ? clientState.myPiecesCount : clientState.opponentPiecesCount}
+                      🔵 {clientState.myRole === 'player1' ? clientState.myPiecesCount : clientState.opponentPiecesCount} /
+                      🔴 {clientState.myRole === 'player2' ? clientState.myPiecesCount : clientState.opponentPiecesCount}
                     </p>
                   </div>
+                  {/* 待ったボタン */}
+                  {history.length > 0 && (
+                    <Button
+                      variant="secondary"
+                      onClick={handleUndo}
+                      className="text-xs sm:text-sm"
+                      aria-label="1手戻す"
+                    >
+                      ↩️ 待った
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -170,8 +202,8 @@ export default function Connect4LocalPage() {
           <Card className="mt-6 bg-white/95">
             <CardHeader>
               <h2 className="text-3xl font-bold text-center text-slate-900">
-                {gameState.winner === 'player1' && '🎉 Player 1 の勝ち！'}
-                {gameState.winner === 'player2' && '🎉 Player 2 の勝ち！'}
+                {gameState.winner === 'player1' && '🎉 Player 1 🔵 の勝ち！'}
+                {gameState.winner === 'player2' && '🎉 Player 2 🔴 の勝ち！'}
                 {gameState.winner === null && '🤝 引き分け'}
               </h2>
             </CardHeader>

@@ -46,6 +46,7 @@ export default function GeisterLocalPage() {
   const [validMoves, setValidMoves] = useState<Position[]>([]);
   const [player1Setup, setPlayer1Setup] = useState<PieceSetup[]>([]);
   const [player2Setup, setPlayer2Setup] = useState<PieceSetup[]>([]);
+  const [history, setHistory] = useState<Array<{ state: GeisterState; player: PlayerRole; selectedPiece: string | null }>>([]);
 
   // Player1の配置完了
   const handlePlayer1SetupComplete = (setup: PieceSetup[]) => {
@@ -102,6 +103,10 @@ export default function GeisterLocalPage() {
 
     try {
       const playerId = currentPlayer === 'player1' ? PLAYER1_ID : PLAYER2_ID;
+
+      // 履歴に現在の状態を保存
+      setHistory([...history, { state: gameState, player: currentPlayer, selectedPiece }]);
+
       const newState = movePiece(gameState, playerId, selectedPiece, to);
 
       setSelectedPiece(null);
@@ -128,6 +133,23 @@ export default function GeisterLocalPage() {
     }
   };
 
+  // 待った（1手戻す）
+  const handleUndo = () => {
+    if (history.length === 0) {
+      showToast('これ以上戻せません', 'error');
+      return;
+    }
+
+    const lastEntry = history[history.length - 1];
+    setGameState(lastEntry.state);
+    setCurrentPlayer(lastEntry.player);
+    setSelectedPiece(null);
+    setValidMoves([]);
+    setHistory(history.slice(0, -1));
+    setPhase('playing');
+    showToast('1手戻しました', 'info');
+  };
+
   // リプレイ
   const handleReplay = () => {
     setPhase('setup-p1');
@@ -143,6 +165,9 @@ export default function GeisterLocalPage() {
     setCurrentPlayer('player1');
     setSelectedPiece(null);
     setValidMoves([]);
+    setPlayer1Setup([]);
+    setPlayer2Setup([]);
+    setHistory([]);
   };
 
   const playerId = currentPlayer === 'player1' ? PLAYER1_ID : PLAYER2_ID;
@@ -244,19 +269,54 @@ export default function GeisterLocalPage() {
           <>
             <Card className="mb-6 bg-white/95">
               <CardContent className="py-4">
-                <div className="flex justify-between items-center">
-                  <div>
+                <div className="grid grid-cols-3 gap-2 items-center">
+                  <div className="text-center">
+                    <p className="text-[10px] sm:text-xs text-slate-600 font-medium mb-0.5">取られた駒</p>
+                    <p className="text-xs sm:text-sm font-semibold text-slate-900">
+                      {clientState.capturedCounts.myGood + clientState.capturedCounts.myBad} / 8
+                    </p>
+                    <div className="flex gap-1 justify-center mt-0.5 text-[10px] sm:text-xs">
+                      <span className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded">
+                        👻 {clientState.capturedCounts.myGood}
+                      </span>
+                      <span className="bg-red-100 text-red-800 px-1 py-0.5 rounded">
+                        😈 {clientState.capturedCounts.myBad}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-center">
                     <p className="text-sm text-slate-600 font-medium">現在のターン</p>
                     <p className="text-xl font-bold text-slate-900">
                       Player {currentPlayer === 'player1' ? '1' : '2'}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-slate-600 font-medium">捕獲した駒</p>
-                    <p className="text-lg font-semibold text-slate-900">
+                  <div className="text-center">
+                    <p className="text-[10px] sm:text-xs text-slate-600 font-medium mb-0.5">捕獲した駒</p>
+                    <p className="text-xs sm:text-sm font-semibold text-slate-900">
                       {clientState.capturedCounts.opponentGood + clientState.capturedCounts.opponentBad} / 8
                     </p>
+                    <div className="flex gap-1 justify-center mt-0.5 text-[10px] sm:text-xs">
+                      <span className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded">
+                        👻 {clientState.capturedCounts.opponentGood}
+                      </span>
+                      <span className="bg-red-100 text-red-800 px-1 py-0.5 rounded">
+                        😈 {clientState.capturedCounts.opponentBad}
+                      </span>
+                    </div>
                   </div>
+                </div>
+                <div className="flex gap-2 justify-center mt-3">
+                  {/* 待ったボタン */}
+                  {history.length > 0 && (
+                    <Button
+                      variant="secondary"
+                      onClick={handleUndo}
+                      className="text-xs sm:text-sm"
+                      aria-label="1手戻す"
+                    >
+                      ↩️ 待った
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
