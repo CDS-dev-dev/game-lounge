@@ -21,6 +21,7 @@ import { GameHeader } from '@/components/layout/GameHeader';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useGameHistory } from '@/lib/hooks/useGameHistory';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/Accordion';
+import { logger } from '@/lib/utils/logger';
 
 type LocalGamePhase = 'setup-p1' | 'setup-p2-interstitial' | 'setup-p2' | 'playing' | 'turnChange' | 'finished';
 
@@ -57,7 +58,7 @@ export default function GeisterLocalPage() {
       setGameState(newState);
       setPhase('setup-p2-interstitial');
     } catch (error) {
-      console.error('Setup error:', error);
+      logger.error('Setup error:', error);
       showToast(formatGameError(error), 'error');
     }
   };
@@ -70,7 +71,7 @@ export default function GeisterLocalPage() {
       setPhase('playing');
       setCurrentPlayer('player1');
     } catch (error) {
-      console.error('Setup error:', error);
+      logger.error('Setup error:', error);
       showToast(formatGameError(error), 'error');
     }
   };
@@ -128,7 +129,7 @@ export default function GeisterLocalPage() {
       setCurrentPlayer(nextPlayer);
       setPhase('turnChange');
     } catch (error) {
-      console.error('Move error:', error);
+      logger.error('Move error:', error);
       showToast(formatGameError(error), 'error');
       setSelectedPiece(null);
       setValidMoves([]);

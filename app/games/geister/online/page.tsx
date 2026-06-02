@@ -13,6 +13,7 @@ import {
   subscribeToGameSession
 } from '@/lib/supabase/gameState';
 import { GameHeader } from '@/components/layout/GameHeader';
+import { logger } from '@/lib/utils/logger';
 
 type MatchingStatus = 'searching' | 'waiting' | 'matched';
 
@@ -47,7 +48,7 @@ export default function GeisterOnlinePage() {
         }
       }
     } catch (error) {
-      console.error('マッチング エラー:', error);
+      logger.error('マッチング エラー:', error);
       showToast('マッチングに失敗しました。もう一度お試しください', 'error');
       setMatchingStatus('searching');
     }

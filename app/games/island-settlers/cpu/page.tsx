@@ -24,6 +24,7 @@ import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
+import { logger } from '@/lib/utils/logger';
 
 type GamePhase = 'setup' | 'playing' | 'cpuThinking' | 'finished';
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -188,7 +189,7 @@ export default function IslandSettlersCpuPage() {
           return;
         }
       } catch (error) {
-        console.error('CPU turn error:', error);
+        logger.error('CPU turn error:', error);
         break;
       }
     }

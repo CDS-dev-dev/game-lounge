@@ -23,6 +23,7 @@ import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useGameHistory } from '@/lib/hooks/useGameHistory';
+import { logger } from '@/lib/utils/logger';
 
 type LocalGamePhase = 'playing' | 'turnChange' | 'finished';
 
@@ -84,7 +85,7 @@ export default function XiangqiLocalPage() {
         setCurrentPlayer(nextPlayer);
         setPhase('turnChange');
       } catch (error) {
-        console.error('Move error:', error);
+        logger.error('Move error:', error);
         showToast(formatGameError(error), 'error');
         setSelectedPiece(null);
         setValidMoves([]);
@@ -292,24 +293,26 @@ export default function XiangqiLocalPage() {
 
         {/* ゲーム終了 */}
         {phase === 'finished' && (
-          <Card className="mt-6 bg-white/95">
-            <CardHeader>
-              <h2 className="text-3xl font-bold text-center text-slate-900">
-                {gameState.winner === 'red' && '🎉 紅（赤）の勝ち！'}
-                {gameState.winner === 'black' && '🎉 黒の勝ち！'}
-              </h2>
-            </CardHeader>
-            <CardContent className="text-center">
-              <div className="flex gap-4 justify-center mt-6">
-                <Button variant="primary" onClick={handleReplay}>
-                  もう一度プレイ
-                </Button>
-                <Button variant="secondary" onClick={() => router.push('/games/xiangqi')}>
-                  モード選択に戻る
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div role="alert" aria-live="assertive">
+            <Card className="mt-6 bg-white/95">
+              <CardHeader>
+                <h2 className="text-3xl font-bold text-center text-slate-900">
+                  {gameState.winner === 'red' && '🎉 紅（赤）の勝ち！'}
+                  {gameState.winner === 'black' && '🎉 黒の勝ち！'}
+                </h2>
+              </CardHeader>
+              <CardContent className="text-center">
+                <div className="flex gap-4 justify-center mt-6">
+                  <Button variant="primary" onClick={handleReplay}>
+                    もう一度プレイ
+                  </Button>
+                  <Button variant="secondary" onClick={() => router.push('/games/xiangqi')}>
+                    モード選択に戻る
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
       </div>

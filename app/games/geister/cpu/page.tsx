@@ -23,6 +23,7 @@ import { useToast } from '@/components/ui/Toast';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
 import { useGameHistory } from '@/lib/hooks/useGameHistory';
+import { logger } from '@/lib/utils/logger';
 
 type CpuGamePhase = 'orderSelect' | 'setup' | 'playing' | 'cpuThinking' | 'finished';
 
@@ -118,7 +119,7 @@ export default function GeisterCpuPage() {
 
       setPhase('playing');
     } catch (error) {
-      console.error('Setup error:', error);
+      logger.error('Setup error:', error);
       showToast(formatGameError(error), 'error');
     }
   };
@@ -194,7 +195,7 @@ export default function GeisterCpuPage() {
       setGameState(newState);
       setPhase('playing');
     } catch (error) {
-      console.error('Move error:', error);
+      logger.error('Move error:', error);
       showToast(formatGameError(error), 'error');
       setSelectedPiece(null);
       setValidMoves([]);

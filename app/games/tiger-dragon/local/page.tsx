@@ -22,6 +22,7 @@ import { TigerDragonBoard } from '@/components/game/TigerDragonBoard';
 import { useToast } from '@/components/ui/Toast';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
+import { logger } from '@/lib/utils/logger';
 
 type GamePhase = 'setup' | 'playing' | 'roundEnd' | 'finished';
 
@@ -83,7 +84,7 @@ export default function TigerDragonLocalPage() {
       setClientState(toClientState(newState, viewPlayerId));
       setIsProcessing(false);
     } catch (error) {
-      console.error('Start round error:', error);
+      logger.error('Start round error:', error);
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
@@ -108,7 +109,7 @@ export default function TigerDragonLocalPage() {
 
       setIsProcessing(false);
     } catch (error) {
-      console.error('Attack error:', error);
+      logger.error('Attack error:', error);
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
@@ -133,7 +134,7 @@ export default function TigerDragonLocalPage() {
 
       setIsProcessing(false);
     } catch (error) {
-      console.error('Defend error:', error);
+      logger.error('Defend error:', error);
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
@@ -150,7 +151,7 @@ export default function TigerDragonLocalPage() {
       setClientState(toClientState(newState, currentViewPlayerId));
       setIsProcessing(false);
     } catch (error) {
-      console.error('Pass error:', error);
+      logger.error('Pass error:', error);
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
@@ -183,7 +184,7 @@ export default function TigerDragonLocalPage() {
 
       setIsProcessing(false);
     } catch (error) {
-      console.error('End round error:', error);
+      logger.error('End round error:', error);
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }

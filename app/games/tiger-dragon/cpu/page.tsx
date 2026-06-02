@@ -23,6 +23,7 @@ import { useToast } from '@/components/ui/Toast';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
 import { getAIAction } from '@/lib/games/tiger-dragon/ai';
+import { logger } from '@/lib/utils/logger';
 
 type GamePhase = 'playerSelect' | 'difficultySelect' | 'playing' | 'roundEnd' | 'finished';
 
@@ -85,7 +86,7 @@ export default function TigerDragonCpuPage() {
         executeCPUTurn(newState);
       }
     } catch (error) {
-      console.error('Start round error:', error);
+      logger.error('Start round error:', error);
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
@@ -139,7 +140,7 @@ export default function TigerDragonCpuPage() {
         executeCPUTurn(newState);
       }
     } catch (error) {
-      console.error('CPU turn error:', error);
+      logger.error('CPU turn error:', error);
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
@@ -169,7 +170,7 @@ export default function TigerDragonCpuPage() {
         executeCPUTurn(newState);
       }
     } catch (error) {
-      console.error('Attack error:', error);
+      logger.error('Attack error:', error);
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
@@ -199,7 +200,7 @@ export default function TigerDragonCpuPage() {
         executeCPUTurn(newState);
       }
     } catch (error) {
-      console.error('Defend error:', error);
+      logger.error('Defend error:', error);
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
@@ -221,7 +222,7 @@ export default function TigerDragonCpuPage() {
         executeCPUTurn(newState);
       }
     } catch (error) {
-      console.error('Pass error:', error);
+      logger.error('Pass error:', error);
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
@@ -258,7 +259,7 @@ export default function TigerDragonCpuPage() {
 
       setIsProcessing(false);
     } catch (error) {
-      console.error('End round error:', error);
+      logger.error('End round error:', error);
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }

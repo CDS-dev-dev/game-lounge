@@ -10,6 +10,7 @@ import { setupPieces } from '@/lib/games/geister/engine';
 import { loadGameSession, saveGameSession, getOrCreatePlayerId } from '@/lib/supabase/gameState';
 import type { PieceSetup, PlayerRole } from '@/lib/games/geister/types';
 import { SetupBoard } from '@/components/game/SetupBoard';
+import { logger } from '@/lib/utils/logger';
 
 const SETUP_TIME_LIMIT = 60; // 60秒
 
@@ -46,7 +47,7 @@ export default function SetupPage() {
           router.push('/games');
         }
       } catch (error) {
-        console.error('セットアップエラー:', error);
+        logger.error('セットアップエラー:', error);
         showToast('ゲームの読み込みに失敗しました', 'error');
         router.push('/games');
       }
@@ -72,7 +73,7 @@ export default function SetupPage() {
       // 対戦画面に遷移
       setTimeout(() => router.push(`/play/${gameId}`), 1000);
     } catch (error) {
-      console.error('配置エラー:', error);
+      logger.error('配置エラー:', error);
       showToast(error instanceof Error ? error.message : '配置に失敗しました', 'error');
     }
   };

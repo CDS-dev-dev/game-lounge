@@ -18,6 +18,7 @@ import { IndianPokerBoard } from '@/components/game/IndianPokerBoard';
 import { useToast } from '@/components/ui/Toast';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
+import { logger } from '@/lib/utils/logger';
 
 type GamePhase = 'playerSelect' | 'difficultySelect' | 'playing' | 'finished';
 
@@ -86,7 +87,7 @@ export default function IndianPokerCpuPage() {
           break;
         }
       } catch (error) {
-        console.error('CPU action error:', error);
+        logger.error('CPU action error:', error);
         showToast(formatGameError(error), 'error');
         break;
       }
@@ -110,7 +111,7 @@ export default function IndianPokerCpuPage() {
         executeCPUTurns(newState);
       }
     } catch (error) {
-      console.error('Player action error:', error);
+      logger.error('Player action error:', error);
       showToast(formatGameError(error), 'error');
     }
   }, [gameState, clientState, setSafeTimeout, showToast]);

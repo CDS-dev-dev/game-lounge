@@ -29,6 +29,7 @@ import {
   SIDE_COLORS,
 } from '@/lib/games/emperor/constants';
 import { TEXT_SIZE, MIN_TAP_AREA } from '@/lib/constants/ui-scale';
+import { logger } from '@/lib/utils/logger';
 
 type GamePhase = 'setup' | 'playing' | 'battleResult' | 'setEnd' | 'finished';
 
@@ -51,7 +52,7 @@ export default function EmperorCpuPage() {
       setGameState(newState);
       setPhase('playing');
     } catch (error) {
-      console.error('Game start error:', error);
+      logger.error('Game start error:', error);
       showToast(formatGameError(error), 'error');
     }
   }, [difficulty, showToast]);
@@ -88,7 +89,7 @@ export default function EmperorCpuPage() {
         }
       }, 2000);
     } catch (error) {
-      console.error('Card select error:', error);
+      logger.error('Card select error:', error);
       showToast(formatGameError(error), 'error');
     }
   }, [gameState, phase, difficulty, showToast]);
@@ -108,7 +109,7 @@ export default function EmperorCpuPage() {
         setSelectedCardId(null);
       }
     } catch (error) {
-      console.error('Next set error:', error);
+      logger.error('Next set error:', error);
       showToast(formatGameError(error), 'error');
     }
   }, [gameState, showToast]);

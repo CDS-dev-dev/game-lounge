@@ -15,33 +15,50 @@ export default function TigerDragonOnlinePage() {
         <div className="max-w-2xl mx-auto">
           <Card>
             <CardHeader>
-              <h2 className="text-2xl font-bold text-center">オンライン対戦</h2>
+              <h2 className="text-2xl font-bold text-center">🚧 オンライン対戦 準備中</h2>
             </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <div className="text-6xl mb-4">🚧</div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">準備中</h3>
-                <p className="text-gray-600 mb-6">
-                  オンライン対戦機能は現在開発中です。
-                  <br />
-                  もうしばらくお待ちください。
-                </p>
-
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                  <p className="text-sm text-gray-700">
-                    <strong>実装予定の機能：</strong>
-                  </p>
-                  <ul className="text-sm text-gray-700 mt-2 space-y-1 text-left list-disc list-inside">
-                    <li>リアルタイムマッチング</li>
-                    <li>フレンド招待</li>
-                    <li>チャット機能</li>
-                    <li>ランキングシステム</li>
-                  </ul>
+            <CardContent className="py-8 space-y-8">
+              {/* 開発進捗表示 */}
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm text-slate-600">
+                  <span>開発進捗</span>
+                  <span className="font-semibold">20%</span>
                 </div>
+                <div className="w-full bg-slate-200 rounded-full h-3">
+                  <div className="bg-indigo-600 h-3 rounded-full" style={{ width: '20%' }}></div>
+                </div>
+                <p className="text-sm text-slate-600 text-center">
+                  マッチング機能とリアルタイム通信を実装予定です
+                </p>
+              </div>
 
-                <Button variant="primary" size="lg" asChild>
-                  <Link href="/games/tiger-dragon">モード選択に戻る</Link>
-                </Button>
+              {/* 代替機能への強い導線 */}
+              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-lg p-6">
+                <p className="text-lg font-bold text-slate-900 mb-4 text-center">
+                  ✨ 今すぐプレイ可能！
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Link href="/games/tiger-dragon/cpu" className="block">
+                    <Button variant="primary" size="lg" className="w-full h-auto py-4 text-lg shadow-lg hover:shadow-xl transition-shadow">
+                      🤖 CPU対戦
+                    </Button>
+                  </Link>
+                  <Link href="/games/tiger-dragon/local" className="block">
+                    <Button variant="primary" size="lg" className="w-full h-auto py-4 text-lg shadow-lg hover:shadow-xl transition-shadow">
+                      👥 ローカル対戦
+                    </Button>
+                  </Link>
+                </div>
+                <p className="text-sm text-slate-600 text-center mt-4">
+                  友達と同じ端末で対戦、またはAIと対戦できます
+                </p>
+              </div>
+
+              {/* 戻るボタン */}
+              <div className="text-center pt-4 border-t">
+                <Link href="/games/tiger-dragon">
+                  <Button variant="secondary" size="lg">モード選択に戻る</Button>
+                </Link>
               </div>
             </CardContent>
           </Card>

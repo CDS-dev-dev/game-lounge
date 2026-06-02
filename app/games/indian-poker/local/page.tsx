@@ -16,6 +16,7 @@ import { IndianPokerBoard } from '@/components/game/IndianPokerBoard';
 import { useToast } from '@/components/ui/Toast';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
+import { logger } from '@/lib/utils/logger';
 
 type GamePhase = 'playerSelect' | 'nameInput' | 'playing' | 'finished';
 
@@ -79,7 +80,7 @@ export default function IndianPokerLocalPage() {
         setClientState(toClientState(newState, nextPlayerId));
       }
     } catch (error) {
-      console.error('Player action error:', error);
+      logger.error('Player action error:', error);
       showToast(formatGameError(error), 'error');
     }
   }, [gameState, clientState, currentPlayerId, setSafeTimeout, showToast]);

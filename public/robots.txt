@@ -1,0 +1,14 @@
+# Game Lounge - Robots.txt
+
+User-agent: *
+Allow: /
+Allow: /games
+Allow: /games/*/rules
+
+# クロールしないページ
+Disallow: /api/
+Disallow: /setup/
+Disallow: /play/
+
+# サイトマップ
+Sitemap: https://game-lounge-pi.vercel.app/sitemap.xml

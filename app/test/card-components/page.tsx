@@ -13,6 +13,7 @@ import {
 } from '@/lib/utils/card-utils';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * カードコンポーネントのデモ・テストページ
@@ -34,9 +35,9 @@ export default function CardComponentsTestPage() {
       setHand([]);
       setDiscardPile([]);
       setSelectedIndices([]);
-      console.log('デッキを初期化しました:', shuffled.length, '枚');
+      logger.log('デッキを初期化しました:', shuffled.length, '枚');
     } catch (error) {
-      console.error('デッキ初期化エラー:', error);
+      logger.error('デッキ初期化エラー:', error);
       alert('デッキの初期化に失敗しました');
     }
   };
@@ -52,9 +53,9 @@ export default function CardComponentsTestPage() {
       const { drawn, remaining } = drawCards(deck, count);
       setHand([...hand, ...drawn]);
       setDeck(remaining);
-      console.log(`${count}枚引きました。残り:`, remaining.length, '枚');
+      logger.log(`${count}枚引きました。残り:`, remaining.length, '枚');
     } catch (error) {
-      console.error('カード引きエラー:', error);
+      logger.error('カード引きエラー:', error);
       alert('カードを引くことができませんでした');
     }
   };
@@ -73,9 +74,9 @@ export default function CardComponentsTestPage() {
       setHand(newHand);
       setDiscardPile([...discardPile, ...discarded]);
       setSelectedIndices([]);
-      console.log(`${discarded.length}枚捨てました`);
+      logger.log(`${discarded.length}枚捨てました`);
     } catch (error) {
-      console.error('カード廃棄エラー:', error);
+      logger.error('カード廃棄エラー:', error);
       alert('カードを捨てることができませんでした');
     }
   };

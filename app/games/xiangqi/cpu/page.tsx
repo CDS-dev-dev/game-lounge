@@ -26,6 +26,7 @@ import { GameHeader } from '@/components/layout/GameHeader';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
 import { useGameHistory } from '@/lib/hooks/useGameHistory';
+import { logger } from '@/lib/utils/logger';
 
 type CpuGamePhase = 'difficulty-select' | 'order-select' | 'playing' | 'cpuThinking' | 'finished';
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -152,7 +153,7 @@ export default function XiangqiCpuPage() {
         setGameState(newState);
         setPhase('playing');
       } catch (error) {
-        console.error('Move error:', error);
+        logger.error('Move error:', error);
         showToast(formatGameError(error), 'error');
         setSelectedPiece(null);
         setValidMoves([]);

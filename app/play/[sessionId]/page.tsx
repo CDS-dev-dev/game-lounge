@@ -20,6 +20,7 @@ import {
 import type { GeisterState, GeisterClientState, Position } from '@/lib/games/geister/types';
 import { BOARD_SIZE } from '@/lib/games/geister/constants';
 import { RulesSummary } from '@/components/game/RulesSummary';
+import { logger } from '@/lib/utils/logger';
 
 export default function PlayPage() {
   const router = useRouter();
@@ -53,7 +54,7 @@ export default function PlayPage() {
           const client = toClientState(state, pid);
           setClientState(client);
         } catch (error) {
-          console.error('クライアント状態の取得エラー:', error);
+          logger.error('クライアント状態の取得エラー:', error);
           showToast('このゲームの参加者ではありません', 'error');
           router.push('/games');
           return;
@@ -66,13 +67,13 @@ export default function PlayPage() {
             const newClient = toClientState(newState, pid);
             setClientState(newClient);
           } catch (error) {
-            console.error('クライアント状態の更新エラー:', error);
+            logger.error('クライアント状態の更新エラー:', error);
           }
         });
 
         return unsubscribe;
       } catch (error) {
-        console.error('ゲーム初期化エラー:', error);
+        logger.error('ゲーム初期化エラー:', error);
         showToast('ゲームの読み込みに失敗しました', 'error');
         router.push('/games');
       }
@@ -151,7 +152,7 @@ export default function PlayPage() {
         }, 500);
       }
     } catch (error) {
-      console.error('移動エラー:', error);
+      logger.error('移動エラー:', error);
       showToast(error instanceof Error ? error.message : '無効な移動です', 'error');
     }
   };

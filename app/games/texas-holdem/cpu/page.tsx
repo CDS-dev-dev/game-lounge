@@ -20,6 +20,7 @@ import { TexasHoldemBoard } from '@/components/game/TexasHoldemBoard';
 import { useToast } from '@/components/ui/Toast';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
+import { logger } from '@/lib/utils/logger';
 
 type GamePhase = 'setup' | 'playing' | 'cpuThinking' | 'roundEnd' | 'finished';
 
@@ -60,7 +61,7 @@ export default function TexasHoldemCpuPage() {
       // CPUのターンを処理
       await processCpuTurns(newState);
     } catch (error) {
-      console.error('Game start error:', error);
+      logger.error('Game start error:', error);
       showToast(formatGameError(error), 'error');
     }
   };
@@ -90,7 +91,7 @@ export default function TexasHoldemCpuPage() {
 
         setGameState(currentState);
       } catch (error) {
-        console.error('CPU action error:', error);
+        logger.error('CPU action error:', error);
         break;
       }
     }
@@ -118,7 +119,7 @@ export default function TexasHoldemCpuPage() {
       // CPUのターンを処理
       await processCpuTurns(newState);
     } catch (error) {
-      console.error('Player action error:', error);
+      logger.error('Player action error:', error);
       showToast(formatGameError(error), 'error');
     }
   };
@@ -138,7 +139,7 @@ export default function TexasHoldemCpuPage() {
         processCpuTurns(newState);
       }
     } catch (error) {
-      console.error('Next round error:', error);
+      logger.error('Next round error:', error);
       showToast(formatGameError(error), 'error');
     }
   };

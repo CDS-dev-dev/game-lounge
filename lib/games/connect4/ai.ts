@@ -225,17 +225,17 @@ export function calculateCpuMove(
 
   const availablePositions = getAvailablePositions(state);
 
+  // 合法手が0件の場合のフォールバック処理
   if (availablePositions.length === 0) {
-    console.error('配置可能な位置がありません:', {
+    console.warn('No valid moves available - stalemate');
+    console.debug('Stalemate details:', {
       status: state.status,
       currentTurn: state.currentTurn,
       cpuRole,
       boardState: state.board.map(layer => layer.map(row => row.map(cell => cell ? '●' : '○'))),
     });
 
-    // フォールバック: 盤面満杯または不正な状態
-    // 中央を返す（エラーは避ける）
-    console.warn('フォールバック: 盤面満杯、中央位置を返します');
+    // フォールバック: 中央位置を返す
     const fallbackPos = {
       x: Math.floor(BOARD_SIZE / 2),
       y: Math.floor(BOARD_SIZE / 2),

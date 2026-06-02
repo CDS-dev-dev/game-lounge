@@ -45,8 +45,11 @@ export function calculateCpuMove(
     }
   }
 
+  // 合法手が0件の場合のフォールバック処理
   if (allMoves.length === 0) {
-    // 各駒の合法手を詳細に出力
+    console.warn('No valid moves available - stalemate');
+
+    // 詳細デバッグ情報（console.debug に変更）
     const debugInfo = myPieces.map(p => {
       const moves = getValidMoves(state, cpuPlayerId, p.id);
       return {
@@ -58,7 +61,7 @@ export function calculateCpuMove(
       };
     });
 
-    console.error('合法手が見つかりません - 詳細デバッグ:', {
+    console.debug('Stalemate details:', {
       cpuRole,
       currentTurn: state.currentTurn,
       status: state.status,
@@ -71,7 +74,6 @@ export function calculateCpuMove(
 
     // フォールバック: 最初の駒をそのまま返す（動けない場合は投了扱い）
     if (myPieces.length > 0) {
-      console.warn('フォールバック: 投了扱いで最初の駒をそのまま返します');
       return {
         pieceId: myPieces[0].id,
         to: myPieces[0].position, // 動けないので同じ位置

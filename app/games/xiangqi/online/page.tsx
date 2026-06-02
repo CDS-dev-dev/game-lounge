@@ -23,22 +23,49 @@ export default function XiangqiOnlinePage() {
 
         <Card className="bg-white/95">
           <CardHeader>
-            <h2 className="text-2xl font-bold text-slate-900">🚧 準備中</h2>
+            <h2 className="text-2xl font-bold text-slate-900 text-center">🚧 オンライン対戦 準備中</h2>
           </CardHeader>
-          <CardContent className="py-8 text-center">
-            <p className="text-lg text-slate-700 mb-6 font-medium">
-              オンライン対戦機能は現在開発中です。<br />
-              しばらくお待ちください。
-            </p>
-            <div className="flex gap-4 justify-center">
-              <Link href="/games/xiangqi/cpu">
-                <Button variant="primary">CPU対戦で遊ぶ</Button>
-              </Link>
-              <Link href="/games/xiangqi/local">
-                <Button variant="primary">ローカル対戦で遊ぶ</Button>
-              </Link>
+          <CardContent className="py-8 space-y-8">
+            {/* 開発進捗表示 */}
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm text-slate-600">
+                <span>開発進捗</span>
+                <span className="font-semibold">20%</span>
+              </div>
+              <div className="w-full bg-slate-200 rounded-full h-3">
+                <div className="bg-indigo-600 h-3 rounded-full" style={{ width: '20%' }}></div>
+              </div>
+              <p className="text-sm text-slate-600 text-center">
+                マッチング機能とリアルタイム通信を実装予定です
+              </p>
+            </div>
+
+            {/* 代替機能への強い導線 */}
+            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-lg p-6">
+              <p className="text-lg font-bold text-slate-900 mb-4 text-center">
+                ✨ 今すぐプレイ可能！
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link href="/games/xiangqi/cpu" className="block">
+                  <Button variant="primary" size="lg" className="w-full h-auto py-4 text-lg shadow-lg hover:shadow-xl transition-shadow">
+                    🤖 CPU対戦
+                  </Button>
+                </Link>
+                <Link href="/games/xiangqi/local" className="block">
+                  <Button variant="primary" size="lg" className="w-full h-auto py-4 text-lg shadow-lg hover:shadow-xl transition-shadow">
+                    👥 ローカル対戦
+                  </Button>
+                </Link>
+              </div>
+              <p className="text-sm text-slate-600 text-center mt-4">
+                友達と同じ端末で対戦、またはAIと対戦できます
+              </p>
+            </div>
+
+            {/* 戻るボタン */}
+            <div className="text-center pt-4 border-t">
               <Link href="/games/xiangqi">
-                <Button variant="secondary">モード選択に戻る</Button>
+                <Button variant="secondary" size="lg">モード選択に戻る</Button>
               </Link>
             </div>
           </CardContent>

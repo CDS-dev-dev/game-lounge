@@ -1,52 +1,59 @@
-// sitemap.xml自動生成
-
 import { MetadataRoute } from 'next';
 
-const BASE_URL = 'https://game-lounge-pi.vercel.app';
-
 export default function sitemap(): MetadataRoute.Sitemap {
-  const games = ['geister', 'xiangqi', 'connect4'];
-  const modes = ['cpu', 'local', 'online'];
+  const baseUrl = 'https://game-lounge-pi.vercel.app';
+  
+  const games = [
+    'geister',
+    'connect4',
+    'xiangqi',
+    'emperor',
+    'tiger-dragon',
+    'island-settlers',
+    'indian-poker',
+    'texas-holdem',
+  ];
 
-  // 静的ページ
-  const staticPages: MetadataRoute.Sitemap = [
+  const staticPages = [
     {
-      url: BASE_URL,
+      url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 1,
+      changeFrequency: 'monthly' as const,
+      priority: 1.0,
     },
     {
-      url: `${BASE_URL}/games`,
+      url: `${baseUrl}/games`,
       lastModified: new Date(),
-      changeFrequency: 'daily',
+      changeFrequency: 'weekly' as const,
       priority: 0.9,
     },
   ];
 
-  // ゲームページ
-  const gamePages: MetadataRoute.Sitemap = games.flatMap((game) => [
-    // ゲームトップ
+  const gamePages = games.flatMap((game) => [
     {
-      url: `${BASE_URL}/games/${game}`,
+      url: `${baseUrl}/games/${game}`,
       lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
+      changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
-    // ルールページ
     {
-      url: `${BASE_URL}/games/${game}/rules`,
+      url: `${baseUrl}/games/${game}/rules`,
       lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
-    // 各モード
-    ...modes.map((mode) => ({
-      url: `${BASE_URL}/games/${game}/${mode}`,
+    {
+      url: `${baseUrl}/games/${game}/cpu`,
       lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
+      changeFrequency: 'monthly' as const,
       priority: 0.6,
-    })),
+    },
+    {
+      url: `${baseUrl}/games/${game}/local`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
   ]);
 
   return [...staticPages, ...gamePages];
