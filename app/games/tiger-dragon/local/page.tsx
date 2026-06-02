@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -39,21 +39,21 @@ export default function TigerDragonLocalPage() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   // プレイヤー人数変更
-  const handlePlayerCountChange = (count: number) => {
+  const handlePlayerCountChange = useCallback((count: number) => {
     setPlayerCount(count);
     const names = Array.from({ length: count }, (_, i) => `プレイヤー${i + 1}`);
     setPlayerNames(names);
-  };
+  }, []);
 
   // プレイヤー名変更
-  const handlePlayerNameChange = (index: number, name: string) => {
+  const handlePlayerNameChange = useCallback((index: number, name: string) => {
     const newNames = [...playerNames];
     newNames[index] = name || `プレイヤー${index + 1}`;
     setPlayerNames(newNames);
-  };
+  }, [playerNames]);
 
   // ゲーム開始
-  const handleStartGame = () => {
+  const handleStartGame = useCallback(() => {
     const playerIds = playerNames.map((_, i) => `player-${i + 1}`);
     const cpuFlags = Array(playerCount).fill(false);
 
@@ -70,10 +70,10 @@ export default function TigerDragonLocalPage() {
 
     // ラウンド開始
     startNewRound(newState, playerIds[0]);
-  };
+  }, [playerCount, playerNames]);
 
   // ラウンド開始
-  const startNewRound = async (state: TigerDragonState, viewPlayerId: string) => {
+  const startNewRound = useCallback(async (state: TigerDragonState, viewPlayerId: string) => {
     try {
       setIsProcessing(true);
       await new Promise((resolve) => setSafeTimeout(() => resolve(undefined), 500));
@@ -87,10 +87,10 @@ export default function TigerDragonLocalPage() {
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
-  };
+  }, [setSafeTimeout, showToast]);
 
   // 攻めアクション
-  const handleAttack = async (tileId: string) => {
+  const handleAttack = useCallback(async (tileId: string) => {
     if (!gameState || isProcessing) return;
 
     try {
@@ -112,10 +112,10 @@ export default function TigerDragonLocalPage() {
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
-  };
+  }, [gameState, isProcessing, currentViewPlayerId, showToast]);
 
   // 受けアクション
-  const handleDefend = async (tileId: string) => {
+  const handleDefend = useCallback(async (tileId: string) => {
     if (!gameState || isProcessing) return;
 
     try {
@@ -137,10 +137,10 @@ export default function TigerDragonLocalPage() {
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
-  };
+  }, [gameState, isProcessing, currentViewPlayerId, showToast]);
 
   // パスアクション
-  const handlePass = async () => {
+  const handlePass = useCallback(async () => {
     if (!gameState || isProcessing) return;
 
     try {
@@ -154,10 +154,10 @@ export default function TigerDragonLocalPage() {
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
-  };
+  }, [gameState, isProcessing, currentViewPlayerId, showToast]);
 
   // ラウンド終了処理
-  const handleEndRound = async () => {
+  const handleEndRound = useCallback(async () => {
     if (!gameState || isProcessing) return;
 
     try {
@@ -187,17 +187,17 @@ export default function TigerDragonLocalPage() {
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
-  };
+  }, [gameState, isProcessing, setSafeTimeout, currentViewPlayerId, startNewRound, showToast]);
 
   // プレイヤー切り替え
-  const handleSwitchPlayer = (playerId: string) => {
+  const handleSwitchPlayer = useCallback((playerId: string) => {
     if (!gameState) return;
     setCurrentViewPlayerId(playerId);
     setClientState(toClientState(gameState, playerId));
-  };
+  }, [gameState]);
 
   // リスタート
-  const handleRestart = () => {
+  const handleRestart = useCallback(() => {
     setPhase('setup');
     setPlayerCount(2);
     setPlayerNames(['プレイヤー1', 'プレイヤー2']);
@@ -205,7 +205,7 @@ export default function TigerDragonLocalPage() {
     setClientState(null);
     setCurrentViewPlayerId('');
     setIsProcessing(false);
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">

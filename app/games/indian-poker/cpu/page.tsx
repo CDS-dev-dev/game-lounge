@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { IconButton } from '@/components/ui/IconButton';
 import { GameHeader } from '@/components/layout/GameHeader';
 import {
   createInitialState,
@@ -33,13 +34,13 @@ export default function IndianPokerCpuPage() {
   const [clientState, setClientState] = useState<IndianPokerClientState | null>(null);
 
   // プレイヤー人数選択
-  const handleSelectPlayerCount = (count: number) => {
+  const handleSelectPlayerCount = useCallback((count: number) => {
     setPlayerCount(count);
     setPhase('difficultySelect');
-  };
+  }, []);
 
   // 難易度選択してゲーム開始
-  const handleStartGame = (selectedDifficulty: Difficulty) => {
+  const handleStartGame = useCallback((selectedDifficulty: Difficulty) => {
     setDifficulty(selectedDifficulty);
 
     const cpuCount = playerCount - 1;
@@ -56,7 +57,7 @@ export default function IndianPokerCpuPage() {
     if (newState.players[newState.currentTurn].isCPU) {
       executeCPUTurns(newState);
     }
-  };
+  }, [playerCount]);
 
   // CPUターンを連続実行
   const executeCPUTurns = async (state: IndianPokerState) => {
@@ -93,7 +94,7 @@ export default function IndianPokerCpuPage() {
   };
 
   // プレイヤーのアクション
-  const handlePlayerAction = (action: BettingAction) => {
+  const handlePlayerAction = useCallback((action: BettingAction) => {
     if (!gameState || !clientState) return;
 
     try {
@@ -112,7 +113,7 @@ export default function IndianPokerCpuPage() {
       console.error('Player action error:', error);
       showToast(formatGameError(error), 'error');
     }
-  };
+  }, [gameState, clientState, setSafeTimeout, showToast]);
 
   // ショーダウン処理
   const handleShowdown = (state: IndianPokerState) => {
@@ -159,11 +160,11 @@ export default function IndianPokerCpuPage() {
   };
 
   // リスタート
-  const handleRestart = () => {
+  const handleRestart = useCallback(() => {
     setPhase('playerSelect');
     setGameState(null);
     setClientState(null);
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">
@@ -190,18 +191,12 @@ export default function IndianPokerCpuPage() {
                   ))}
                 </div>
 
-                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-gray-700">
-                    <strong>ヒント：</strong> 人数が多いほど心理戦が複雑になります。
-                    初心者は3-4人がおすすめです。
-                  </p>
-                </div>
+                <p className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-gray-700">
+                  <strong>ヒント：</strong> 人数が多いほど心理戦が複雑になります。初心者は3-4人がおすすめです。
+                </p>
 
                 <div className="mt-6 text-center">
-                  <Link
-                    href="/games/indian-poker"
-                    className="text-purple-600 hover:text-purple-800 underline"
-                  >
+                  <Link href="/games/indian-poker" className="text-purple-600 hover:text-purple-800 underline">
                     モード選択に戻る
                   </Link>
                 </div>
@@ -218,25 +213,23 @@ export default function IndianPokerCpuPage() {
                 <h2 className="text-2xl font-bold text-center">難易度を選択</h2>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <button
-                    onClick={() => handleStartGame('easy')}
-                    className="w-full bg-green-500 hover:bg-green-600 text-white py-6 rounded-lg font-bold text-xl transition-colors"
-                  >
-                    Easy - ランダムに行動
-                  </button>
-                  <button
-                    onClick={() => handleStartGame('medium')}
-                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-6 rounded-lg font-bold text-xl transition-colors"
-                  >
-                    Medium - 基本的な戦略あり
-                  </button>
-                  <button
-                    onClick={() => handleStartGame('hard')}
-                    className="w-full bg-red-500 hover:bg-red-600 text-white py-6 rounded-lg font-bold text-xl transition-colors"
-                  >
-                    Hard - 高度な推測と戦略
-                  </button>
+                <div className="flex justify-center items-center gap-8">
+                  {[
+                    { difficulty: 'easy' as Difficulty, icon: '🟢', label: '簡単', variant: 'success' as const },
+                    { difficulty: 'medium' as Difficulty, icon: '🟡', label: '普通', variant: 'warning' as const },
+                    { difficulty: 'hard' as Difficulty, icon: '🔴', label: '難しい', variant: 'danger' as const },
+                  ].map(({ difficulty, icon, label, variant }) => (
+                    <div key={difficulty} className="flex flex-col items-center gap-2">
+                      <IconButton
+                        icon={<span className="text-2xl">{icon}</span>}
+                        label={label}
+                        onClick={() => handleStartGame(difficulty)}
+                        variant={variant}
+                        size="lg"
+                      />
+                      <span className="text-sm font-medium">{label}</span>
+                    </div>
+                  ))}
                 </div>
 
                 <div className="mt-6 text-center">

@@ -3,26 +3,27 @@
 'use client';
 
 import React, { Component, ReactNode } from 'react';
-import { Card, CardContent, CardHeader } from './Card';
 import { Button } from './Button';
+import { Card, CardContent, CardHeader } from './Card';
+import { TEXT_SIZE, PADDING } from '@/lib/constants/ui-scale';
 
-interface Props {
+interface ErrorBoundaryProps {
   children: ReactNode;
-  fallback?: ReactNode;
+  fallback?: (error: Error, reset: () => void) => ReactNode;
 }
 
-interface State {
+interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
@@ -32,38 +33,50 @@ export class ErrorBoundary extends Component<Props, State> {
 
   handleReset = () => {
     this.setState({ hasError: false, error: null });
-    window.location.reload();
   };
 
   render() {
-    if (this.state.hasError) {
+    if (this.state.hasError && this.state.error) {
       if (this.props.fallback) {
-        return this.props.fallback;
+        return this.props.fallback(this.state.error, this.handleReset);
       }
 
       return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4">
-          <Card className="max-w-lg">
+          <Card className="max-w-md w-full">
             <CardHeader>
-              <h2 className="text-2xl font-bold text-center text-red-600">エラーが発生しました</h2>
+              <div className="text-center">
+                <div className="text-6xl mb-4">⚠️</div>
+                <h1 className={`${TEXT_SIZE.heading2} font-bold text-slate-900`}>
+                  エラーが発生しました
+                </h1>
+              </div>
             </CardHeader>
-            <CardContent className="text-center space-y-4">
-              <p className="text-slate-700">
+            <CardContent className={PADDING.card}>
+              <p className={`${TEXT_SIZE.body} text-slate-700 mb-4`}>
                 申し訳ございません。予期しないエラーが発生しました。
               </p>
-              {this.state.error && (
-                <div className="bg-red-50 border border-red-200 rounded p-3 text-left">
-                  <p className="text-xs font-mono text-red-800 break-all">
+              {process.env.NODE_ENV === 'development' && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                  <p className={`${TEXT_SIZE.label} font-mono text-red-800 break-all`}>
                     {this.state.error.message}
                   </p>
                 </div>
               )}
-              <div className="flex gap-4 justify-center">
-                <Button variant="primary" onClick={this.handleReset}>
-                  ページを再読み込み
+              <div className="flex gap-3">
+                <Button
+                  variant="primary"
+                  onClick={this.handleReset}
+                  className="flex-1"
+                >
+                  リトライ
                 </Button>
-                <Button variant="secondary" onClick={() => (window.location.href = '/')}>
-                  ホームに戻る
+                <Button
+                  variant="secondary"
+                  onClick={() => window.location.href = '/games'}
+                  className="flex-1"
+                >
+                  ゲーム選択に戻る
                 </Button>
               </div>
             </CardContent>

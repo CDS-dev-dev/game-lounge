@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
@@ -11,11 +11,10 @@ import {
   setupPieces,
   movePiece,
   checkWinner,
-  toClientState,
   getValidMoves,
 } from '@/lib/games/geister/engine';
 import { calculateCpuMove, generateCpuSetup } from '@/lib/games/geister/ai';
-import type { GeisterState, PieceSetup, Position, GeisterClientState } from '@/lib/games/geister/types';
+import type { GeisterState, PieceSetup, Position, GeisterClientState, PlayerRole } from '@/lib/games/geister/types';
 import { GeisterBoard } from '@/components/game/GeisterBoard';
 import { SetupBoard } from '@/components/game/SetupBoard';
 import { RulesSummary } from '@/components/game/RulesSummary';
@@ -214,13 +213,17 @@ export default function GeisterCpuPage() {
     gameHistory.clearHistory();
   }, [gameHistory]);
 
-  // CPU対戦用のクライアント状態を作成
-  const createCpuClientState = (state: GeisterState): GeisterClientState => {
-    const myRole = playerOrder === 'first' ? 'player1' : 'player2';
-    const opponentRole = playerOrder === 'first' ? 'player2' : 'player1';
+  // CPU対戦用のクライアント状態を作成（メモ化）
+  const clientState = useMemo(() => {
+    if (phase === 'orderSelect' || phase === 'setup' || !playerOrder) {
+      return null;
+    }
+
+    const myRole: PlayerRole = playerOrder === 'first' ? 'player1' : 'player2';
+    const opponentRole: PlayerRole = playerOrder === 'first' ? 'player2' : 'player1';
 
     // 盤面を変換（相手の駒のtypeを隠す）
-    const clientBoard = state.board.map((row) =>
+    const clientBoard = gameState.board.map((row) =>
       row.map((piece) => {
         if (!piece) return null;
         return {
@@ -234,33 +237,33 @@ export default function GeisterCpuPage() {
       })
     );
 
-    const opponentPieces = state.pieces[opponentRole];
+    const opponentPieces = gameState.pieces[opponentRole];
     const opponentCaptured = opponentPieces.filter((p) => p.captured).length;
 
-    const myCapturedGood = state.pieces[myRole].filter((p) => p.type === 'good' && p.captured).length;
-    const myCapturedBad = state.pieces[myRole].filter((p) => p.type === 'bad' && p.captured).length;
+    const myCapturedGood = gameState.pieces[myRole].filter((p) => p.type === 'good' && p.captured).length;
+    const myCapturedBad = gameState.pieces[myRole].filter((p) => p.type === 'bad' && p.captured).length;
     const opponentCapturedGood = opponentPieces.filter((p) => p.type === 'good' && p.captured).length;
     const opponentCapturedBad = opponentPieces.filter((p) => p.type === 'bad' && p.captured).length;
 
     // lastMoveをクライアント用に変換
     let clientLastMove: { from: Position; to: Position } | null = null;
-    if (state.lastMove) {
+    if (gameState.lastMove) {
       clientLastMove = {
-        from: state.lastMove.from,
-        to: state.lastMove.to,
+        from: gameState.lastMove.from,
+        to: gameState.lastMove.to,
       };
     }
 
     return {
-      gameId: state.gameId,
-      status: state.status,
+      gameId: gameState.gameId,
+      status: gameState.status,
       board: clientBoard,
-      currentTurn: state.currentTurn,
+      currentTurn: gameState.currentTurn,
       myRole,
       myPlayerId: PLAYER_ID,
-      myPieces: state.pieces[myRole],
-      isMyTurn: state.currentTurn === myRole,
-      canOperate: state.status === 'playing' && state.currentTurn === myRole,
+      myPieces: gameState.pieces[myRole],
+      isMyTurn: gameState.currentTurn === myRole,
+      canOperate: gameState.status === 'playing' && gameState.currentTurn === myRole,
       opponentPiecesCount: {
         total: 8,
         captured: opponentCaptured,
@@ -272,19 +275,19 @@ export default function GeisterCpuPage() {
         opponentBad: opponentCapturedBad,
       },
       setupReady: {
-        player1: state.status !== 'setup',
-        player2: state.status !== 'setup',
+        player1: gameState.status !== 'setup',
+        player2: gameState.status !== 'setup',
       },
-      winner: state.winner,
-      winReason: state.winReason,
-      lastMove: clientLastMove, // 最後の手を含める
+      winner: gameState.winner,
+      winReason: gameState.winReason,
+      lastMove: clientLastMove,
     };
-  };
+  }, [phase, playerOrder, gameState]);
 
-  // orderSelect/setup状態の時はclientStateを作らない
-  const clientState = (phase === 'orderSelect' || phase === 'setup') ? null : createCpuClientState(gameState);
-  const playerRole = playerOrder === 'first' ? 'player1' : 'player2';
-  const isPlayerTurn = phase === 'playing' && gameState.currentTurn === playerRole;
+  // プレイヤーロールをメモ化
+  const playerRole = useMemo(() => {
+    return playerOrder === 'first' ? 'player1' : 'player2';
+  }, [playerOrder]);
 
   return (
     <>
@@ -295,82 +298,61 @@ export default function GeisterCpuPage() {
       />
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-3 px-2 sm:px-3">
         <div className="max-w-3xl mx-auto">
-          {/* ヘッダー（コンパクト） */}
-          <div className="text-center mb-3 sm:mb-4">
-            <h1 className="text-xl sm:text-2xl font-bold text-white mb-0.5 sm:mb-1">CPU対戦</h1>
-            <p className="text-xs sm:text-sm text-gray-200">あなた vs コンピュータ</p>
-          </div>
 
-        {/* 先攻後攻選択（コンパクト） */}
+        {/* 先攻後攻選択 */}
         {phase === 'orderSelect' && (
           <Card className="bg-white/95">
             <CardHeader className="pb-2">
-              <h2 className="text-lg sm:text-xl font-bold text-slate-900 text-center">先攻・後攻を選択</h2>
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 text-center">先攻・後攻を選択</h2>
             </CardHeader>
             <CardContent className="pt-2">
-              <div className="grid grid-cols-2 gap-2 sm:gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => handleOrderSelect('first')}
-                  className="p-3 sm:p-4 rounded-lg border-2 border-blue-500 bg-blue-50 hover:bg-blue-100 transition-all hover:scale-105 active:scale-95"
+                  className="p-2 sm:p-3 rounded-lg border-2 border-blue-500 bg-blue-50 hover:bg-blue-100 transition-all"
                 >
-                  <div className="text-3xl sm:text-4xl mb-1 sm:mb-2">⚡</div>
-                  <div className="text-sm sm:text-lg font-bold text-slate-900 mb-0.5 sm:mb-1">先攻</div>
-                  <div className="text-[10px] sm:text-xs text-slate-600">
-                    先に動く
-                  </div>
+                  <div className="text-2xl sm:text-3xl mb-1">⚡</div>
+                  <div className="text-xs sm:text-sm font-bold text-slate-900">先攻</div>
                 </button>
-
                 <button
                   onClick={() => handleOrderSelect('second')}
-                  className="p-3 sm:p-4 rounded-lg border-2 border-purple-500 bg-purple-50 hover:bg-purple-100 transition-all hover:scale-105 active:scale-95"
+                  className="p-2 sm:p-3 rounded-lg border-2 border-purple-500 bg-purple-50 hover:bg-purple-100 transition-all"
                 >
-                  <div className="text-3xl sm:text-4xl mb-1 sm:mb-2">🛡️</div>
-                  <div className="text-sm sm:text-lg font-bold text-slate-900 mb-0.5 sm:mb-1">後攻</div>
-                  <div className="text-[10px] sm:text-xs text-slate-600">
-                    後から動く
-                  </div>
+                  <div className="text-2xl sm:text-3xl mb-1">🛡️</div>
+                  <div className="text-xs sm:text-sm font-bold text-slate-900">後攻</div>
                 </button>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* 配置フェーズ（コンパクト） */}
+        {/* 配置フェーズ */}
         {phase === 'setup' && (
-          <>
-            <Card className="bg-white/95">
-              <CardHeader className="pb-2">
-                <h2 className="text-lg sm:text-xl font-bold text-slate-900">駒の初期配置</h2>
-                <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                  👻×4、😈×4を配置
-                </p>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <SetupBoard
-                  myRole={playerOrder === 'first' ? 'player1' : 'player2'}
-                  setup={playerSetup}
-                  onSetupChange={setPlayerSetup}
-                  onComplete={handlePlayerSetupComplete}
-                />
-              </CardContent>
-            </Card>
-            <div className="mt-2 text-center">
-              <Link href="/games/geister" className="text-gray-200 hover:text-white underline text-xs sm:text-sm">
-                モード選択に戻る
-              </Link>
-            </div>
-          </>
+          <Card className="bg-white/95">
+            <CardHeader className="pb-2">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900">駒の初期配置</h2>
+              <p className="text-xs text-slate-600 mt-1">👻×4、😈×4を配置</p>
+            </CardHeader>
+            <CardContent className="pt-2">
+              <SetupBoard
+                myRole={playerOrder === 'first' ? 'player1' : 'player2'}
+                setup={playerSetup}
+                onSetupChange={setPlayerSetup}
+                onComplete={handlePlayerSetupComplete}
+              />
+            </CardContent>
+          </Card>
         )}
 
-        {/* CPU思考中インジケーター（画面サイズを変えない固定配置） */}
+        {/* CPU思考中インジケーター */}
         {phase === 'cpuThinking' && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 pointer-events-none">
             <Card className="bg-white/95 pointer-events-auto">
-              <CardContent className="py-6 px-8 text-center">
-                <div className="flex justify-center mb-3">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+              <CardContent className="py-4 px-6 text-center">
+                <div className="flex justify-center mb-2">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500"></div>
                 </div>
-                <p className="text-lg font-semibold text-slate-900">CPUが思考中...</p>
+                <p className="text-sm font-semibold text-slate-900">CPUが思考中...</p>
               </CardContent>
             </Card>
           </div>
@@ -381,38 +363,46 @@ export default function GeisterCpuPage() {
           <>
             <Card className="mb-2 bg-white/95">
               <CardContent className="py-1.5 sm:py-2 px-2 sm:px-3">
-                <div className="flex items-center justify-between text-[10px] sm:text-xs">
-                  <div className="flex gap-1">
-                    <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-semibold">
+                <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center text-[10px] sm:text-xs">
+                  {/* あなたの捕獲情報 */}
+                  <div className="flex gap-1 justify-start">
+                    <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">
                       👻 {clientState.capturedCounts.myGood}
                     </span>
-                    <span className="bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-semibold">
+                    <span className="bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">
                       😈 {clientState.capturedCounts.myBad}
                     </span>
                   </div>
-                  <div className="text-sm sm:text-base font-bold text-slate-900">
-                    {gameState.currentTurn === playerRole ? 'あなた' : 'CPU'}
+
+                  {/* ターン表示 */}
+                  <div className="text-xs sm:text-sm font-bold text-slate-900 text-center whitespace-nowrap">
+                    {phase === 'cpuThinking' ? '🤖' : gameState.currentTurn === playerRole ? '👤' : '🤖'}
                   </div>
-                  <div className="flex gap-1">
-                    <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-semibold">
+
+                  {/* CPUの捕獲情報 */}
+                  <div className="flex gap-1 justify-end">
+                    <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">
                       👻 {clientState.capturedCounts.opponentGood}
                     </span>
-                    <span className="bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-semibold">
+                    <span className="bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">
                       😈 {clientState.capturedCounts.opponentBad}
                     </span>
                   </div>
                 </div>
-                {/* ボタン（コンパクト） */}
-                {phase === 'playing' && gameHistory.canUndo() && (
+
+                {/* 操作ボタン */}
+                {phase === 'playing' && (
                   <div className="flex gap-1 justify-center mt-1.5">
-                    <Button
-                      variant="secondary"
-                      onClick={handleUndo}
-                      className="text-[10px] sm:text-xs py-1 px-2"
-                      aria-label="1手戻す"
-                    >
-                      ↩️ 待った
-                    </Button>
+                    {gameHistory.canUndo() && (
+                      <Button
+                        variant="secondary"
+                        onClick={handleUndo}
+                        className="text-[10px] sm:text-xs py-1 px-2"
+                        aria-label="1手戻す"
+                      >
+                        ↩️ 待った
+                      </Button>
+                    )}
                     <RulesModal gameName="ガイスター">
                       <RulesSummary />
                     </RulesModal>
@@ -433,29 +423,29 @@ export default function GeisterCpuPage() {
 
             {phase === 'finished' && (
               <div role="alert" aria-live="assertive">
-                <Card className="mt-3 bg-white/95 animate-[fadeIn_0.5s_ease-in]">
+                <Card className="mt-2 bg-white/95">
                   <CardHeader className="pb-2">
-                    <h2 className="text-xl sm:text-2xl font-bold text-center text-slate-900">
+                    <h2 className="text-lg sm:text-xl font-bold text-center text-slate-900">
                       {gameState.winner === playerRole ? '🎉 勝利！' : gameState.winner ? '😢 敗北' : '🤝 引き分け'}
                     </h2>
                   </CardHeader>
                 <CardContent className="text-center pt-2">
-                  <p className="text-xs sm:text-sm text-slate-700 mb-3 font-medium">
+                  <p className="text-xs text-slate-700 mb-3 font-medium">
                     {gameState.winReason === 'escape' && '👻脱出成功！'}
                     {gameState.winReason === 'captureAllGood' && '相手の👻を全て捕獲！'}
                     {gameState.winReason === 'loseAllBad' && '😈を全て取らせた！'}
                     {gameState.winReason === 'draw' && '引き分け'}
                   </p>
                   <div className="flex gap-2 justify-center">
-                    <Button variant="primary" onClick={handleReplay} className="text-xs sm:text-sm py-1.5 px-3">
+                    <Button variant="primary" onClick={handleReplay} className="text-xs py-1 px-2">
                       もう一度
                     </Button>
-                    <Button variant="secondary" onClick={() => router.push('/games/geister')} className="text-xs sm:text-sm py-1.5 px-3">
+                    <Button variant="secondary" onClick={() => router.push('/games/geister')} className="text-xs py-1 px-2">
                       戻る
                     </Button>
                   </div>
                 </CardContent>
-              </Card>
+                </Card>
               </div>
             )}
           </>

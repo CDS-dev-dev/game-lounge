@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -40,7 +40,7 @@ export default function TigerDragonCpuPage() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   // ゲーム開始
-  const handleStartGame = () => {
+  const handleStartGame = useCallback(() => {
     // プレイヤーIDと名前を生成
     const playerIds = [PLAYER_ID];
     const playerNames = ['あなた'];
@@ -67,10 +67,10 @@ export default function TigerDragonCpuPage() {
 
     // ラウンド開始
     startNewRound(newState);
-  };
+  }, [playerCount, difficulty]);
 
   // ラウンド開始
-  const startNewRound = async (state: TigerDragonState) => {
+  const startNewRound = useCallback(async (state: TigerDragonState) => {
     try {
       setIsProcessing(true);
       await new Promise((resolve) => setSafeTimeout(() => resolve(undefined), 500));
@@ -89,10 +89,10 @@ export default function TigerDragonCpuPage() {
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
-  };
+  }, [setSafeTimeout, showToast]);
 
   // CPUのターン実行
-  const executeCPUTurn = async (state: TigerDragonState) => {
+  const executeCPUTurn = useCallback(async (state: TigerDragonState) => {
     if (state.status !== 'playing') return;
 
     const currentPlayer = state.players.find((p) => p.id === state.currentPlayerId);
@@ -143,10 +143,10 @@ export default function TigerDragonCpuPage() {
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
-  };
+  }, [setSafeTimeout, showToast]);
 
   // 攻めアクション
-  const handleAttack = async (tileId: string) => {
+  const handleAttack = useCallback(async (tileId: string) => {
     if (!gameState || isProcessing) return;
 
     try {
@@ -173,10 +173,10 @@ export default function TigerDragonCpuPage() {
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
-  };
+  }, [gameState, isProcessing, executeCPUTurn, showToast]);
 
   // 受けアクション
-  const handleDefend = async (tileId: string) => {
+  const handleDefend = useCallback(async (tileId: string) => {
     if (!gameState || isProcessing) return;
 
     try {
@@ -203,10 +203,10 @@ export default function TigerDragonCpuPage() {
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
-  };
+  }, [gameState, isProcessing, executeCPUTurn, showToast]);
 
   // パスアクション
-  const handlePass = async () => {
+  const handlePass = useCallback(async () => {
     if (!gameState || isProcessing) return;
 
     try {
@@ -225,10 +225,10 @@ export default function TigerDragonCpuPage() {
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
-  };
+  }, [gameState, isProcessing, executeCPUTurn, showToast]);
 
   // ラウンド終了処理
-  const handleEndRound = async () => {
+  const handleEndRound = useCallback(async () => {
     if (!gameState || isProcessing) return;
 
     try {
@@ -262,17 +262,17 @@ export default function TigerDragonCpuPage() {
       showToast(formatGameError(error), 'error');
       setIsProcessing(false);
     }
-  };
+  }, [gameState, isProcessing, setSafeTimeout, startNewRound, showToast]);
 
   // リスタート
-  const handleRestart = () => {
+  const handleRestart = useCallback(() => {
     setPhase('playerSelect');
     setPlayerCount(2);
     setDifficulty('medium');
     setGameState(null);
     setClientState(null);
     setIsProcessing(false);
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">

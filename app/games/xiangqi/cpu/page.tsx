@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
@@ -47,10 +47,10 @@ export default function XiangqiCpuPage() {
   const [validMoves, setValidMoves] = useState<Position[]>([]);
 
   // 難易度選択
-  const handleDifficultySelect = (selectedDifficulty: Difficulty) => {
+  const handleDifficultySelect = useCallback((selectedDifficulty: Difficulty) => {
     setDifficulty(selectedDifficulty);
     setPhase('order-select');
-  };
+  }, []);
 
   // 先攻後攻選択してゲーム開始
   const startGame = async (color: 'red' | 'black') => {
@@ -82,7 +82,7 @@ export default function XiangqiCpuPage() {
   };
 
   // 待った機能（プレイヤーの手とCPUの手の2手戻す）
-  const handleUndo = () => {
+  const handleUndo = useCallback(() => {
     const previousState = gameHistory.undo(2);
     if (!previousState) {
       showToast('待ったできません', 'error');
@@ -93,10 +93,10 @@ export default function XiangqiCpuPage() {
     setSelectedPiece(null);
     setValidMoves([]);
     showToast('1手戻しました', 'success');
-  };
+  }, [gameHistory, showToast]);
 
   // セルクリック
-  const handleCellClick = async (pos: Position) => {
+  const handleCellClick = useCallback(async (pos: Position) => {
     if (!gameState || phase !== 'playing' || gameState.currentTurn !== playerColor) return;
 
     const clickedPiece = gameState.board[pos.row][pos.col];
@@ -158,19 +158,22 @@ export default function XiangqiCpuPage() {
         setValidMoves([]);
       }
     }
-  };
+  }, [gameState, phase, playerColor, selectedPiece, gameHistory, setSafeTimeout, difficulty, showToast]);
 
   // リプレイ
-  const handleReplay = () => {
+  const handleReplay = useCallback(() => {
     setPhase('difficulty-select');
     setPlayerColor(null);
     setGameState(null);
     setSelectedPiece(null);
     setValidMoves([]);
     gameHistory.clearHistory();
-  };
+  }, [gameHistory]);
 
-  const clientState = gameState ? toClientState(gameState, PLAYER_ID) : null;
+  const clientState = useMemo(() =>
+    gameState ? toClientState(gameState, PLAYER_ID) : null,
+    [gameState]
+  );
 
   return (
     <>

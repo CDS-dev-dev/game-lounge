@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import {
@@ -21,7 +20,7 @@ import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useGameHistory } from '@/lib/hooks/useGameHistory';
-import { TEXT_SIZE } from '@/lib/constants/ui-scale';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/Accordion';
 
 type LocalGamePhase = 'setup-p1' | 'setup-p2-interstitial' | 'setup-p2' | 'playing' | 'turnChange' | 'finished';
 
@@ -172,10 +171,14 @@ export default function GeisterLocalPage() {
     gameHistory.clearHistory();
   }, [gameHistory]);
 
+  // クライアント状態をメモ化
   const playerId = currentPlayer === 'player1' ? PLAYER1_ID : PLAYER2_ID;
-  const clientState = phase === 'playing' || phase === 'finished'
-    ? toClientState(gameState, playerId)
-    : null;
+  const clientState = useMemo(() => {
+    if (phase !== 'playing' && phase !== 'finished') {
+      return null;
+    }
+    return toClientState(gameState, playerId);
+  }, [phase, gameState, playerId]);
 
   return (
     <>
@@ -184,24 +187,17 @@ export default function GeisterLocalPage() {
         backUrl="/games/geister"
         backLabel="モード選択"
       />
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">
-        <div className="max-w-4xl mx-auto">
-          {/* ヘッダー */}
-          <div className="text-center mb-4 sm:mb-6 md:mb-8">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2">ローカル対戦</h1>
-            <p className="text-sm sm:text-base text-gray-200">同じ端末で2人対戦</p>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-3 px-2 sm:px-3">
+        <div className="max-w-3xl mx-auto">
 
         {/* Player1配置フェーズ */}
         {phase === 'setup-p1' && (
           <Card className="bg-white/95">
-            <CardHeader>
-              <h2 className="text-2xl font-bold text-slate-900">Player 1 - 駒の初期配置</h2>
-              <p className="text-sm text-slate-600 mt-2 font-medium">
-                青いお化け👻×4、赤い悪魔😈×4を中央4列×2行（下側）に配置してください
-              </p>
+            <CardHeader className="pb-2">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900">Player 1 - 駒の配置</h2>
+              <p className="text-xs text-slate-600 mt-1">👻×4、😈×4を配置</p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-2">
               <SetupBoard
                 myRole="player1"
                 setup={player1Setup}
@@ -214,16 +210,11 @@ export default function GeisterLocalPage() {
 
         {/* Player2配置前の中間画面 */}
         {phase === 'setup-p2-interstitial' && (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Player 2の番です</h2>
-              <p className="text-gray-700 mb-8">
-                端末をPlayer 2に渡してください。<br />
-                準備ができたらボタンを押してください。
-              </p>
-              <Button variant="primary" onClick={handleReadyForSetup}>
-                準備完了
-              </Button>
+          <Card className="bg-white/95">
+            <CardContent className="py-6 text-center">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-3">Player 2の番です</h2>
+              <p className="text-xs sm:text-sm text-slate-700 mb-4">端末をPlayer 2に渡してください</p>
+              <Button variant="primary" onClick={handleReadyForSetup} className="text-sm">準備完了</Button>
             </CardContent>
           </Card>
         )}
@@ -231,13 +222,11 @@ export default function GeisterLocalPage() {
         {/* Player2配置フェーズ */}
         {phase === 'setup-p2' && (
           <Card className="bg-white/95">
-            <CardHeader>
-              <h2 className="text-2xl font-bold text-slate-900">Player 2 - 駒の初期配置</h2>
-              <p className="text-sm text-slate-600 mt-2 font-medium">
-                青いお化け👻×4、赤い悪魔😈×4を中央4列×2行（上側）に配置してください
-              </p>
+            <CardHeader className="pb-2">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900">Player 2 - 駒の配置</h2>
+              <p className="text-xs text-slate-600 mt-1">👻×4、😈×4を配置</p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-2">
               <SetupBoard
                 myRole="player2"
                 setup={player2Setup}
@@ -250,133 +239,129 @@ export default function GeisterLocalPage() {
 
         {/* ターン交代画面 */}
         {phase === 'turnChange' && (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <h2 className={`${TEXT_SIZE.heading2} font-bold text-gray-900 mb-6 break-words`}>
+          <Card className="bg-white/95">
+            <CardContent className="py-6 text-center">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-3">
                 Player {currentPlayer === 'player1' ? '1' : '2'} の番です
               </h2>
-              <p className="text-gray-700 mb-8">
-                端末を Player {currentPlayer === 'player1' ? '1' : '2'} に渡してください。<br />
-                準備ができたらボタンを押してください。
+              <p className="text-xs sm:text-sm text-slate-700 mb-4">
+                端末を Player {currentPlayer === 'player1' ? '1' : '2'} に渡してください
               </p>
-              <Button variant="primary" onClick={handleReadyForTurn}>
-                準備完了
-              </Button>
+              <Button variant="primary" onClick={handleReadyForTurn} className="text-sm">準備完了</Button>
             </CardContent>
           </Card>
         )}
 
-        {/* ゲームプレイ */}
+        {/* ゲームプレイ（コンパクト） */}
         {phase === 'playing' && clientState && (
           <>
-            <Card className="mb-6 bg-white/95">
-              <CardContent className="py-4">
-                <div className="grid grid-cols-3 gap-2 items-center">
-                  <div className="text-center">
-                    <p className="text-[10px] sm:text-xs text-slate-600 font-medium mb-0.5">取られた駒</p>
-                    <p className="text-xs sm:text-sm font-semibold text-slate-900">
-                      {clientState.capturedCounts.myGood + clientState.capturedCounts.myBad} / 8
-                    </p>
-                    <div className="flex gap-1 justify-center mt-0.5 text-[10px] sm:text-xs">
-                      <span className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded">
-                        👻 {clientState.capturedCounts.myGood}
-                      </span>
-                      <span className="bg-red-100 text-red-800 px-1 py-0.5 rounded">
-                        😈 {clientState.capturedCounts.myBad}
-                      </span>
-                    </div>
+            {/* ステータスカード */}
+            <Card className="mb-2 bg-white/95">
+              <CardContent className="py-1.5 sm:py-2 px-2 sm:px-3">
+                <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center text-[10px] sm:text-xs">
+                  {/* Player1/現在プレイヤーの捕獲情報 */}
+                  <div className="flex gap-1 justify-start">
+                    <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">
+                      👻 {clientState.capturedCounts.myGood}
+                    </span>
+                    <span className="bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">
+                      😈 {clientState.capturedCounts.myBad}
+                    </span>
                   </div>
-                  <div className="text-center">
-                    <p className="text-sm text-slate-600 font-medium">現在のターン</p>
-                    <p className="text-xl font-bold text-slate-900">
-                      Player {currentPlayer === 'player1' ? '1' : '2'}
-                    </p>
+
+                  {/* ターン表示 */}
+                  <div className="text-xs sm:text-sm font-bold text-slate-900 text-center whitespace-nowrap">
+                    P{currentPlayer === 'player1' ? '1' : '2'}
                   </div>
-                  <div className="text-center">
-                    <p className="text-[10px] sm:text-xs text-slate-600 font-medium mb-0.5">捕獲した駒</p>
-                    <p className="text-xs sm:text-sm font-semibold text-slate-900">
-                      {clientState.capturedCounts.opponentGood + clientState.capturedCounts.opponentBad} / 8
-                    </p>
-                    <div className="flex gap-1 justify-center mt-0.5 text-[10px] sm:text-xs">
-                      <span className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded">
-                        👻 {clientState.capturedCounts.opponentGood}
-                      </span>
-                      <span className="bg-red-100 text-red-800 px-1 py-0.5 rounded">
-                        😈 {clientState.capturedCounts.opponentBad}
-                      </span>
-                    </div>
+
+                  {/* 相手の捕獲情報 */}
+                  <div className="flex gap-1 justify-end">
+                    <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">
+                      👻 {clientState.capturedCounts.opponentGood}
+                    </span>
+                    <span className="bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">
+                      😈 {clientState.capturedCounts.opponentBad}
+                    </span>
                   </div>
                 </div>
-                <div className="flex gap-2 justify-center mt-3">
-                  {/* 待ったボタン */}
+
+                {/* 操作ボタン */}
+                <div className="flex gap-1 justify-center mt-1.5">
                   {gameHistory.canUndo() && (
                     <Button
                       variant="secondary"
                       onClick={handleUndo}
-                      className="text-xs sm:text-sm"
+                      className="text-[10px] sm:text-xs py-1 px-2"
                       aria-label="1手戻す"
                     >
                       ↩️ 待った
                     </Button>
                   )}
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setPhase('turnChange');
+                      const nextPlayer: PlayerRole = currentPlayer === 'player1' ? 'player2' : 'player1';
+                      setCurrentPlayer(nextPlayer);
+                      setSelectedPiece(null);
+                      setValidMoves([]);
+                    }}
+                    className="text-[10px] sm:text-xs py-1 px-2"
+                  >
+                    🔄 交代
+                  </Button>
                 </div>
               </CardContent>
             </Card>
 
-            {/* ルール概要 */}
-            <div className="mb-6">
-              <RulesSummary />
+            {/* ルール概要（Accordion化） */}
+            <div className="mb-2">
+              <Accordion type="single" collapsible defaultValue="">
+                <AccordionItem value="rules">
+                  <AccordionTrigger className="text-xs sm:text-sm py-2 px-3 bg-white/95 rounded-t-lg">
+                    ルール概要
+                  </AccordionTrigger>
+                  <AccordionContent className="bg-white/95">
+                    <RulesSummary />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </div>
 
-            <GeisterBoard
-              gameState={clientState}
-              onPieceClick={handlePieceClick}
-              onCellClick={handleMove}
-              selectedPieceId={selectedPiece}
-              validMoves={validMoves}
-            />
-
-            <div className="mt-6 text-center">
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setPhase('turnChange');
-                  const nextPlayer: PlayerRole = currentPlayer === 'player1' ? 'player2' : 'player1';
-                  setCurrentPlayer(nextPlayer);
-                  setSelectedPiece(null);
-                  setValidMoves([]);
-                }}
-              >
-                ターン終了
-              </Button>
+            <div className="flex justify-center">
+              <GeisterBoard
+                gameState={clientState}
+                onPieceClick={handlePieceClick}
+                onCellClick={handleMove}
+                selectedPieceId={selectedPiece}
+                validMoves={validMoves}
+              />
             </div>
           </>
         )}
 
         {/* ゲーム終了 */}
         {phase === 'finished' && (
-          <Card>
-            <CardHeader>
-              <h2 className="text-3xl font-bold text-center">
-                🎉 Player {gameState.winner === 'player1' ? '1' : '2'} の勝ち！
-              </h2>
-            </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-gray-700 mb-6">
-                {gameState.winReason === 'escape' && '青いお化け👻の脱出成功！'}
-                {gameState.winReason === 'captureAllGood' && '相手の青いお化け👻を全て捕獲！'}
-                {gameState.winReason === 'loseAllBad' && '相手に赤い悪魔😈を全て取らせた！'}
-              </p>
-              <div className="flex gap-4 justify-center">
-                <Button variant="primary" onClick={handleReplay}>
-                  もう一度プレイ
-                </Button>
-                <Button variant="secondary" onClick={() => router.push('/games/geister')}>
-                  モード選択に戻る
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div role="alert" aria-live="assertive">
+            <Card className="bg-white/95">
+              <CardHeader className="pb-2">
+                <h2 className="text-lg sm:text-xl font-bold text-center text-slate-900">
+                  🎉 Player {gameState.winner === 'player1' ? '1' : '2'} の勝ち！
+                </h2>
+              </CardHeader>
+              <CardContent className="text-center pt-2">
+                <p className="text-xs text-slate-700 mb-3 font-medium">
+                  {gameState.winReason === 'escape' && '👻脱出成功！'}
+                  {gameState.winReason === 'captureAllGood' && '相手の👻を全て捕獲！'}
+                  {gameState.winReason === 'loseAllBad' && '😈を全て取らせた！'}
+                </p>
+                <div className="flex gap-2 justify-center">
+                  <Button variant="primary" onClick={handleReplay} className="text-xs py-1 px-2">もう一度</Button>
+                  <Button variant="secondary" onClick={() => router.push('/games/geister')} className="text-xs py-1 px-2">戻る</Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
       </div>

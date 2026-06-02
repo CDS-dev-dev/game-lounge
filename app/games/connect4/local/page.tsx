@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
@@ -112,9 +112,18 @@ export default function Connect4LocalPage() {
     gameHistory.clearHistory();
   }, [gameHistory]);
 
-  const playerId = currentPlayer === 'player1' ? PLAYER1_ID : PLAYER2_ID;
-  const clientState = toClientState(gameState, playerId);
-  const availablePositions = phase === 'playing' ? getAvailablePositions(gameState) : [];
+  const playerId = useMemo(() =>
+    currentPlayer === 'player1' ? PLAYER1_ID : PLAYER2_ID,
+    [currentPlayer]
+  );
+  const clientState = useMemo(() =>
+    toClientState(gameState, playerId),
+    [gameState, playerId]
+  );
+  const availablePositions = useMemo(() =>
+    phase === 'playing' ? getAvailablePositions(gameState) : [],
+    [gameState, phase]
+  );
 
   return (
     <>

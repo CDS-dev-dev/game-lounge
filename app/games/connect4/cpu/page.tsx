@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
@@ -169,11 +169,15 @@ export default function Connect4CpuPage() {
     gameHistory.clearHistory();
   }, [gameHistory]);
 
-  const clientState: Connect4ClientState | null = gameState
-    ? toClientState(gameState, PLAYER_ID)
-    : null;
+  const clientState: Connect4ClientState | null = useMemo(() =>
+    gameState ? toClientState(gameState, PLAYER_ID) : null,
+    [gameState]
+  );
 
-  const availablePositions = gameState && phase === 'playing' ? getAvailablePositions(gameState) : [];
+  const availablePositions = useMemo(() =>
+    gameState && phase === 'playing' ? getAvailablePositions(gameState) : [],
+    [gameState, phase]
+  );
 
   return (
     <>

@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
@@ -45,7 +45,7 @@ export default function XiangqiLocalPage() {
   const gameHistory = useGameHistory<{ state: XiangqiState; player: PlayerRole; selectedPiece: Position | null }>();
 
   // セルクリック
-  const handleCellClick = (pos: Position) => {
+  const handleCellClick = useCallback((pos: Position) => {
     if (phase !== 'playing') return;
 
     const clickedPiece = gameState.board[pos.row][pos.col];
@@ -90,15 +90,15 @@ export default function XiangqiLocalPage() {
         setValidMoves([]);
       }
     }
-  };
+  }, [phase, gameState, currentPlayer, gameHistory, showToast]);
 
   // ターン交代画面から戻る
-  const handleReadyForTurn = () => {
+  const handleReadyForTurn = useCallback(() => {
     setPhase('playing');
-  };
+  }, []);
 
   // 待った（1手戻す）
-  const handleUndo = () => {
+  const handleUndo = useCallback(() => {
     const previousEntry = gameHistory.undo();
     if (!previousEntry) {
       showToast('これ以上戻せません', 'error');
@@ -111,10 +111,10 @@ export default function XiangqiLocalPage() {
     setValidMoves([]);
     setPhase('playing');
     showToast('1手戻しました', 'info');
-  };
+  }, [gameHistory, showToast]);
 
   // リプレイ
-  const handleReplay = () => {
+  const handleReplay = useCallback(() => {
     let state = createInitialState(GAME_ID, PLAYER_RED_ID);
     state = joinBlackPlayer(state, PLAYER_BLACK_ID);
     setGameState(state);
@@ -123,10 +123,16 @@ export default function XiangqiLocalPage() {
     setSelectedPiece(null);
     setValidMoves([]);
     gameHistory.clearHistory();
-  };
+  }, [gameHistory]);
 
-  const playerId = currentPlayer === 'red' ? PLAYER_RED_ID : PLAYER_BLACK_ID;
-  const clientState = toClientState(gameState, playerId);
+  const playerId = useMemo(() =>
+    currentPlayer === 'red' ? PLAYER_RED_ID : PLAYER_BLACK_ID,
+    [currentPlayer]
+  );
+  const clientState = useMemo(() =>
+    toClientState(gameState, playerId),
+    [gameState, playerId]
+  );
 
   return (
     <>
