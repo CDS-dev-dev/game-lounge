@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
 import {
   createInitialState,
-  dealCards,
-  processBettingAction,
+  startRound,
+  executeAction,
   toClientState,
 } from '@/lib/games/indian-poker/engine';
 import type { IndianPokerState, IndianPokerClientState, BettingAction } from '@/lib/games/indian-poker/types';
@@ -51,7 +51,7 @@ export default function IndianPokerLocalPage() {
     const cpuFlags = playerNames.map(() => false);
 
     let newState = createInitialState(GAME_ID, playerIds, playerNames, cpuFlags);
-    newState = dealCards(newState);
+    newState = startRound(newState);
 
     setGameState(newState);
     const firstPlayerId = newState.players[newState.currentTurn].id;
@@ -65,7 +65,7 @@ export default function IndianPokerLocalPage() {
     if (!gameState || !clientState) return;
 
     try {
-      let newState = processBettingAction(gameState, currentPlayerId, action);
+      let newState = executeAction(gameState, currentPlayerId, action);
       setGameState(newState);
 
       // ショーダウンになったら結果表示

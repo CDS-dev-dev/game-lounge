@@ -240,7 +240,8 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
                   {row + 1}
                 </div>
               </div>
-            ))}
+            );
+          })}
 
           {/* 楚河漢界テキスト */}
           <div
