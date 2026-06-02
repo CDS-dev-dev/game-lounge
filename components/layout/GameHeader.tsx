@@ -14,6 +14,7 @@ interface GameHeaderProps {
   showBackToHome?: boolean;
   backUrl?: string;
   backLabel?: string;
+  icon?: React.ReactNode; // アイコンをオプションで追加
 }
 
 export const GameHeader: React.FC<GameHeaderProps> = ({
@@ -22,6 +23,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   showBackToHome = false,
   backUrl,
   backLabel,
+  icon,
 }) => {
   const router = useRouter();
 
@@ -52,8 +54,9 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
               </svg>
             </Link>
             {title && (
-              <h1 className={`${TEXT_SIZE.body} sm:${TEXT_SIZE.heading3} font-bold text-white line-clamp-1`}>
-                {title}
+              <h1 className={`${TEXT_SIZE.body} sm:${TEXT_SIZE.heading3} font-bold text-white line-clamp-1 flex items-center gap-2`}>
+                {icon && <span className="flex-shrink-0">{icon}</span>}
+                <span>{title}</span>
               </h1>
             )}
           </div>

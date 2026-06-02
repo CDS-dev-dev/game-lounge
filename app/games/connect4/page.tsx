@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { GameModeSelector } from '@/components/game/GameModeSelector';
 import { TEXT_SIZE, CARD_BG, PADDING } from '@/lib/constants/ui-scale';
+import { Box } from 'lucide-react';
 
 export default function Connect4ModePage() {
   const router = useRouter();
@@ -37,7 +38,10 @@ export default function Connect4ModePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <GameHeader title="立体四目並べ" />
+      <GameHeader
+        title="立体四目並べ"
+        icon={<Box className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />}
+      />
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-8 px-4">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-4 sm:mb-6">

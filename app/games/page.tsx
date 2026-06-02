@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { TEXT_SIZE, CARD_BG, HOVER_SCALE, MIN_TAP_AREA, PADDING, RESPONSIVE_SPACING } from '@/lib/constants/ui-scale';
+import { Ghost, Box, Crown, Palmtree, Spade, Flame, Gamepad2 } from 'lucide-react';
 
 export default function GamesPage() {
   const router = useRouter();
@@ -28,7 +29,7 @@ export default function GamesPage() {
             className={`${CARD_BG} rounded-lg ${PADDING.sm} ${HOVER_SCALE} ${MIN_TAP_AREA} flex flex-col items-center justify-center`}
             aria-label="ガイスターを選択"
           >
-            <div className="text-3xl sm:text-5xl mb-2" role="img" aria-hidden="true">👻</div>
+            <Ghost className="w-12 h-12 sm:w-16 sm:h-16 mb-2 text-indigo-600" aria-hidden="true" />
             <h2 className={`${TEXT_SIZE.title} font-bold text-slate-900 mb-1`}>ガイスター</h2>
             <p className={`${TEXT_SIZE.caption} text-slate-600`}>心理戦ゲーム</p>
           </button>
@@ -39,7 +40,7 @@ export default function GamesPage() {
             aria-label="立体四目並べを選択"
             className={`${CARD_BG} rounded-lg ${PADDING.sm} ${HOVER_SCALE} ${MIN_TAP_AREA} flex flex-col items-center justify-center`}
           >
-            <div className="text-3xl sm:text-5xl mb-2">🎯</div>
+            <Box className="w-12 h-12 sm:w-16 sm:h-16 mb-2 text-blue-600" aria-hidden="true" />
             <h2 className={`${TEXT_SIZE.title} font-bold text-slate-900 mb-1`}>立体四目並べ</h2>
             <p className={`${TEXT_SIZE.caption} text-slate-600`}>3D戦略ゲーム</p>
           </button>
@@ -61,7 +62,7 @@ export default function GamesPage() {
             aria-label="エンペラーゲームを選択"
             className={`${CARD_BG} rounded-lg ${PADDING.sm} ${HOVER_SCALE} ${MIN_TAP_AREA} flex flex-col items-center justify-center`}
           >
-            <div className="text-3xl sm:text-5xl mb-2" role="img" aria-hidden="true">👑</div>
+            <Crown className="w-12 h-12 sm:w-16 sm:h-16 mb-2 text-yellow-600" aria-hidden="true" />
             <h2 className={`${TEXT_SIZE.title} font-bold text-slate-900 mb-1`}>エンペラー</h2>
             <p className={`${TEXT_SIZE.caption} text-slate-600`}>カイジ心理戦</p>
           </button>
@@ -72,7 +73,7 @@ export default function GamesPage() {
             aria-label="アイランドセトラーズを選択"
             className={`${CARD_BG} rounded-lg ${PADDING.sm} ${HOVER_SCALE} ${MIN_TAP_AREA} flex flex-col items-center justify-center`}
           >
-            <div className="text-3xl sm:text-5xl mb-2" role="img" aria-hidden="true">🏝️</div>
+            <Palmtree className="w-12 h-12 sm:w-16 sm:h-16 mb-2 text-green-600" aria-hidden="true" />
             <h2 className={`${TEXT_SIZE.title} font-bold text-slate-900 mb-1`}>アイランドセトラーズ</h2>
             <p className={`${TEXT_SIZE.caption} text-slate-600`}>開拓戦略ゲーム</p>
           </button>
@@ -83,7 +84,7 @@ export default function GamesPage() {
             aria-label="テキサスホールデムを選択"
             className={`${CARD_BG} rounded-lg ${PADDING.sm} ${HOVER_SCALE} ${MIN_TAP_AREA} flex flex-col items-center justify-center`}
           >
-            <div className="text-3xl sm:text-5xl mb-2" role="img" aria-hidden="true">🃏</div>
+            <Spade className="w-12 h-12 sm:w-16 sm:h-16 mb-2 text-slate-900" aria-hidden="true" />
             <h2 className={`${TEXT_SIZE.title} font-bold text-slate-900 mb-1`}>テキサスホールデム</h2>
             <p className={`${TEXT_SIZE.caption} text-slate-600`}>ポーカー</p>
           </button>
@@ -94,7 +95,7 @@ export default function GamesPage() {
             aria-label="タイガー&ドラゴンを選択"
             className={`${CARD_BG} rounded-lg ${PADDING.sm} ${HOVER_SCALE} ${MIN_TAP_AREA} flex flex-col items-center justify-center`}
           >
-            <div className="text-3xl sm:text-5xl mb-2" role="img" aria-hidden="true">🐯🐉</div>
+            <Flame className="w-12 h-12 sm:w-16 sm:h-16 mb-2 text-orange-600" aria-hidden="true" />
             <h2 className={`${TEXT_SIZE.title} font-bold text-slate-900 mb-1`}>タイガー&ドラゴン</h2>
             <p className={`${TEXT_SIZE.caption} text-slate-600`}>攻めと受けの牌ゲーム</p>
           </button>
@@ -105,7 +106,7 @@ export default function GamesPage() {
             aria-label="インディアンポーカーを選択"
             className={`${CARD_BG} rounded-lg ${PADDING.sm} ${HOVER_SCALE} ${MIN_TAP_AREA} flex flex-col items-center justify-center`}
           >
-            <div className="text-3xl sm:text-5xl mb-2" role="img" aria-hidden="true">🎴</div>
+            <Gamepad2 className="w-12 h-12 sm:w-16 sm:h-16 mb-2 text-purple-600" aria-hidden="true" />
             <h2 className={`${TEXT_SIZE.title} font-bold text-slate-900 mb-1`}>インディアンポーカー</h2>
             <p className={`${TEXT_SIZE.caption} text-slate-600`}>自分のカードが見えない心理戦</p>
           </button>

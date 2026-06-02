@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { CARD_BG, HOVER_SCALE, MIN_TAP_AREA, TEXT_SIZE } from '@/lib/constants/ui-scale';
+import { Cpu, Users, Globe } from 'lucide-react';
 
 export interface GameMode {
   type: 'cpu' | 'local' | 'online';
@@ -37,6 +38,19 @@ export function GameModeSelector({ gameName, modes }: GameModeSelectorProps) {
     }
   };
 
+  const getModeIcon = (type: string) => {
+    switch (type) {
+      case 'cpu':
+        return <Cpu className="w-10 h-10 sm:w-12 sm:h-12 text-indigo-600" aria-hidden="true" />;
+      case 'local':
+        return <Users className="w-10 h-10 sm:w-12 sm:h-12 text-green-600" aria-hidden="true" />;
+      case 'online':
+        return <Globe className="w-10 h-10 sm:w-12 sm:h-12 text-blue-600" aria-hidden="true" />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
       {modes.map((mode) => (
@@ -51,8 +65,8 @@ export function GameModeSelector({ gameName, modes }: GameModeSelectorProps) {
             aria-disabled={mode.disabled}
             className={`w-full text-center ${MIN_TAP_AREA} flex flex-col items-center justify-center p-3 sm:p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${mode.disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
           >
-            <div className="text-2xl sm:text-4xl mb-2" role="img" aria-hidden="true">
-              {mode.emoji}
+            <div className="mb-2">
+              {getModeIcon(mode.type)}
             </div>
             <h2 className={`${TEXT_SIZE.title} font-bold text-slate-900 mb-1`}>
               {mode.title}

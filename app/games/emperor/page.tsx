@@ -8,11 +8,15 @@ import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { GameModeSelector } from '@/components/game/GameModeSelector';
 import { TEXT_SIZE, CARD_BG, PADDING } from '@/lib/constants/ui-scale';
+import { Crown } from 'lucide-react';
 
 export default function EmperorPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-8 px-4">
-      <GameHeader title="エンペラーゲーム（Eカード）" />
+      <GameHeader
+        title="エンペラーゲーム（Eカード）"
+        icon={<Crown className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />}
+      />
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-4 sm:mb-6">
           <h1 className={`${TEXT_SIZE.heading1} font-bold text-white mb-2 sm:mb-3`}>

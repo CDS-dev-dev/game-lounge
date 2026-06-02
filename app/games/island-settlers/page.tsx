@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { GameModeSelector } from '@/components/game/GameModeSelector';
 import { TEXT_SIZE, CARD_BG, PADDING } from '@/lib/constants/ui-scale';
+import { Palmtree } from 'lucide-react';
 
 export default function IslandSettlersPage() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function IslandSettlersPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-8 px-4">
       <GameHeader
         title="アイランドセトラーズ"
+        icon={<Palmtree className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />}
       />
 
       <main className="container mx-auto px-4 py-8">

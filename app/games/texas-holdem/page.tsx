@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { GameModeSelector } from '@/components/game/GameModeSelector';
 import { TEXT_SIZE, CARD_BG, PADDING } from '@/lib/constants/ui-scale';
+import { Spade } from 'lucide-react';
 
 export const metadata = {
   title: 'テキサスホールデム | Game Lounge',
@@ -14,7 +15,11 @@ export const metadata = {
 export default function TexasHoldemPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-8 px-4">
-      <GameHeader title="テキサスホールデム" showBackToGames />
+      <GameHeader
+        title="テキサスホールデム"
+        showBackToGames
+        icon={<Spade className="w-5 h-5 sm:w-6 sm:h-6 text-slate-200" />}
+      />
 
       <div className="container mx-auto p-4">
         <div className="max-w-3xl mx-auto space-y-6">
