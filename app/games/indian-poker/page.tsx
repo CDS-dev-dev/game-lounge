@@ -39,7 +39,7 @@ export default function IndianPokerModePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       <GameHeader title="インディアンポーカー" />
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900 pt-16 sm:pt-20 pb-4 px-3 sm:px-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 px-3 sm:px-4">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-4 sm:mb-6">
             <h1 className="text-xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">

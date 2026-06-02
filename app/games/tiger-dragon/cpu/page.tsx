@@ -275,7 +275,7 @@ export default function TigerDragonCpuPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">
       <GameHeader title="タイガー&ドラゴン - CPU対戦" />
 
       <main className="container mx-auto px-4 py-8">

@@ -144,7 +144,7 @@ export default function TexasHoldemCpuPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">
       <GameHeader
         title="テキサスホールデム - CPU対戦"
         showBackToGames

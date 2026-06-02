@@ -11,7 +11,7 @@ export const metadata = {
 
 export default function TexasHoldemRulesPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">
       <GameHeader title="テキサスホールデム - ルール" showBackToGames />
 
       <div className="container mx-auto p-4">

@@ -8,7 +8,7 @@ import { INITIAL_COINS, TRANSFER_COINS } from '@/lib/games/emperor/constants';
 
 export default function EmperorRulesPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">
       <GameHeader title="エンペラーゲーム - ルール説明" />
 
       <main className="container mx-auto px-4 py-8">
