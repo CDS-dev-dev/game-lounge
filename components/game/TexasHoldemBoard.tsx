@@ -56,7 +56,7 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
   // (変換関数は toCommonCard を使用)
 
   return (
-    <div className="w-full h-full flex flex-col bg-gradient-to-br from-green-800 to-green-900 p-4 overflow-hidden">
+    <div className="w-full min-h-screen flex flex-col bg-gradient-to-br from-green-800 to-green-900 p-4">
       {/* 対戦相手エリア */}
       <div className="mb-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 max-w-6xl mx-auto">

@@ -217,7 +217,7 @@ export default function TexasHoldemCpuPage() {
 
       {/* ゲーム画面 */}
       {(phase === 'playing' || phase === 'cpuThinking' || phase === 'roundEnd') && gameState && (
-        <div className="container mx-auto p-4 h-[calc(100vh-80px)]">
+        <div className="container mx-auto p-4">
           <TexasHoldemBoard
             gameState={toClientState(gameState, PLAYER_ID)}
             onAction={handlePlayerAction}
