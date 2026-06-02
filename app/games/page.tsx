@@ -50,6 +50,56 @@ export default function GamesPage() {
             <h2 className="text-sm sm:text-lg font-bold text-slate-900 mb-1">中国象棋</h2>
             <p className="text-[10px] sm:text-xs text-slate-600">伝統将棋</p>
           </button>
+
+          {/* エンペラーゲーム */}
+          <button
+            onClick={() => router.push('/games/emperor')}
+            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95"
+          >
+            <div className="text-3xl sm:text-5xl mb-2">👑</div>
+            <h2 className="text-sm sm:text-lg font-bold text-slate-900 mb-1">エンペラー</h2>
+            <p className="text-[10px] sm:text-xs text-slate-600">カイジ心理戦</p>
+          </button>
+
+          {/* アイランドセトラーズ */}
+          <button
+            onClick={() => router.push('/games/island-settlers')}
+            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95"
+          >
+            <div className="text-3xl sm:text-5xl mb-2">🏝️</div>
+            <h2 className="text-sm sm:text-lg font-bold text-slate-900 mb-1">アイランドセトラーズ</h2>
+            <p className="text-[10px] sm:text-xs text-slate-600">開拓戦略ゲーム</p>
+          </button>
+
+          {/* テキサスホールデム */}
+          <button
+            onClick={() => router.push('/games/texas-holdem')}
+            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95"
+          >
+            <div className="text-3xl sm:text-5xl mb-2">🃏</div>
+            <h2 className="text-sm sm:text-lg font-bold text-slate-900 mb-1">テキサスホールデム</h2>
+            <p className="text-[10px] sm:text-xs text-slate-600">ポーカー</p>
+          </button>
+
+          {/* タイガー&ドラゴン */}
+          <button
+            onClick={() => router.push('/games/tiger-dragon')}
+            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95"
+          >
+            <div className="text-3xl sm:text-5xl mb-2">🐯🐉</div>
+            <h2 className="text-sm sm:text-lg font-bold text-slate-900 mb-1">タイガー&ドラゴン</h2>
+            <p className="text-[10px] sm:text-xs text-slate-600">攻めと受けの牌ゲーム</p>
+          </button>
+
+          {/* インディアンポーカー */}
+          <button
+            onClick={() => router.push('/games/indian-poker')}
+            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95"
+          >
+            <div className="text-3xl sm:text-5xl mb-2">🎴</div>
+            <h2 className="text-sm sm:text-lg font-bold text-slate-900 mb-1">インディアンポーカー</h2>
+            <p className="text-[10px] sm:text-xs text-slate-600">自分のカードが見えない心理戦</p>
+          </button>
         </div>
 
       </div>
