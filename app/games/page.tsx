@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
+import { TEXT_SIZE, CARD_BG, HOVER_SCALE, MIN_TAP_AREA, PADDING, RESPONSIVE_SPACING } from '@/lib/constants/ui-scale';
 
 export default function GamesPage() {
   const router = useRouter();
@@ -12,93 +13,101 @@ export default function GamesPage() {
   return (
     <>
       <GameHeader title="ゲーム選択" showBackToHome />
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 px-3 sm:px-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-8 px-4">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-4 sm:mb-6">
-            <h1 className="text-xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">ゲーム選択</h1>
-            <p className="text-xs sm:text-sm text-gray-200">遊びたいゲームをタップ</p>
+          <div className="text-center mb-6">
+            <h1 className={`${TEXT_SIZE.heading1} font-bold text-white mb-2`}>ゲーム選択</h1>
+            <p className={`${TEXT_SIZE.label} text-gray-200`}>遊びたいゲームをタップ</p>
           </div>
 
-        {/* コンパクトなゲームカード：2列配置 */}
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 max-w-2xl mx-auto">
+          {/* ゲームカード：2列配置 */}
+          <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 ${RESPONSIVE_SPACING.sm} max-w-4xl mx-auto`}>
           {/* ガイスター */}
           <button
             onClick={() => router.push('/games/geister')}
-            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95"
+            className={`${CARD_BG} rounded-lg ${PADDING.sm} ${HOVER_SCALE} ${MIN_TAP_AREA} flex flex-col items-center justify-center`}
+            aria-label="ガイスターを選択"
           >
-            <div className="text-3xl sm:text-5xl mb-2">👻</div>
-            <h2 className="text-sm sm:text-lg font-bold text-slate-900 mb-1">ガイスター</h2>
-            <p className="text-[10px] sm:text-xs text-slate-600">心理戦ゲーム</p>
+            <div className="text-3xl sm:text-5xl mb-2" role="img" aria-hidden="true">👻</div>
+            <h2 className={`${TEXT_SIZE.title} font-bold text-slate-900 mb-1`}>ガイスター</h2>
+            <p className={`${TEXT_SIZE.caption} text-slate-600`}>心理戦ゲーム</p>
           </button>
 
           {/* 立体四目並べ */}
           <button
             onClick={() => router.push('/games/connect4')}
-            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95"
+            aria-label="立体四目並べを選択"
+            className={`${CARD_BG} rounded-lg ${PADDING.sm} ${HOVER_SCALE} ${MIN_TAP_AREA} flex flex-col items-center justify-center`}
           >
             <div className="text-3xl sm:text-5xl mb-2">🎯</div>
-            <h2 className="text-sm sm:text-lg font-bold text-slate-900 mb-1">立体四目並べ</h2>
-            <p className="text-[10px] sm:text-xs text-slate-600">3D戦略ゲーム</p>
+            <h2 className={`${TEXT_SIZE.title} font-bold text-slate-900 mb-1`}>立体四目並べ</h2>
+            <p className={`${TEXT_SIZE.caption} text-slate-600`}>3D戦略ゲーム</p>
           </button>
 
           {/* 中国象棋 */}
           <button
             onClick={() => router.push('/games/xiangqi')}
-            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95"
+            aria-label="中国象棋を選択"
+            className={`${CARD_BG} rounded-lg ${PADDING.sm} ${HOVER_SCALE} ${MIN_TAP_AREA} flex flex-col items-center justify-center`}
           >
-            <div className="text-3xl sm:text-5xl mb-2">♟️</div>
-            <h2 className="text-sm sm:text-lg font-bold text-slate-900 mb-1">中国象棋</h2>
-            <p className="text-[10px] sm:text-xs text-slate-600">伝統将棋</p>
+            <div className="text-3xl sm:text-5xl mb-2" role="img" aria-hidden="true">♟️</div>
+            <h2 className={`${TEXT_SIZE.title} font-bold text-slate-900 mb-1`}>中国象棋</h2>
+            <p className={`${TEXT_SIZE.caption} text-slate-600`}>伝統将棋</p>
           </button>
 
           {/* エンペラーゲーム */}
           <button
             onClick={() => router.push('/games/emperor')}
-            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95"
+            aria-label="エンペラーゲームを選択"
+            className={`${CARD_BG} rounded-lg ${PADDING.sm} ${HOVER_SCALE} ${MIN_TAP_AREA} flex flex-col items-center justify-center`}
           >
-            <div className="text-3xl sm:text-5xl mb-2">👑</div>
-            <h2 className="text-sm sm:text-lg font-bold text-slate-900 mb-1">エンペラー</h2>
-            <p className="text-[10px] sm:text-xs text-slate-600">カイジ心理戦</p>
+            <div className="text-3xl sm:text-5xl mb-2" role="img" aria-hidden="true">👑</div>
+            <h2 className={`${TEXT_SIZE.title} font-bold text-slate-900 mb-1`}>エンペラー</h2>
+            <p className={`${TEXT_SIZE.caption} text-slate-600`}>カイジ心理戦</p>
           </button>
 
           {/* アイランドセトラーズ */}
           <button
             onClick={() => router.push('/games/island-settlers')}
-            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95"
+            aria-label="アイランドセトラーズを選択"
+            className={`${CARD_BG} rounded-lg ${PADDING.sm} ${HOVER_SCALE} ${MIN_TAP_AREA} flex flex-col items-center justify-center`}
           >
-            <div className="text-3xl sm:text-5xl mb-2">🏝️</div>
-            <h2 className="text-sm sm:text-lg font-bold text-slate-900 mb-1">アイランドセトラーズ</h2>
-            <p className="text-[10px] sm:text-xs text-slate-600">開拓戦略ゲーム</p>
+            <div className="text-3xl sm:text-5xl mb-2" role="img" aria-hidden="true">🏝️</div>
+            <h2 className={`${TEXT_SIZE.title} font-bold text-slate-900 mb-1`}>アイランドセトラーズ</h2>
+            <p className={`${TEXT_SIZE.caption} text-slate-600`}>開拓戦略ゲーム</p>
           </button>
 
           {/* テキサスホールデム */}
           <button
             onClick={() => router.push('/games/texas-holdem')}
-            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95"
+            aria-label="テキサスホールデムを選択"
+            className={`${CARD_BG} rounded-lg ${PADDING.sm} ${HOVER_SCALE} ${MIN_TAP_AREA} flex flex-col items-center justify-center`}
           >
-            <div className="text-3xl sm:text-5xl mb-2">🃏</div>
-            <h2 className="text-sm sm:text-lg font-bold text-slate-900 mb-1">テキサスホールデム</h2>
-            <p className="text-[10px] sm:text-xs text-slate-600">ポーカー</p>
+            <div className="text-3xl sm:text-5xl mb-2" role="img" aria-hidden="true">🃏</div>
+            <h2 className={`${TEXT_SIZE.title} font-bold text-slate-900 mb-1`}>テキサスホールデム</h2>
+            <p className={`${TEXT_SIZE.caption} text-slate-600`}>ポーカー</p>
           </button>
 
           {/* タイガー&ドラゴン */}
           <button
             onClick={() => router.push('/games/tiger-dragon')}
-            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95"
+            aria-label="タイガー&ドラゴンを選択"
+            className={`${CARD_BG} rounded-lg ${PADDING.sm} ${HOVER_SCALE} ${MIN_TAP_AREA} flex flex-col items-center justify-center`}
           >
-            <div className="text-3xl sm:text-5xl mb-2">🐯🐉</div>
-            <h2 className="text-sm sm:text-lg font-bold text-slate-900 mb-1">タイガー&ドラゴン</h2>
-            <p className="text-[10px] sm:text-xs text-slate-600">攻めと受けの牌ゲーム</p>
+            <div className="text-3xl sm:text-5xl mb-2" role="img" aria-hidden="true">🐯🐉</div>
+            <h2 className={`${TEXT_SIZE.title} font-bold text-slate-900 mb-1`}>タイガー&ドラゴン</h2>
+            <p className={`${TEXT_SIZE.caption} text-slate-600`}>攻めと受けの牌ゲーム</p>
           </button>
 
           {/* インディアンポーカー */}
           <button
             onClick={() => router.push('/games/indian-poker')}
-            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95"
+            aria-label="インディアンポーカーを選択"
+            className={`${CARD_BG} rounded-lg ${PADDING.sm} ${HOVER_SCALE} ${MIN_TAP_AREA} flex flex-col items-center justify-center`}
           >
-            <div className="text-3xl sm:text-5xl mb-2">🎴</div>
-            <h2 className="text-sm sm:text-lg font-bold text-slate-900 mb-1">インディアンポーカー</h2>
-            <p className="text-[10px] sm:text-xs text-slate-600">自分のカードが見えない心理戦</p>
+            <div className="text-3xl sm:text-5xl mb-2" role="img" aria-hidden="true">🎴</div>
+            <h2 className={`${TEXT_SIZE.title} font-bold text-slate-900 mb-1`}>インディアンポーカー</h2>
+            <p className={`${TEXT_SIZE.caption} text-slate-600`}>自分のカードが見えない心理戦</p>
           </button>
         </div>
 
