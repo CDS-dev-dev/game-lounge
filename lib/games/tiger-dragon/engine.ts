@@ -8,6 +8,7 @@ import type {
   BattlefieldCard,
   TigerDragonClientState,
   AttackColumn,
+  GameStatus,
 } from './types';
 import {
   MIN_PLAYERS,
@@ -251,7 +252,7 @@ export function attack(
   });
 
   // 手牌が0枚になったら上がり
-  let newStatus = state.status;
+  let newStatus: GameStatus = state.status;
   let roundEndPlayer: TigerDragonPlayer | null = null;
 
   if (newHand.length === 0) {
@@ -334,7 +335,7 @@ export function defend(
   });
 
   // 手牌が0枚になったら上がり
-  let newStatus = state.status;
+  let newStatus: GameStatus = state.status;
   let roundEndPlayer: TigerDragonPlayer | null = null;
 
   if (newHand.length === 0) {

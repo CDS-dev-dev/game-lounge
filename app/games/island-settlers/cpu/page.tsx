@@ -206,11 +206,7 @@ export default function IslandSettlersCpuPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
-      <GameHeader
-        title="アイランドセトラーズ"
-        subtitle="CPU対戦"
-        onBack={() => router.push('/games')}
-      />
+      <GameHeader title="アイランドセトラーズ - CPU対戦" />
 
       <main className="container mx-auto px-4 py-8">
         {phase === 'setup' && (

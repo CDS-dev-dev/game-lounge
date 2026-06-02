@@ -10,6 +10,7 @@ interface ButtonProps {
   disabled?: boolean;
   className?: string;
   'aria-label'?: string;
+  asChild?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -20,6 +21,7 @@ export const Button: React.FC<ButtonProps> = ({
   disabled = false,
   className = '',
   'aria-label': ariaLabel,
+  asChild = false,
 }) => {
   const baseClasses = 'font-semibold rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed';
 
@@ -35,13 +37,22 @@ export const Button: React.FC<ButtonProps> = ({
     lg: 'px-6 py-3 text-lg',
   };
 
+  const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
+
+  // asChildの場合、childrenが単一のReact要素であることを期待し、そのpropsにclassNameを追加
+  if (asChild && React.isValidElement(children)) {
+    return React.cloneElement(children as React.ReactElement<any>, {
+      className: `${(children as any).props.className || ''} ${classes}`.trim(),
+    });
+  }
+
   return (
     <button
       onClick={onClick}
       disabled={disabled}
       aria-label={ariaLabel}
       aria-disabled={disabled}
-      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={classes}
     >
       {children}
     </button>

@@ -146,9 +146,8 @@ export default function TexasHoldemCpuPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <GameHeader
-        title="テキサスホールデム"
-        mode="CPU対戦"
-        showBackButton
+        title="テキサスホールデム - CPU対戦"
+        showBackToGames
       />
 
       {/* セットアップ画面 */}

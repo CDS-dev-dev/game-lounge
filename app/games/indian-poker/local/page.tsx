@@ -47,10 +47,7 @@ export default function IndianPokerLocalPage() {
 
   // ゲーム開始
   const handleStartGame = () => {
-    const playerIds = playerNames.map((_, i) => `player-${i}`);
-    const cpuFlags = playerNames.map(() => false);
-
-    let newState = createInitialState(GAME_ID, playerIds, playerNames, cpuFlags);
+    let newState = createInitialState(GAME_ID, playerCount, `player-0`, 0);
     newState = startRound(newState);
 
     setGameState(newState);
@@ -71,7 +68,7 @@ export default function IndianPokerLocalPage() {
       // ショーダウンになったら結果表示
       if (newState.status === 'showdown') {
         // 全員にカードを見せるため、最初のプレイヤーの視点で表示
-        setClientState(toClientState(newState, newState.players[0].id, true));
+        setClientState(toClientState(newState, newState.players[0].id));
         setSafeTimeout(() => handleShowdown(newState), 1500);
       } else if (newState.status === 'betting') {
         // 次のプレイヤーに切り替え
@@ -238,7 +235,7 @@ export default function IndianPokerLocalPage() {
 
             {/* ゲームボード */}
             <IndianPokerBoard
-              gameState={clientState}
+              state={clientState}
               onAction={phase === 'playing' ? handlePlayerAction : undefined}
             />
 

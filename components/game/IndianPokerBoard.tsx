@@ -9,7 +9,7 @@ import { PLAYER_COLORS } from '@/lib/games/indian-poker/constants';
 
 interface IndianPokerBoardProps {
   state: IndianPokerClientState;
-  onAction: (action: BettingAction) => void;
+  onAction?: (action: BettingAction) => void;
   disabled?: boolean;
 }
 
@@ -55,14 +55,14 @@ export function IndianPokerBoard({ state, onAction, disabled = false }: IndianPo
           {/* チェック/コールボタン */}
           {state.canCheck ? (
             <button
-              onClick={() => onAction({ type: 'check' })}
+              onClick={() => onAction && onAction({ type: 'check' })}
               className="w-full py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-bold transition-colors"
             >
               チェック
             </button>
           ) : (
             <button
-              onClick={() => onAction({ type: 'call' })}
+              onClick={() => onAction && onAction({ type: 'call' })}
               className="w-full py-2 px-4 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold transition-colors"
             >
               コール ({state.callAmount}チップ)
@@ -86,7 +86,7 @@ export function IndianPokerBoard({ state, onAction, disabled = false }: IndianPo
                 </span>
               </div>
               <button
-                onClick={() => onAction({ type: 'raise', amount: raiseAmount })}
+                onClick={() => onAction && onAction({ type: 'raise', amount: raiseAmount })}
                 className="w-full py-2 px-4 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-bold transition-colors"
               >
                 レイズ
@@ -97,7 +97,7 @@ export function IndianPokerBoard({ state, onAction, disabled = false }: IndianPo
           {/* オールインボタン */}
           {state.myChips > 0 && (
             <button
-              onClick={() => onAction({ type: 'allin' })}
+              onClick={() => onAction && onAction({ type: 'allin' })}
               className="w-full py-2 px-4 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-bold transition-colors"
             >
               オールイン
@@ -106,7 +106,7 @@ export function IndianPokerBoard({ state, onAction, disabled = false }: IndianPo
 
           {/* フォールドボタン */}
           <button
-            onClick={() => onAction({ type: 'fold' })}
+            onClick={() => onAction && onAction({ type: 'fold' })}
             className="w-full py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded-lg font-bold transition-colors"
           >
             フォールド

@@ -357,7 +357,7 @@ function checkOnePair(cards: Card[]): HandEvaluation | null {
 /**
  * ハイカード判定
  */
-function checkHighCard(cards: Card[]): HandEvaluation | null {
+function checkHighCard(cards: Card[]): HandEvaluation {
   // 上位5枚を選択
   const topFive = cards.slice(0, 5);
 

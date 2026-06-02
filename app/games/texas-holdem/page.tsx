@@ -12,7 +12,7 @@ export const metadata = {
 export default function TexasHoldemPage() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <GameHeader title="テキサスホールデム" showBackButton />
+      <GameHeader title="テキサスホールデム" showBackToGames />
 
       <div className="container mx-auto p-4">
         <div className="max-w-4xl mx-auto space-y-6">

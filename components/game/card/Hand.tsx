@@ -93,7 +93,7 @@ interface LayoutProps {
   onCardClick?: (card: CardType, index: number) => void;
   selectedIndices: number[];
   disabled: boolean;
-  hasMore: boolean;
+  hasMore: boolean | number | undefined;
   totalCards: number;
 }
 

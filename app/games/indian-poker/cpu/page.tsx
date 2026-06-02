@@ -42,20 +42,8 @@ export default function IndianPokerCpuPage() {
   const handleStartGame = (selectedDifficulty: Difficulty) => {
     setDifficulty(selectedDifficulty);
 
-    // プレイヤーIDと名前を生成
-    const playerIds = [PLAYER_ID];
-    const playerNames = ['あなた'];
-    const cpuFlags = [false];
-    const difficulties: Difficulty[] = ['easy']; // 人間プレイヤーはダミー
-
-    for (let i = 1; i < playerCount; i++) {
-      playerIds.push(`cpu-${i}`);
-      playerNames.push(`CPU ${i}`);
-      cpuFlags.push(true);
-      difficulties.push(selectedDifficulty);
-    }
-
-    let newState = createInitialState(GAME_ID, playerIds, playerNames, cpuFlags, difficulties);
+    const cpuCount = playerCount - 1;
+    let newState = createInitialState(GAME_ID, playerCount, PLAYER_ID, cpuCount, selectedDifficulty);
 
     // カードを配る
     newState = startRound(newState);
@@ -269,7 +257,7 @@ export default function IndianPokerCpuPage() {
           <div>
             {/* ゲームボード */}
             <IndianPokerBoard
-              gameState={clientState}
+              state={clientState}
               onAction={phase === 'playing' ? handlePlayerAction : undefined}
             />
 

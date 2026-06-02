@@ -15,8 +15,6 @@ export default function IslandSettlersPage() {
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
       <GameHeader
         title="アイランドセトラーズ"
-        subtitle="島を開拓する戦略ゲーム"
-        onBack={() => router.push('/games')}
       />
 
       <main className="container mx-auto px-4 py-8">
