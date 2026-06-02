@@ -24,14 +24,16 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
   const boardRef = useRef<HTMLDivElement>(null);
 
   // どちらのプレイヤーも常に自分が下側に表示されるようにする
-  // SetupBoardと同じロジック：描画順序で調整し、座標変換は不要
-  // 表示インデックス → 内部座標
-  const toInternalCoords = (displayIndex: number): number => {
-    // player1: 上から下（displayIndex 0→内部0, 1→内部1, ...）
-    // player2: 下から上（displayIndex 0→内部5, 1→内部4, ...）
-    return gameState.myRole === 'player2'
-      ? BOARD_SIZE - 1 - displayIndex
-      : displayIndex;
+  // Y座標（行）のみを反転する（SetupBoardと同じロジック）
+  // player1: 内部座標の上が画面の上（Y反転なし）→ 自分は内部Y=0,1なので上に見える → Y反転が必要
+  // player2: 内部座標の下が画面の下（Y反転なし）→ 自分は内部Y=4,5なので下に見える → Y反転不要
+  const toInternalY = (displayRowIndex: number): number => {
+    // player1の場合：画面上部が内部下部になるよう反転
+    // displayRowIndex 0 → 内部 Y=5（相手陣地）
+    // displayRowIndex 5 → 内部 Y=0（自分陣地を下に表示）
+    return gameState.myRole === 'player1'
+      ? BOARD_SIZE - 1 - displayRowIndex
+      : displayRowIndex;
   };
 
   const isEscapePosition = (x: number, y: number) => {
@@ -68,7 +70,7 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
     }
   };
 
-  // キーボード操作（内部座標で管理）
+  // キーボード操作（画面座標で操作、内部座標に変換）
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!gameState.canOperate || !boardRef.current) return;
@@ -86,28 +88,33 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
       switch (e.key) {
         case 'ArrowUp':
           e.preventDefault();
-          // 内部座標で上に移動
-          newY = Math.max(0, focusedCell.y - 1);
+          // 画面上に移動 = player1なら内部Yを増やす、player2なら内部Yを減らす
+          if (gameState.myRole === 'player1') {
+            newY = Math.min(BOARD_SIZE - 1, focusedCell.y + 1);
+          } else {
+            newY = Math.max(0, focusedCell.y - 1);
+          }
           break;
         case 'ArrowDown':
           e.preventDefault();
-          // 内部座標で下に移動
-          newY = Math.min(BOARD_SIZE - 1, focusedCell.y + 1);
+          // 画面下に移動 = player1なら内部Yを減らす、player2なら内部Yを増やす
+          if (gameState.myRole === 'player1') {
+            newY = Math.max(0, focusedCell.y - 1);
+          } else {
+            newY = Math.min(BOARD_SIZE - 1, focusedCell.y + 1);
+          }
           break;
         case 'ArrowLeft':
           e.preventDefault();
-          // 内部座標で左に移動
           newX = Math.max(0, focusedCell.x - 1);
           break;
         case 'ArrowRight':
           e.preventDefault();
-          // 内部座標で右に移動
           newX = Math.min(BOARD_SIZE - 1, focusedCell.x + 1);
           break;
         case 'Enter':
         case ' ':
           e.preventDefault();
-          // 内部座標でクリック処理
           handleCellClick(focusedCell.x, focusedCell.y);
           return;
       }
@@ -119,7 +126,7 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusedCell, gameState.canOperate, selectedPieceId]);
+  }, [focusedCell, gameState.canOperate, selectedPieceId, gameState.myRole]);
 
   const getPieceDisplay = (piece: NonNullable<GeisterClientState['board'][number][number]>) => {
     if (piece.owner === gameState.myRole) {
@@ -180,13 +187,12 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
       <div className="grid gap-0.5 sm:gap-1" style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)` }}>
         {Array.from({ length: BOARD_SIZE }).map((_, rowIndex) => {
           // どちらのプレイヤーも自分が下側に来るように描画順序を調整
-          // player1: 上から下（rowIndex 0→内部Y=0, 1→内部Y=1, ...）
-          // player2: 下から上（rowIndex 0→内部Y=5, 1→内部Y=4, ...）
-          const internalY = toInternalCoords(rowIndex);
+          // Y座標のみ反転（SetupBoardと統一）
+          const internalY = toInternalY(rowIndex);
 
           return Array.from({ length: BOARD_SIZE }).map((_, colIndex) => {
-            // X座標も同様
-            const internalX = toInternalCoords(colIndex);
+            // X座標は反転しない
+            const internalX = colIndex;
 
             const piece = gameState.board[internalY][internalX];
             const isSelected = piece?.id === selectedPieceId;
@@ -202,11 +208,19 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
                 key={`${internalX}-${internalY}`}
                 role="gridcell"
                 aria-label={getCellAriaLabel(internalX, internalY)}
-                onClick={() => handleCellClick(internalX, internalY)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCellClick(internalX, internalY);
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCellClick(internalX, internalY);
+                }}
                 onFocus={() => setFocusedCell({ x: internalX, y: internalY })}
                 tabIndex={isFocused ? 0 : -1}
                 className={`
-                  w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center border-2 cursor-pointer transition-all
+                  w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center border-2 cursor-pointer transition-all touch-manipulation
                   ${isEscape ? 'bg-yellow-200 border-yellow-400' : 'bg-amber-50 border-amber-300'}
                   ${isLastFrom ? 'bg-yellow-100 border-yellow-300' : ''}
                   ${isLastTo ? 'ring-2 ring-yellow-500' : ''}
@@ -218,7 +232,7 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
               >
                 {piece && !piece.captured && !piece.escaped && (
                   <div
-                    className={`text-2xl sm:text-4xl transition-all duration-300 ${
+                    className={`text-2xl sm:text-4xl transition-all duration-300 pointer-events-none ${
                       piece.owner === gameState.myRole ? 'opacity-100' : 'opacity-80'
                     } ${isSelected ? 'scale-110' : 'scale-100'} hover:scale-105`}
                   >
@@ -227,7 +241,7 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
                 )}
                 {/* 脱出口のマーカー */}
                 {isEscape && !piece && (
-                  <div className="text-xl sm:text-2xl">🚪</div>
+                  <div className="text-xl sm:text-2xl pointer-events-none">🚪</div>
                 )}
               </div>
             );

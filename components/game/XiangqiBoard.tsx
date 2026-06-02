@@ -47,7 +47,7 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
     }
   };
 
-  // キーボード操作
+  // キーボード操作（画面座標で操作、内部座標に変換）
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!gameState.canOperate || !boardRef.current) return;
@@ -64,11 +64,21 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
       switch (e.key) {
         case 'ArrowUp':
           e.preventDefault();
-          newRow = Math.min(BOARD_ROWS - 1, focusedCell.row + 1);
+          // 画面上に移動 = redなら内部rowを増やす、blackなら内部rowを減らす
+          if (gameState.myRole === 'red') {
+            newRow = Math.min(BOARD_ROWS - 1, focusedCell.row + 1);
+          } else {
+            newRow = Math.max(0, focusedCell.row - 1);
+          }
           break;
         case 'ArrowDown':
           e.preventDefault();
-          newRow = Math.max(0, focusedCell.row - 1);
+          // 画面下に移動 = redなら内部rowを減らす、blackなら内部rowを増やす
+          if (gameState.myRole === 'red') {
+            newRow = Math.max(0, focusedCell.row - 1);
+          } else {
+            newRow = Math.min(BOARD_ROWS - 1, focusedCell.row + 1);
+          }
           break;
         case 'ArrowLeft':
           e.preventDefault();
@@ -92,7 +102,7 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusedCell, gameState.canOperate, selectedPiece]);
+  }, [focusedCell, gameState.canOperate, selectedPiece, gameState.myRole]);
 
   // 列ラベル（a-i）
   const colLabels = Array.from({ length: BOARD_COLS }, (_, i) =>
@@ -122,6 +132,15 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
     return label;
   };
 
+  // Y座標（行）を反転：自分の陣地が常に下に表示されるようにする
+  // red（内部row=0-2が陣地）: displayRowIndex 0 → 内部row 9（黒陣地を上に）
+  // black（内部row=7-9が陣地）: displayRowIndex 0 → 内部row 0（赤陣地を上に）
+  const toInternalRow = (displayRowIndex: number): number => {
+    return gameState.myRole === 'red'
+      ? BOARD_ROWS - 1 - displayRowIndex
+      : displayRowIndex;
+  };
+
   return (
     <div className="flex flex-col items-center overflow-x-auto">
       {/* ボード */}
@@ -132,18 +151,23 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
         aria-label="中国象棋の盤面"
         tabIndex={0}
       >
-        {/* 黒陣地ラベル */}
+        {/* 相手陣地ラベル */}
         <div className="text-center mb-1 sm:mb-2">
-          <span className="text-xs sm:text-sm font-bold text-slate-800 px-2 sm:px-3 py-0.5 sm:py-1 bg-slate-200 rounded">
-            {PLAYER_COLORS.black.name}
+          <span className="text-xs sm:text-sm font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded"
+            style={{
+              backgroundColor: gameState.myRole === 'red' ? '#e2e8f0' : '#fee2e2',
+              color: gameState.myRole === 'red' ? '#1e293b' : '#991b1b',
+            }}
+          >
+            {gameState.myRole === 'red' ? PLAYER_COLORS.black.name : PLAYER_COLORS.red.name}
           </span>
         </div>
 
-        {/* グリッド（上から下：row 9→0） */}
+        {/* グリッド */}
         <div className="relative">
-          {Array.from({ length: BOARD_ROWS })
-            .map((_, i) => BOARD_ROWS - 1 - i) // 9→0
-            .map((row) => (
+          {Array.from({ length: BOARD_ROWS }).map((_, displayRowIndex) => {
+            const row = toInternalRow(displayRowIndex);
+            return (
               <div key={row} className="flex items-center">
                 {/* 行番号（左） */}
                 <div className="w-4 sm:w-6 text-center text-[10px] sm:text-xs font-semibold text-amber-900">
@@ -240,10 +264,15 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
           <div className="w-4 sm:w-6"></div>
         </div>
 
-        {/* 赤陣地ラベル */}
+        {/* 自分陣地ラベル */}
         <div className="text-center mt-1 sm:mt-2">
-          <span className="text-xs sm:text-sm font-bold text-red-700 px-2 sm:px-3 py-0.5 sm:py-1 bg-red-100 rounded">
-            {PLAYER_COLORS.red.name}
+          <span className="text-xs sm:text-sm font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded"
+            style={{
+              backgroundColor: gameState.myRole === 'red' ? '#fee2e2' : '#e2e8f0',
+              color: gameState.myRole === 'red' ? '#991b1b' : '#1e293b',
+            }}
+          >
+            {gameState.myRole === 'red' ? PLAYER_COLORS.red.name : PLAYER_COLORS.black.name}
           </span>
         </div>
       </div>
