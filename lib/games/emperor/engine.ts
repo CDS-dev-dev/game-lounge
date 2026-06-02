@@ -1,277 +1,347 @@
-// エンペラーゲームのエンジン
+// エンペラーゲーム（カイジのEカード）エンジン
 
 import type {
   EmperorState,
   EmperorPlayer,
-  EmperorCard,
+  ECard,
+  CardType,
+  PlayerSide,
+  BattleResult,
   EmperorClientState,
-  CardRank,
-  RankType,
 } from './types';
 import {
-  MIN_PLAYERS,
-  MAX_PLAYERS,
-  INITIAL_COINS,
-  TRANSFER_COINS,
-  MAX_ROUNDS,
-  CARD_RANK_VALUES,
-  CARD_TO_RANK,
+  MAX_SETS,
+  INITIAL_HAND,
+  POINTS,
+  MAX_BATTLES_PER_SET,
 } from './constants';
 
-// デッキを作成（プレイヤー人数分のカードを生成）
-function createDeck(playerCount: number): EmperorCard[] {
-  const ranks: CardRank[] = ['K', 'Q', 'J'];
-  const deck: EmperorCard[] = [];
+const PLAYER_ID = 'player';
+const CPU_ID = 'cpu';
 
-  // 皇帝1枚、奴隷1枚、残りは市民
-  deck.push({ id: 'card-emperor', rank: 'K' });
-  deck.push({ id: 'card-slave', rank: 'J' });
+/**
+ * 初期手札を生成
+ */
+function createInitialHand(side: PlayerSide): ECard[] {
+  const hand: ECard[] = [];
 
-  for (let i = 0; i < playerCount - 2; i++) {
-    deck.push({ id: `card-citizen-${i}`, rank: 'Q' });
+  // 皇帝側の場合
+  if (side === 'emperor') {
+    // 皇帝カード1枚
+    hand.push({ id: `emperor-0`, type: 'emperor' });
+    // 市民カード4枚
+    for (let i = 0; i < 4; i++) {
+      hand.push({ id: `citizen-e-${i}`, type: 'citizen' });
+    }
+  }
+  // 奴隷側の場合
+  else {
+    // 奴隷カード1枚
+    hand.push({ id: `slave-0`, type: 'slave' });
+    // 市民カード4枚
+    for (let i = 0; i < 4; i++) {
+      hand.push({ id: `citizen-s-${i}`, type: 'citizen' });
+    }
   }
 
-  return deck;
+  return hand;
 }
 
-// デッキをシャッフル
-function shuffleDeck(deck: EmperorCard[]): EmperorCard[] {
-  const shuffled = [...deck];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-}
-
-// 初期状態を作成
+/**
+ * 初期状態を作成
+ */
 export function createInitialState(
   gameId: string,
-  playerIds: string[],
-  playerNames: string[],
-  cpuFlags: boolean[]
+  cpuDifficulty: 'easy' | 'medium' | 'hard' = 'medium'
 ): EmperorState {
-  const playerCount = playerIds.length;
+  // セット1: プレイヤーが皇帝側
+  const playerSide: PlayerSide = 'emperor';
+  const cpuSide: PlayerSide = 'slave';
 
-  if (playerCount < MIN_PLAYERS || playerCount > MAX_PLAYERS) {
-    throw new Error(`プレイヤー人数は${MIN_PLAYERS}〜${MAX_PLAYERS}人である必要があります`);
-  }
-
-  const players: EmperorPlayer[] = playerIds.map((id, index) => ({
-    id,
-    name: playerNames[index] || `Player ${index + 1}`,
-    coins: INITIAL_COINS,
-    role: null,
-    card: null,
-    isActive: true,
-    isCpu: cpuFlags[index] || false,
-  }));
+  const players: EmperorPlayer[] = [
+    {
+      id: PLAYER_ID,
+      name: 'あなた',
+      side: playerSide,
+      hand: createInitialHand(playerSide),
+      score: 0,
+      isCpu: false,
+    },
+    {
+      id: CPU_ID,
+      name: 'CPU',
+      side: cpuSide,
+      hand: createInitialHand(cpuSide),
+      score: 0,
+      isCpu: true,
+      cpuDifficulty,
+    },
+  ];
 
   return {
     gameId,
-    status: 'waiting',
+    status: 'ready',
     players,
-    currentRound: 0,
-    maxRounds: MAX_ROUNDS,
-    deck: [],
-    transferAmount: TRANSFER_COINS,
-    lastTransfer: null,
+    currentSet: 1,
+    maxSets: MAX_SETS,
+    currentBattle: 0,
+    battleHistory: [],
+    playerCard: null,
+    cpuCard: null,
+    lastBattleResult: null,
     winner: null,
-    playerCount,
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
 }
 
-// ゲームを開始（カードを配る）
-export function startGame(state: EmperorState): EmperorState {
-  if (state.status !== 'waiting' && state.status !== 'transfer') {
-    throw new Error('ゲームを開始できる状態ではありません');
-  }
+/**
+ * セットを開始
+ */
+export function startSet(state: EmperorState): EmperorState {
+  // サイドを決定（奇数セット: プレイヤー=皇帝側、偶数セット: プレイヤー=奴隷側）
+  const playerSide: PlayerSide = state.currentSet % 2 === 1 ? 'emperor' : 'slave';
+  const cpuSide: PlayerSide = playerSide === 'emperor' ? 'slave' : 'emperor';
 
-  // アクティブなプレイヤーのみ対象
-  const activePlayers = state.players.filter((p) => p.isActive);
-  if (activePlayers.length < MIN_PLAYERS) {
-    throw new Error('アクティブなプレイヤーが不足しています');
-  }
-
-  // デッキを作成してシャッフル
-  const deck = shuffleDeck(createDeck(activePlayers.length));
-
-  // 各プレイヤーにカードを配る
-  const newPlayers = state.players.map((player) => {
-    if (!player.isActive) {
-      return player;
+  const newPlayers = state.players.map((p) => {
+    if (p.id === PLAYER_ID) {
+      return {
+        ...p,
+        side: playerSide,
+        hand: createInitialHand(playerSide),
+      };
+    } else {
+      return {
+        ...p,
+        side: cpuSide,
+        hand: createInitialHand(cpuSide),
+      };
     }
-    const card = deck.shift()!;
-    const role = CARD_TO_RANK[card.rank];
-    return {
-      ...player,
-      card,
-      role,
-    };
   });
 
   return {
     ...state,
-    status: 'dealing',
+    status: 'playing',
     players: newPlayers,
-    deck,
-    currentRound: state.currentRound + 1,
-    lastTransfer: null,
+    currentBattle: 0,
+    battleHistory: [],
+    playerCard: null,
+    cpuCard: null,
+    lastBattleResult: null,
     updatedAt: Date.now(),
   };
 }
 
-// カードを公開
-export function revealCards(state: EmperorState): EmperorState {
-  if (state.status !== 'dealing') {
-    throw new Error('カードを公開できる状態ではありません');
+/**
+ * カードの強弱を判定
+ * @returns 'player' | 'cpu' | 'draw'
+ */
+function judgeCards(playerCard: ECard, cpuCard: ECard): 'player' | 'cpu' | 'draw' {
+  const playerType = playerCard.type;
+  const cpuType = cpuCard.type;
+
+  // 同じカード = 引き分け
+  if (playerType === cpuType) {
+    return 'draw';
+  }
+
+  // 皇帝 vs 市民 → 皇帝の勝ち
+  if (playerType === 'emperor' && cpuType === 'citizen') return 'player';
+  if (cpuType === 'emperor' && playerType === 'citizen') return 'cpu';
+
+  // 市民 vs 奴隷 → 市民の勝ち
+  if (playerType === 'citizen' && cpuType === 'slave') return 'player';
+  if (cpuType === 'citizen' && playerType === 'slave') return 'cpu';
+
+  // 奴隷 vs 皇帝 → 奴隷の勝ち
+  if (playerType === 'slave' && cpuType === 'emperor') return 'player';
+  if (cpuType === 'slave' && playerType === 'emperor') return 'cpu';
+
+  return 'draw';
+}
+
+/**
+ * プレイヤーがカードを選択
+ */
+export function selectPlayerCard(state: EmperorState, cardId: string): EmperorState {
+  if (state.status !== 'playing') {
+    throw new Error('ゲーム中ではありません');
+  }
+
+  const player = state.players.find((p) => p.id === PLAYER_ID);
+  if (!player) {
+    throw new Error('プレイヤーが見つかりません');
+  }
+
+  const card = player.hand.find((c) => c.id === cardId);
+  if (!card) {
+    throw new Error('カードが見つかりません');
   }
 
   return {
     ...state,
-    status: 'reveal',
+    playerCard: card,
     updatedAt: Date.now(),
   };
 }
 
-// コイン移動（奴隷→皇帝）
-export function transferCoins(state: EmperorState): EmperorState {
-  if (state.status !== 'reveal') {
-    throw new Error('コイン移動できる状態ではありません');
+/**
+ * CPUがカードを選択
+ */
+export function selectCpuCard(state: EmperorState): EmperorState {
+  const cpu = state.players.find((p) => p.id === CPU_ID);
+  if (!cpu || cpu.hand.length === 0) {
+    throw new Error('CPUの手札がありません');
   }
 
-  // 皇帝と奴隷を見つける
-  const emperor = state.players.find((p) => p.role === 'emperor' && p.isActive);
-  const slave = state.players.find((p) => p.role === 'slave' && p.isActive);
+  // ランダムに選択（AI実装は後で改善）
+  const randomIndex = Math.floor(Math.random() * cpu.hand.length);
+  const selectedCard = cpu.hand[randomIndex];
 
-  if (!emperor || !slave) {
-    throw new Error('皇帝または奴隷が見つかりません');
+  return {
+    ...state,
+    cpuCard: selectedCard,
+    updatedAt: Date.now(),
+  };
+}
+
+/**
+ * 勝負を実行
+ */
+export function executeBattle(state: EmperorState): EmperorState {
+  if (!state.playerCard || !state.cpuCard) {
+    throw new Error('両方のカードが選択されていません');
   }
 
-  // コインを移動
-  const transferAmount = Math.min(slave.coins, state.transferAmount);
+  const player = state.players.find((p) => p.id === PLAYER_ID)!;
+  const cpu = state.players.find((p) => p.id === CPU_ID)!;
 
-  const newPlayers = state.players.map((player) => {
-    if (player.id === emperor.id) {
-      return {
-        ...player,
-        coins: player.coins + transferAmount,
-      };
-    }
-    if (player.id === slave.id) {
-      return {
-        ...player,
-        coins: player.coins - transferAmount,
-      };
-    }
-    return player;
-  });
+  // 勝敗判定
+  const winner = judgeCards(state.playerCard, state.cpuCard);
 
-  // 破産チェック
-  const bankruptPlayers = newPlayers.filter((p) => p.coins <= 0 && p.isActive);
-  const finalPlayers = newPlayers.map((p) => {
-    if (bankruptPlayers.some((bp) => bp.id === p.id)) {
-      return { ...p, isActive: false };
+  // 得点計算
+  let playerPoints = 0;
+  let cpuPoints = 0;
+
+  if (winner === 'player') {
+    // プレイヤーが勝った場合
+    if (player.side === 'emperor') {
+      playerPoints = POINTS.emperorWin;
+    } else {
+      playerPoints = POINTS.slaveWin;
+    }
+  } else if (winner === 'cpu') {
+    // CPUが勝った場合
+    if (cpu.side === 'emperor') {
+      cpuPoints = POINTS.emperorWin;
+    } else {
+      cpuPoints = POINTS.slaveWin;
+    }
+  }
+
+  const battleResult: BattleResult = {
+    playerCard: state.playerCard,
+    cpuCard: state.cpuCard,
+    winner,
+    playerPoints,
+    cpuPoints,
+  };
+
+  // 手札からカードを削除
+  const newPlayers = state.players.map((p) => {
+    if (p.id === PLAYER_ID) {
+      return {
+        ...p,
+        hand: p.hand.filter((c) => c.id !== state.playerCard!.id),
+        score: p.score + playerPoints,
+      };
+    } else if (p.id === CPU_ID) {
+      return {
+        ...p,
+        hand: p.hand.filter((c) => c.id !== state.cpuCard!.id),
+        score: p.score + cpuPoints,
+      };
     }
     return p;
   });
 
-  // 勝者判定
-  const activePlayers = finalPlayers.filter((p) => p.isActive);
-  let winner: string | null = null;
-  let newStatus: EmperorState['status'] = 'transfer';
+  const newBattleHistory = [...state.battleHistory, battleResult];
+  const newCurrentBattle = state.currentBattle + 1;
 
-  if (activePlayers.length === 1) {
-    winner = activePlayers[0].id;
-    newStatus = 'finished';
-  } else if (state.currentRound >= state.maxRounds) {
-    // 最大ラウンド到達時、最もコインが多いプレイヤーが勝者
-    const maxCoins = Math.max(...activePlayers.map((p) => p.coins));
-    winner = activePlayers.find((p) => p.coins === maxCoins)!.id;
-    newStatus = 'finished';
+  // セット終了判定
+  let newStatus = state.status;
+  if (winner !== 'draw' || newCurrentBattle >= MAX_BATTLES_PER_SET) {
+    newStatus = 'roundEnd';
   }
 
   return {
     ...state,
     status: newStatus,
-    players: finalPlayers,
-    lastTransfer: { from: slave.id, to: emperor.id, amount: transferAmount },
-    winner,
+    players: newPlayers,
+    currentBattle: newCurrentBattle,
+    battleHistory: newBattleHistory,
+    lastBattleResult: battleResult,
+    playerCard: null,
+    cpuCard: null,
     updatedAt: Date.now(),
   };
 }
 
-// 次のラウンドへ
-export function nextRound(state: EmperorState): EmperorState {
-  if (state.status !== 'transfer') {
-    throw new Error('次のラウンドに進めません');
+/**
+ * 次のセットへ進む
+ */
+export function nextSet(state: EmperorState): EmperorState {
+  if (state.status !== 'roundEnd') {
+    throw new Error('セット終了状態ではありません');
   }
 
-  // カードとロールをリセット
-  const newPlayers = state.players.map((player) => ({
-    ...player,
-    card: null,
-    role: null,
-  }));
+  const nextSetNumber = state.currentSet + 1;
 
-  return {
+  // 全セット終了判定
+  if (nextSetNumber > MAX_SETS) {
+    const player = state.players.find((p) => p.id === PLAYER_ID)!;
+    const cpu = state.players.find((p) => p.id === CPU_ID)!;
+
+    const winner = player.score > cpu.score ? PLAYER_ID : cpu.score > player.score ? CPU_ID : null;
+
+    return {
+      ...state,
+      status: 'finished',
+      winner,
+      updatedAt: Date.now(),
+    };
+  }
+
+  // 次のセットを開始
+  const newState = {
     ...state,
-    status: 'waiting',
-    players: newPlayers,
+    currentSet: nextSetNumber,
     updatedAt: Date.now(),
   };
+
+  return startSet(newState);
 }
 
-// クライアント用の状態に変換
+/**
+ * クライアント用状態に変換
+ */
 export function toClientState(state: EmperorState, playerId: string): EmperorClientState {
   const myPlayer = state.players.find((p) => p.id === playerId) || null;
-
-  // カードの表示制御: dealing状態では自分のカードのみ見える、reveal以降は全員見える
-  const players = state.players.map((player) => ({
-    id: player.id,
-    name: player.name,
-    coins: player.coins,
-    role: player.role,
-    hasCard: player.card !== null,
-    card:
-      state.status === 'reveal' || state.status === 'transfer' || state.status === 'finished'
-        ? player.card
-        : player.id === playerId
-        ? player.card
-        : null,
-    isActive: player.isActive,
-    isCpu: player.isCpu,
-  }));
+  const opponentPlayer = state.players.find((p) => p.id !== playerId) || null;
 
   return {
     gameId: state.gameId,
     status: state.status,
-    players,
     myPlayerId: playerId,
     myPlayer,
-    currentRound: state.currentRound,
-    maxRounds: state.maxRounds,
-    transferAmount: state.transferAmount,
-    lastTransfer: state.lastTransfer,
+    opponentPlayer,
+    currentSet: state.currentSet,
+    maxSets: state.maxSets,
+    currentBattle: state.currentBattle,
+    battleHistory: state.battleHistory,
+    playerCard: state.playerCard,
+    cpuCard: state.cpuCard,
+    lastBattleResult: state.lastBattleResult,
     winner: state.winner,
-    playerCount: state.playerCount,
   };
-}
-
-// ゲーム全体のフロー制御
-export function progressGame(state: EmperorState): EmperorState {
-  switch (state.status) {
-    case 'waiting':
-      return startGame(state);
-    case 'dealing':
-      return revealCards(state);
-    case 'reveal':
-      return transferCoins(state);
-    case 'transfer':
-      return nextRound(state);
-    default:
-      return state;
-  }
 }

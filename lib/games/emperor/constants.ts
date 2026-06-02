@@ -1,54 +1,53 @@
-// エンペラーゲームの定数定義
+// エンペラーゲーム（カイジのEカード）の定数定義
 
-// プレイヤー人数
-export const MIN_PLAYERS = 3;
-export const MAX_PLAYERS = 6;
+// セット数
+export const MAX_SETS = 6;
 
-// 初期コイン数
-export const INITIAL_COINS = 10;
-
-// 奴隷が皇帝に渡すコイン数
-export const TRANSFER_COINS = 3;
-
-// 最大ラウンド数（破産者が出たら終了するので、実質的には無限）
-export const MAX_ROUNDS = 50;
-
-// カードのランクと階級の対応
-// K = 皇帝（最も強い）
-// Q = 市民（中間）
-// J = 奴隷（最も弱い）
-export const CARD_RANK_VALUES: Record<string, number> = {
-  K: 3, // 皇帝
-  Q: 2, // 市民
-  J: 1, // 奴隷
+// 初期手札構成
+export const INITIAL_HAND = {
+  emperor: { emperor: 1, citizen: 4 }, // 皇帝側: 皇帝1枚、市民4枚
+  slave: { slave: 1, citizen: 4 }, // 奴隷側: 奴隷1枚、市民4枚
 };
 
-// 階級の表示名
-export const RANK_NAMES: Record<string, string> = {
+// 得点
+export const POINTS = {
+  emperorWin: 1, // 皇帝側が勝った場合
+  slaveWin: 5, // 奴隷側が勝った場合
+  draw: 0, // 引き分け
+};
+
+// 1セット内の最大勝負回数
+export const MAX_BATTLES_PER_SET = 5;
+
+// カードの表示名
+export const CARD_NAMES: Record<string, string> = {
   emperor: '皇帝',
   citizen: '市民',
   slave: '奴隷',
 };
 
-// 階級の色
-export const RANK_COLORS: Record<string, string> = {
-  emperor: 'text-yellow-500 bg-yellow-50 border-yellow-500',
-  citizen: 'text-blue-500 bg-blue-50 border-blue-500',
-  slave: 'text-gray-500 bg-gray-50 border-gray-500',
-};
-
-// 階級の絵文字
-export const RANK_EMOJIS: Record<string, string> = {
+// カードの絵文字
+export const CARD_EMOJIS: Record<string, string> = {
   emperor: '👑',
   citizen: '🧑',
   slave: '⛓️',
 };
 
-// カードランクと階級の対応
-export const CARD_TO_RANK: Record<string, RankType> = {
-  K: 'emperor',
-  Q: 'citizen',
-  J: 'slave',
+// カードの色
+export const CARD_COLORS: Record<string, string> = {
+  emperor: 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-white border-yellow-700',
+  citizen: 'bg-gradient-to-br from-blue-400 to-blue-600 text-white border-blue-700',
+  slave: 'bg-gradient-to-br from-gray-400 to-gray-600 text-white border-gray-700',
 };
 
-import type { RankType } from './types';
+// サイドの表示名
+export const SIDE_NAMES: Record<string, string> = {
+  emperor: '皇帝側',
+  slave: '奴隷側',
+};
+
+// サイドの色
+export const SIDE_COLORS: Record<string, string> = {
+  emperor: 'text-yellow-500 bg-yellow-900/30 border-yellow-500',
+  slave: 'text-gray-400 bg-gray-900/30 border-gray-500',
+};

@@ -1,63 +1,65 @@
-// エンペラーゲーム（カイジ）の型定義
+// エンペラーゲーム（カイジのEカード）の型定義
 
-export type PlayerRole = 'player1' | 'player2' | 'player3' | 'player4' | 'player5' | 'player6';
-export type GameStatus = 'waiting' | 'dealing' | 'reveal' | 'transfer' | 'finished';
-export type RankType = 'emperor' | 'citizen' | 'slave' | null;
+export type GameStatus = 'ready' | 'playing' | 'roundEnd' | 'finished';
+export type CardType = 'emperor' | 'citizen' | 'slave';
+export type PlayerSide = 'emperor' | 'slave';
 
-// カードのランク（実際にはトランプの絵札を使用）
-export type CardRank = 'J' | 'Q' | 'K';
-
-export interface EmperorCard {
+// カード
+export interface ECard {
   id: string;
-  rank: CardRank;
-  // Kが皇帝、Qが市民、Jが奴隷
+  type: CardType;
 }
 
+// プレイヤー
 export interface EmperorPlayer {
   id: string;
   name: string;
-  coins: number; // 所持コイン数
-  role: RankType; // 現在のラウンドでの階級
-  card: EmperorCard | null; // 配られたカード
-  isActive: boolean; // 破産していないか
-  isCpu: boolean; // CPU対戦かどうか
+  side: PlayerSide; // 皇帝側か奴隷側か
+  hand: ECard[]; // 現在の手札
+  score: number; // 合計得点
+  isCpu: boolean;
+  cpuDifficulty?: 'easy' | 'medium' | 'hard';
 }
 
+// 1回の勝負の結果
+export interface BattleResult {
+  playerCard: ECard | null;
+  cpuCard: ECard | null;
+  winner: 'player' | 'cpu' | 'draw';
+  playerPoints: number;
+  cpuPoints: number;
+}
+
+// ゲーム状態
 export interface EmperorState {
   gameId: string;
   status: GameStatus;
   players: EmperorPlayer[];
-  currentRound: number; // 現在のラウンド数
-  maxRounds: number; // 最大ラウンド数（破産者が出たら終了）
-  deck: EmperorCard[]; // 山札（シャッフル済み）
-  transferAmount: number; // 奴隷が皇帝に渡すコイン数
-  lastTransfer: { from: string; to: string; amount: number } | null; // 最後の移動
-  winner: string | null; // 勝者のプレイヤーID
-  playerCount: number; // プレイヤー数（3-6人）
+  currentSet: number; // 現在のセット（1-6）
+  maxSets: number; // 最大セット数（6）
+  currentBattle: number; // 現在のセット内での勝負回数（1-5）
+  battleHistory: BattleResult[]; // セット内の勝負履歴
+  playerCard: ECard | null; // プレイヤーが選択したカード
+  cpuCard: ECard | null; // CPUが選択したカード
+  lastBattleResult: BattleResult | null; // 最後の勝負結果
+  winner: string | null; // ゲーム全体の勝者
   createdAt: number;
   updatedAt: number;
 }
 
-// クライアント用の状態（カードが見えないプレイヤーの情報を隠す）
+// クライアント用の状態
 export interface EmperorClientState {
   gameId: string;
   status: GameStatus;
-  players: {
-    id: string;
-    name: string;
-    coins: number;
-    role: RankType;
-    hasCard: boolean; // カードを持っているか（中身は見えない）
-    card: EmperorCard | null; // 自分のカードのみ見える、他は公開後に見える
-    isActive: boolean;
-    isCpu: boolean;
-  }[];
   myPlayerId: string;
   myPlayer: EmperorPlayer | null;
-  currentRound: number;
-  maxRounds: number;
-  transferAmount: number;
-  lastTransfer: { from: string; to: string; amount: number } | null;
+  opponentPlayer: EmperorPlayer | null;
+  currentSet: number;
+  maxSets: number;
+  currentBattle: number;
+  battleHistory: BattleResult[];
+  playerCard: ECard | null;
+  cpuCard: ECard | null;
+  lastBattleResult: BattleResult | null;
   winner: string | null;
-  playerCount: number;
 }

@@ -1,144 +1,133 @@
-// エンペラーゲームのAIロジック
+// エンペラーゲーム（カイジのEカード）AI
 
-import type { EmperorState, RankType } from './types';
-import { CARD_RANK_VALUES } from './constants';
-
-export interface AiDecision {
-  action: 'ready' | 'wait';
-  confidence: number; // 0-1の確信度
-  reasoning: string; // 判断理由（デバッグ用）
-}
+import type { EmperorState, ECard } from './types';
 
 /**
- * CPUの判断を計算
- * エンペラーゲームはカードが配られるだけなので、
- * AIとしての判断は「次のアクションに進むタイミング」のみ
+ * CPUがカードを選択する
  */
-export function calculateCpuDecision(state: EmperorState, cpuPlayerId: string): AiDecision {
-  const cpuPlayer = state.players.find((p) => p.id === cpuPlayerId);
-
-  if (!cpuPlayer) {
-    throw new Error('CPUプレイヤーが見つかりません');
-  }
-
-  // エンペラーゲームは自動進行なので、常に準備完了
-  return {
-    action: 'ready',
-    confidence: 1.0,
-    reasoning: 'エンペラーゲームは自動進行',
-  };
-}
-
-/**
- * 期待値計算: 各階級になる確率と期待コイン変動
- */
-export function calculateExpectedValue(
+export function calculateCpuCard(
   state: EmperorState,
-  playerId: string
-): {
-  expectedCoins: number;
-  emperorProbability: number;
-  slaveProbability: number;
-  citizenProbability: number;
-} {
-  const activePlayers = state.players.filter((p) => p.isActive);
-  const totalPlayers = activePlayers.length;
+  difficulty: 'easy' | 'medium' | 'hard' = 'medium'
+): ECard {
+  const cpu = state.players.find((p) => p.isCpu);
+  if (!cpu || cpu.hand.length === 0) {
+    throw new Error('CPUの手札がありません');
+  }
 
-  // 各階級になる確率（均等）
-  const emperorProb = 1 / totalPlayers;
-  const slaveProb = 1 / totalPlayers;
-  const citizenProb = (totalPlayers - 2) / totalPlayers;
+  const hand = cpu.hand;
+  const player = state.players.find((p) => !p.isCpu)!;
 
-  // 期待コイン変動
-  // 皇帝: +3コイン
-  // 奴隷: -3コイン
-  // 市民: 0コイン
-  const expectedChange = emperorProb * state.transferAmount - slaveProb * state.transferAmount;
+  // 難易度による思考パターン
+  if (difficulty === 'easy') {
+    // かんたん: 完全ランダム
+    return hand[Math.floor(Math.random() * hand.length)];
+  }
 
-  const player = state.players.find((p) => p.id === playerId);
-  const currentCoins = player?.coins || 0;
+  if (difficulty === 'medium') {
+    // ふつう: 基本的な戦略
+    return mediumStrategy(hand, cpu.side, state.currentBattle, player.hand.length);
+  }
 
-  return {
-    expectedCoins: currentCoins + expectedChange,
-    emperorProbability: emperorProb,
-    slaveProbability: slaveProb,
-    citizenProbability: citizenProb,
-  };
+  // むずかしい: 高度な読み合い
+  return hardStrategy(hand, cpu.side, state.currentBattle, player.hand.length, state.battleHistory);
 }
 
 /**
- * リスク評価: 破産リスクを計算
+ * ふつう難易度の戦略
  */
-export function calculateBankruptcyRisk(state: EmperorState, playerId: string): number {
-  const player = state.players.find((p) => p.id === playerId);
-  if (!player || !player.isActive) {
-    return 1.0; // すでに破産している
+function mediumStrategy(
+  hand: ECard[],
+  cpuSide: 'emperor' | 'slave',
+  currentBattle: number,
+  opponentHandCount: number
+): ECard {
+  const emperorCards = hand.filter((c) => c.type === 'emperor');
+  const citizenCards = hand.filter((c) => c.type === 'citizen');
+  const slaveCards = hand.filter((c) => c.type === 'slave');
+
+  // 最初の勝負: 市民を出しやすい
+  if (currentBattle === 0) {
+    if (citizenCards.length > 0 && Math.random() < 0.7) {
+      return citizenCards[Math.floor(Math.random() * citizenCards.length)];
+    }
   }
 
-  const currentCoins = player.coins;
-  const transferAmount = state.transferAmount;
-  const activePlayers = state.players.filter((p) => p.isActive);
-  const totalPlayers = activePlayers.length;
-
-  // 奴隷になる確率
-  const slaveProb = 1 / totalPlayers;
-
-  // 奴隷になってもコインが残る確率
-  if (currentCoins > transferAmount) {
-    return 0; // 破産リスクなし
+  // 皇帝側の場合
+  if (cpuSide === 'emperor') {
+    // 序盤は市民を出して温存
+    if (currentBattle < 2 && citizenCards.length > 0 && Math.random() < 0.6) {
+      return citizenCards[Math.floor(Math.random() * citizenCards.length)];
+    }
+    // 中盤以降は皇帝を出す確率を上げる
+    if (emperorCards.length > 0 && Math.random() < 0.5) {
+      return emperorCards[0];
+    }
   }
 
-  // 破産リスク = 奴隷になる確率 × コイン不足度
-  const shortfall = transferAmount - currentCoins;
-  const riskFactor = Math.min(1.0, shortfall / transferAmount);
+  // 奴隷側の場合
+  if (cpuSide === 'slave') {
+    // 相手の手札が少ない = 皇帝を温存している可能性
+    if (opponentHandCount <= 2 && slaveCards.length > 0 && Math.random() < 0.7) {
+      return slaveCards[0];
+    }
+    // それ以外は市民優先
+    if (citizenCards.length > 0 && Math.random() < 0.6) {
+      return citizenCards[Math.floor(Math.random() * citizenCards.length)];
+    }
+  }
 
-  return slaveProb * riskFactor;
+  // デフォルト: ランダム
+  return hand[Math.floor(Math.random() * hand.length)];
 }
 
 /**
- * CPUの難易度別の思考時間を計算（演出用）
+ * むずかしい難易度の戦略
  */
-export function calculateThinkingTime(difficulty: 'easy' | 'medium' | 'hard'): number {
-  switch (difficulty) {
-    case 'easy':
-      return 500; // 0.5秒
-    case 'medium':
-      return 1000; // 1秒
-    case 'hard':
-      return 1500; // 1.5秒
-    default:
-      return 1000;
-  }
-}
+function hardStrategy(
+  hand: ECard[],
+  cpuSide: 'emperor' | 'slave',
+  currentBattle: number,
+  opponentHandCount: number,
+  battleHistory: any[]
+): ECard {
+  const emperorCards = hand.filter((c) => c.type === 'emperor');
+  const citizenCards = hand.filter((c) => c.type === 'citizen');
+  const slaveCards = hand.filter((c) => c.type === 'slave');
 
-/**
- * ゲーム状況の分析（デバッグ用）
- */
-export function analyzeGameState(state: EmperorState): {
-  activePlayersCount: number;
-  averageCoins: number;
-  maxCoins: number;
-  minCoins: number;
-  bankruptcyRisk: Record<string, number>;
-} {
-  const activePlayers = state.players.filter((p) => p.isActive);
-  const totalCoins = activePlayers.reduce((sum, p) => sum + p.coins, 0);
-  const avgCoins = totalCoins / activePlayers.length;
+  // 過去の履歴から相手の傾向を分析
+  const opponentPlayedEmperor = battleHistory.some((b) => b.playerCard?.type === 'emperor');
+  const opponentPlayedSlave = battleHistory.some((b) => b.playerCard?.type === 'slave');
 
-  const coins = activePlayers.map((p) => p.coins);
-  const maxCoins = Math.max(...coins);
-  const minCoins = Math.min(...coins);
-
-  const bankruptcyRisk: Record<string, number> = {};
-  for (const player of activePlayers) {
-    bankruptcyRisk[player.id] = calculateBankruptcyRisk(state, player.id);
+  // 皇帝側の場合
+  if (cpuSide === 'emperor') {
+    // 相手が奴隷をまだ出していない && 手札が少ない = 奴隷を温存
+    if (!opponentPlayedSlave && opponentHandCount <= 2 && citizenCards.length > 0) {
+      // 市民を出して奴隷を誘う
+      return citizenCards[Math.floor(Math.random() * citizenCards.length)];
+    }
+    // 相手が奴隷を既に使った = 皇帝を出しても安全
+    if (opponentPlayedSlave && emperorCards.length > 0 && Math.random() < 0.8) {
+      return emperorCards[0];
+    }
+    // それ以外は市民優先
+    if (citizenCards.length > 0 && Math.random() < 0.5) {
+      return citizenCards[Math.floor(Math.random() * citizenCards.length)];
+    }
   }
 
-  return {
-    activePlayersCount: activePlayers.length,
-    averageCoins: avgCoins,
-    maxCoins,
-    minCoins,
-    bankruptcyRisk,
-  };
+  // 奴隷側の場合
+  if (cpuSide === 'slave') {
+    // 相手が皇帝をまだ出していない && 手札が少ない
+    if (!opponentPlayedEmperor && opponentHandCount <= 2 && slaveCards.length > 0) {
+      // 奴隷を出して皇帝を狙う
+      return slaveCards[0];
+    }
+    // 相手が皇帝を既に使った = 市民を出して安全に
+    if (opponentPlayedEmperor && citizenCards.length > 0) {
+      return citizenCards[Math.floor(Math.random() * citizenCards.length)];
+    }
+  }
+
+  // デフォルト: medium戦略にフォールバック
+  return mediumStrategy(hand, cpuSide, currentBattle, opponentHandCount);
 }
