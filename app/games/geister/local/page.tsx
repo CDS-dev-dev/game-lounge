@@ -188,7 +188,7 @@ export default function GeisterLocalPage() {
         backUrl="/games/geister"
         backLabel="モード選択"
       />
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-3 px-2 sm:px-3">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-3 px-3 sm:px-4">
         <div className="max-w-3xl mx-auto">
 
         {/* Player1配置フェーズ */}

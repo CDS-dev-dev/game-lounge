@@ -24,6 +24,7 @@ import { formatGameError } from '@/lib/utils/error-handler';
 import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
 import { useGameHistory } from '@/lib/hooks/useGameHistory';
 import { logger } from '@/lib/utils/logger';
+import { Z_INDEX } from '@/lib/constants/z-index';
 
 type CpuGamePhase = 'orderSelect' | 'setup' | 'playing' | 'cpuThinking' | 'finished';
 
@@ -297,7 +298,7 @@ export default function GeisterCpuPage() {
         backUrl="/games/geister"
         backLabel="モード選択"
       />
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-3 px-2 sm:px-3">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-3 px-3 sm:px-4">
         <div className="max-w-3xl mx-auto">
 
         {/* 先攻後攻選択 */}
@@ -347,7 +348,7 @@ export default function GeisterCpuPage() {
 
         {/* CPU思考中インジケーター */}
         {phase === 'cpuThinking' && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 pointer-events-none">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center pointer-events-none" style={{ zIndex: Z_INDEX.OVERLAY }}>
             <Card className="bg-white/95 pointer-events-auto">
               <CardContent className="py-4 px-6 text-center">
                 <div className="flex justify-center mb-2">

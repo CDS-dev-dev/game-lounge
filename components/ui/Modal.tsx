@@ -4,6 +4,7 @@
 
 import React, { useEffect, useCallback } from 'react';
 import { TEXT_SIZE, PADDING } from '@/lib/constants/ui-scale';
+import { Z_INDEX } from '@/lib/constants/z-index';
 
 interface ModalProps {
   isOpen: boolean;
@@ -56,7 +57,8 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in"
+      style={{ zIndex: Z_INDEX.MODAL }}
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
@@ -64,7 +66,7 @@ export const Modal: React.FC<ModalProps> = ({
     >
       <div
         className={`
-          bg-white rounded-lg shadow-2xl max-w-md w-full max-h-[90vh] overflow-auto
+          bg-white rounded-lg shadow-2xl max-w-md w-full max-h-[calc(100vh-8rem)] overflow-auto
           animate-scale-in
           ${className}
         `}

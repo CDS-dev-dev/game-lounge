@@ -27,6 +27,7 @@ import { formatGameError } from '@/lib/utils/error-handler';
 import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
 import { useGameHistory } from '@/lib/hooks/useGameHistory';
 import { logger } from '@/lib/utils/logger';
+import { Z_INDEX } from '@/lib/constants/z-index';
 
 type CpuGamePhase = 'difficulty-select' | 'order-select' | 'playing' | 'cpuThinking' | 'finished';
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -183,7 +184,7 @@ export default function XiangqiCpuPage() {
         backUrl="/games/xiangqi"
         backLabel="モード選択"
       />
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-4 sm:pb-8 px-3 sm:px-4">
         <div className="max-w-5xl mx-auto">
           {/* ヘッダー */}
           <div className="text-center mb-4 sm:mb-6 md:mb-8">
@@ -294,8 +295,8 @@ export default function XiangqiCpuPage() {
 
         {/* CPU思考中インジケーター（固定オーバーレイ） */}
         {phase === 'cpuThinking' && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <Card className="bg-white/95">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center pointer-events-none" style={{ zIndex: Z_INDEX.OVERLAY }}>
+            <Card className="bg-white/95 pointer-events-auto">
               <CardContent className="py-6 px-8 text-center">
                 <div className="flex justify-center mb-3">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>

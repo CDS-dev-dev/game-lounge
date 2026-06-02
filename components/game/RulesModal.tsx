@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
+import { Z_INDEX } from '@/lib/constants/z-index';
 
 interface RulesModalProps {
   gameName: string;
@@ -44,14 +45,15 @@ export const RulesModal: React.FC<RulesModalProps> = ({ gameName, children }) =>
 
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-2 sm:p-4"
+          style={{ zIndex: Z_INDEX.MODAL }}
           onClick={() => setIsOpen(false)}
           role="dialog"
           aria-modal="true"
           aria-labelledby="rules-modal-title"
         >
           <div
-            className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[calc(100vh-8rem)] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="sticky top-0 bg-white border-b border-gray-200 p-3 sm:p-4 flex justify-between items-center">

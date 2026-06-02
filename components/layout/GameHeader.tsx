@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { TEXT_SIZE, MIN_TAP_AREA } from '@/lib/constants/ui-scale';
+import { Z_INDEX } from '@/lib/constants/z-index';
 
 interface GameHeaderProps {
   title?: string;
@@ -25,7 +26,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   const router = useRouter();
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-slate-900/95 backdrop-blur-sm border-b border-slate-700 z-50">
+    <header className="fixed top-0 left-0 right-0 bg-slate-900/95 backdrop-blur-sm border-b border-slate-700" style={{ zIndex: Z_INDEX.HEADER }}>
       <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
         <div className="flex items-center justify-between gap-2">
           {/* 左側：タイトル */}

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 
 export default function Connect4RulesPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 sm:py-8 md:py-12 px-2 sm:px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 sm:py-8 md:py-12 px-3 sm:px-4">
       <div className="max-w-4xl mx-auto">
         <Card className="bg-white/95">
           <CardHeader>

@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from './Button';
 import { Card, CardContent, CardHeader } from './Card';
+import { Z_INDEX } from '@/lib/constants/z-index';
 
 interface KeyboardShortcut {
   keys: string[];
@@ -43,18 +44,20 @@ export const KeyboardHelpModal: React.FC<KeyboardHelpModalProps> = ({
 
   return (
     <>
-      <Button
-        variant="secondary"
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 left-4 z-40"
-        aria-label="キーボード操作ヘルプを開く"
-      >
-        ⌨️ ヘルプ
-      </Button>
+      <div className="fixed bottom-4 left-4" style={{ zIndex: Z_INDEX.FLOATING }}>
+        <Button
+          variant="secondary"
+          onClick={() => setIsOpen(true)}
+          aria-label="キーボード操作ヘルプを開く"
+        >
+          ⌨️ ヘルプ
+        </Button>
+      </div>
 
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4"
+          style={{ zIndex: Z_INDEX.MODAL }}
           onClick={() => setIsOpen(false)}
           role="dialog"
           aria-modal="true"

@@ -7,7 +7,7 @@ import { GameHeader } from '@/components/layout/GameHeader';
 
 export default function IndianPokerOnlinePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-4 sm:pb-8 px-3 sm:px-4">
       <GameHeader title="インディアンポーカー - オンライン対戦" />
 
       <main className="container mx-auto px-4 py-8">

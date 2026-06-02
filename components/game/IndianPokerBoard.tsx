@@ -22,7 +22,7 @@ export function IndianPokerBoard({ state, onAction, disabled = false }: IndianPo
     if (index === state.myIndex) {
       return {
         position: 'absolute' as const,
-        bottom: '20px',
+        bottom: '32px',
         left: '50%',
         transform: 'translateX(-50%)',
       };
@@ -50,7 +50,7 @@ export function IndianPokerBoard({ state, onAction, disabled = false }: IndianPo
     if (!state.canOperate || disabled) return null;
 
     return (
-      <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 bg-white/95 rounded-xl shadow-2xl p-3 sm:p-4 min-w-[280px] sm:min-w-[320px]">
+      <div className="absolute bottom-32 sm:bottom-36 left-1/2 transform -translate-x-1/2 bg-white/95 rounded-xl shadow-2xl p-3 sm:p-4 w-[95%] max-w-[320px]">
         <div className="space-y-2">
           {/* チェック/コールボタン */}
           {state.canCheck ? (

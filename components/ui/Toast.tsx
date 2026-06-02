@@ -3,6 +3,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Z_INDEX } from '@/lib/constants/z-index';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -105,7 +106,7 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed bottom-4 right-4 space-y-2 pointer-events-none z-50 flex flex-col items-end">
+      <div className="fixed bottom-4 right-4 space-y-2 pointer-events-none flex flex-col items-end" style={{ zIndex: Z_INDEX.TOAST }}>
         {toasts.map((toast) => (
           <div key={toast.id} className="pointer-events-auto">
             <Toast

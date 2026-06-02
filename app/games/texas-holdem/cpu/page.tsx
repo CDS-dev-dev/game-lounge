@@ -21,6 +21,7 @@ import { useToast } from '@/components/ui/Toast';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
 import { logger } from '@/lib/utils/logger';
+import { Z_INDEX } from '@/lib/constants/z-index';
 
 type GamePhase = 'setup' | 'playing' | 'cpuThinking' | 'roundEnd' | 'finished';
 
@@ -145,7 +146,7 @@ export default function TexasHoldemCpuPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 sm:pb-8 px-2 sm:px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-4 sm:pb-8 px-3 sm:px-4">
       <GameHeader
         title="テキサスホールデム - CPU対戦"
         showBackToGames
@@ -224,8 +225,8 @@ export default function TexasHoldemCpuPage() {
           />
 
           {phase === 'roundEnd' && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <Card className="max-w-md">
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center pointer-events-none" style={{ zIndex: Z_INDEX.OVERLAY }}>
+              <Card className="max-w-md pointer-events-auto">
                 <CardHeader>
                   <h2 className="text-2xl font-bold">ラウンド終了</h2>
                 </CardHeader>
