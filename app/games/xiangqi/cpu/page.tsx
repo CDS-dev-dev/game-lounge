@@ -253,9 +253,10 @@ export default function XiangqiCpuPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <button
                   onClick={() => startGame('red')}
-                  className="p-6 sm:p-8 rounded-xl border-4 border-red-500 bg-red-50 hover:bg-red-100 transition-all hover:scale-105"
+                  aria-label="紅（先攻）でゲームを開始"
+                  className="p-6 sm:p-8 rounded-xl border-4 border-red-500 bg-red-50 hover:bg-red-100 transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                 >
-                  <div className="text-4xl sm:text-6xl mb-3">🔴</div>
+                  <div className="text-4xl sm:text-6xl mb-3" role="img" aria-hidden="true">🔴</div>
                   <div className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">紅（先攻）</div>
                   <div className="text-sm sm:text-base text-slate-600">
                     あなたが先に動きます
@@ -264,9 +265,10 @@ export default function XiangqiCpuPage() {
 
                 <button
                   onClick={() => startGame('black')}
-                  className="p-6 sm:p-8 rounded-xl border-4 border-slate-700 bg-slate-50 hover:bg-slate-100 transition-all hover:scale-105"
+                  aria-label="黒（後攻）でゲームを開始"
+                  className="p-6 sm:p-8 rounded-xl border-4 border-slate-700 bg-slate-50 hover:bg-slate-100 transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-slate-700 focus:ring-offset-2"
                 >
-                  <div className="text-4xl sm:text-6xl mb-3">⚫</div>
+                  <div className="text-4xl sm:text-6xl mb-3" role="img" aria-hidden="true">⚫</div>
                   <div className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">黒（後攻）</div>
                   <div className="text-sm sm:text-base text-slate-600">
                     CPUが先に動きます
@@ -276,7 +278,8 @@ export default function XiangqiCpuPage() {
               <div className="mt-4 text-center">
                 <button
                   onClick={() => setPhase('difficulty-select')}
-                  className="text-slate-600 hover:text-slate-900 underline text-sm"
+                  aria-label="難易度選択画面に戻る"
+                  className="text-slate-600 hover:text-slate-900 underline text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 rounded px-2 py-1"
                 >
                   難易度を変更
                 </button>

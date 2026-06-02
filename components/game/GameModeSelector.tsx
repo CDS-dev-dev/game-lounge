@@ -42,13 +42,14 @@ export function GameModeSelector({ gameName, modes }: GameModeSelectorProps) {
       {modes.map((mode) => (
         <Card
           key={mode.type}
-          className={`${CARD_BG} ${mode.disabled ? 'opacity-60' : HOVER_SCALE} cursor-pointer`}
+          className={`${CARD_BG} ${mode.disabled ? 'opacity-60' : HOVER_SCALE}`}
         >
           <button
             onClick={() => !mode.disabled && router.push(mode.href)}
             disabled={mode.disabled}
             aria-label={`${gameName}の${getModeLabel(mode.type)}を開始`}
-            className={`w-full text-center ${MIN_TAP_AREA} flex flex-col items-center justify-center p-3 sm:p-4`}
+            aria-disabled={mode.disabled}
+            className={`w-full text-center ${MIN_TAP_AREA} flex flex-col items-center justify-center p-3 sm:p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${mode.disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
           >
             <div className="text-2xl sm:text-4xl mb-2" role="img" aria-hidden="true">
               {mode.emoji}

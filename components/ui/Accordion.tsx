@@ -106,7 +106,11 @@ export const AccordionItem: React.FC<AccordionItemProps> = ({
 
   return (
     <AccordionItemContext.Provider value={{ value, isOpen, disabled, onToggle: handleToggle }}>
-      <div className={`border border-slate-300 rounded-lg bg-white ${className}`}>
+      <div
+        className={`border border-slate-300 rounded-lg bg-white ${className}`}
+        role="region"
+        aria-labelledby={`accordion-trigger-${value}`}
+      >
         {children}
       </div>
     </AccordionItemContext.Provider>
@@ -139,7 +143,7 @@ export const AccordionTrigger: React.FC<AccordionTriggerProps> = ({
   className = '',
   children,
 }) => {
-  const { isOpen, disabled, onToggle } = useAccordionItemContext();
+  const { value, isOpen, disabled, onToggle } = useAccordionItemContext();
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -153,8 +157,10 @@ export const AccordionTrigger: React.FC<AccordionTriggerProps> = ({
 
   return (
     <button
+      id={`accordion-trigger-${value}`}
       type="button"
       aria-expanded={isOpen}
+      aria-controls={`accordion-content-${value}`}
       disabled={disabled}
       onClick={onToggle}
       onKeyDown={handleKeyDown}
@@ -171,6 +177,7 @@ export const AccordionTrigger: React.FC<AccordionTriggerProps> = ({
       {children}
       <svg
         xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
         className={`h-5 w-5 transition-transform duration-200 ${
           isOpen ? 'rotate-180' : ''
         }`}
@@ -193,10 +200,13 @@ export const AccordionContent: React.FC<AccordionContentProps> = ({
   className = '',
   children,
 }) => {
-  const { isOpen } = useAccordionItemContext();
+  const { value, isOpen } = useAccordionItemContext();
 
   return (
     <div
+      id={`accordion-content-${value}`}
+      role="region"
+      aria-labelledby={`accordion-trigger-${value}`}
       className={`overflow-hidden transition-all duration-300 ${
         isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
       }`}

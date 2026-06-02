@@ -56,14 +56,15 @@ export const Toast: React.FC<ToastProps> = ({
       }`}
     >
       <div className="flex items-center space-x-3">
-        <span className="text-2xl font-bold">{icons[type]}</span>
+        <span className="text-2xl font-bold" aria-hidden="true">{icons[type]}</span>
         <p className="font-semibold">{message}</p>
         <button
           onClick={() => {
             setIsVisible(false);
             setTimeout(() => onClose?.(), 300);
           }}
-          className="ml-auto text-white hover:text-gray-200 font-bold text-xl"
+          aria-label="通知を閉じる"
+          className="ml-auto text-white hover:text-gray-200 font-bold text-xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-current rounded"
         >
           ×
         </button>

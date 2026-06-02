@@ -32,8 +32,20 @@ export const CompactPlayerCard: React.FC<CompactPlayerCardProps> = ({
 }) => {
   const chipPercentage = Math.min((chips / maxChips) * 100, 100);
 
+  // アクセシビリティ用のステータス説明
+  const statusDescription = [
+    isActive && 'アクティブ',
+    isFolded && 'フォールド済み',
+    isDealer && 'ディーラー',
+    position && `ポジション${position}`,
+  ].filter(Boolean).join(', ');
+
+  const ariaLabel = `${name}, チップ${chips}枚${bet ? `, ベット${bet}枚` : ''}${statusDescription ? `, ${statusDescription}` : ''}`;
+
   return (
     <div
+      role="status"
+      aria-label={ariaLabel}
       className={`
         relative rounded-lg p-2 sm:p-3
         transition-all duration-200
@@ -45,7 +57,7 @@ export const CompactPlayerCard: React.FC<CompactPlayerCardProps> = ({
       {/* ディーラーボタン */}
       {isDealer && (
         <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-xs font-bold shadow-md">
-          D
+          <span aria-label="ディーラー">D</span>
         </div>
       )}
 
@@ -58,7 +70,7 @@ export const CompactPlayerCard: React.FC<CompactPlayerCardProps> = ({
 
       <div className="flex items-center gap-2">
         {/* アバター */}
-        <div className="text-2xl flex-shrink-0">{avatar}</div>
+        <div className="text-2xl flex-shrink-0" role="img" aria-hidden="true">{avatar}</div>
 
         <div className="flex-1 min-w-0">
           {/* 名前 */}
@@ -68,7 +80,7 @@ export const CompactPlayerCard: React.FC<CompactPlayerCardProps> = ({
 
           {/* チップス残量バー */}
           <div className="flex items-center gap-2 mt-1">
-            <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+            <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden" role="progressbar" aria-valuenow={chipPercentage} aria-valuemin={0} aria-valuemax={100} aria-label={`チップ残量${Math.round(chipPercentage)}%`}>
               <div
                 className={`h-full transition-all duration-300 ${
                   chipPercentage > 50
@@ -81,7 +93,7 @@ export const CompactPlayerCard: React.FC<CompactPlayerCardProps> = ({
               />
             </div>
             <span className={`${TEXT_SIZE.caption} font-semibold text-slate-700 whitespace-nowrap`}>
-              💰{chips.toLocaleString()}
+              <span aria-hidden="true">💰</span>{chips.toLocaleString()}
             </span>
           </div>
 

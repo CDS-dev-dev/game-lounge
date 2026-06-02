@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './Button';
 import { Card, CardContent, CardHeader } from './Card';
 
@@ -21,6 +21,25 @@ export const KeyboardHelpModal: React.FC<KeyboardHelpModalProps> = ({
   gameName = 'このゲーム',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  // ESCキーで閉じる
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   return (
     <>

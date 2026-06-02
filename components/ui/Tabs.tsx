@@ -99,14 +99,35 @@ export const TabsTrigger: React.FC<TabsTriggerProps> = ({
         e.preventDefault();
         handleClick();
       }
+      // 矢印キーでタブ移動をサポート
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        const tablist = e.currentTarget.parentElement;
+        if (!tablist) return;
+
+        const tabs = Array.from(tablist.querySelectorAll('[role="tab"]')) as HTMLElement[];
+        const currentIndex = tabs.indexOf(e.currentTarget as HTMLElement);
+
+        let nextIndex: number;
+        if (e.key === 'ArrowLeft') {
+          nextIndex = currentIndex > 0 ? currentIndex - 1 : tabs.length - 1;
+        } else {
+          nextIndex = currentIndex < tabs.length - 1 ? currentIndex + 1 : 0;
+        }
+
+        tabs[nextIndex]?.focus();
+        tabs[nextIndex]?.click();
+      }
     },
     [handleClick]
   );
 
   return (
     <button
+      id={`tab-${value}`}
       role="tab"
       aria-selected={isSelected}
+      aria-controls={`tabpanel-${value}`}
       aria-disabled={disabled}
       tabIndex={isSelected ? 0 : -1}
       disabled={disabled}
@@ -148,9 +169,11 @@ export const TabsContent: React.FC<TabsContentProps> = ({
 
   return (
     <div
+      id={`tabpanel-${value}`}
       role="tabpanel"
+      aria-labelledby={`tab-${value}`}
       tabIndex={0}
-      className={`py-4 sm:py-6 animate-fade-in ${className}`}
+      className={`py-4 sm:py-6 animate-fade-in focus:outline-none ${className}`}
       style={{
         animation: 'fadeIn 0.2s ease-in',
       }}
