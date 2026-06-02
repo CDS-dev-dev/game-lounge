@@ -11,6 +11,12 @@ import {
   ODD_TILES,
 } from '@/lib/games/tiger-dragon/constants';
 import { KeyboardHelpModal } from '@/components/ui/KeyboardHelpModal';
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@/components/ui/Accordion';
 
 interface TigerDragonBoardProps {
   gameState: TigerDragonClientState;
@@ -173,67 +179,86 @@ export const TigerDragonBoard: React.FC<TigerDragonBoardProps> = ({
           </div>
         </div>
 
-        {/* プレイヤー情報 */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
-          {gameState.players.map((player) => {
-            const isMe = player.id === gameState.myPlayerId;
-            const isCurrent = player.id === gameState.currentPlayerId;
+        {/* プレイヤー情報（折りたたみ可能） */}
+        <div className="mb-4">
+          <Accordion
+            type="multiple"
+            defaultValue={gameState.players
+              .filter((p) => p.id === gameState.myPlayerId || p.id === gameState.currentPlayerId)
+              .map((p) => p.id)}
+          >
+            {gameState.players.map((player) => {
+              const isMe = player.id === gameState.myPlayerId;
+              const isCurrent = player.id === gameState.currentPlayerId;
 
-            return (
-              <div
-                key={player.id}
-                className={`bg-white rounded-lg shadow-lg p-2 sm:p-3 ${
-                  isMe ? 'border-4 border-blue-500' : 'border-2 border-gray-300'
-                } ${isCurrent ? 'ring-2 ring-green-500' : ''} ${
-                  player.hasFinished ? 'opacity-50' : ''
-                }`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span
-                    className={`text-xs sm:text-sm font-bold ${
-                      isMe ? 'text-blue-600' : 'text-gray-700'
+              return (
+                <AccordionItem key={player.id} value={player.id}>
+                  <AccordionTrigger
+                    className={`${
+                      isMe ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+                    } ${isCurrent ? 'bg-green-50 border-l-4 border-green-500' : ''} ${
+                      player.hasFinished ? 'opacity-60' : ''
                     }`}
                   >
-                    {player.name}
-                    {player.isCpu && ' 🤖'}
-                  </span>
-                  {player.hasFinished && (
-                    <span className="text-xs text-green-500 font-bold">上がり</span>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <span className="text-base sm:text-lg">🃏</span>
-                    <span className="text-sm sm:text-base font-bold">
-                      {player.handCount}枚
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-base sm:text-lg">🏅</span>
-                    <span className="text-sm sm:text-base font-bold text-yellow-600">
-                      {player.score}点
-                    </span>
-                  </div>
-                </div>
-
-                {player.roundBonusCount > 0 && (
-                  <div className="mt-2 text-xs text-purple-600 font-bold">
-                    1周ボーナス: {player.roundBonusCount}
-                  </div>
-                )}
-
-                {player.finishTile && (
-                  <div className="mt-2">
-                    <p className="text-xs text-gray-600 mb-1">上がり牌:</p>
-                    <div className="flex justify-center">
-                      {renderTile(player.finishTile)}
+                    <div className="flex items-center gap-2 w-full">
+                      <span className="text-base sm:text-lg">👥</span>
+                      <span className={`font-bold ${isMe ? 'text-blue-600' : 'text-gray-700'}`}>
+                        {player.name}
+                        {player.isCpu && ' 🤖'}
+                        {isCurrent && ' ⭕'}
+                      </span>
+                      <span className="ml-auto mr-4 flex items-center gap-2">
+                        <span className="text-sm sm:text-base">🏅 {player.score}点</span>
+                        {player.hasFinished && (
+                          <span className="text-xs text-green-600 font-bold">上がり</span>
+                        )}
+                      </span>
                     </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-3">
+                      {/* 手牌枚数と得点 */}
+                      <div className="flex items-center justify-start gap-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base sm:text-lg">🃏</span>
+                          <span className="text-sm sm:text-base font-bold">
+                            手牌: {player.handCount}枚
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-base sm:text-lg">🏅</span>
+                          <span className="text-sm sm:text-base font-bold text-yellow-600">
+                            勝利点: {player.score}点
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* 1周ボーナス */}
+                      {player.roundBonusCount > 0 && (
+                        <div className="bg-purple-50 rounded-lg p-2 border border-purple-200">
+                          <span className="text-xs sm:text-sm text-purple-700 font-bold">
+                            🎯 1周ボーナス: {player.roundBonusCount}回
+                          </span>
+                        </div>
+                      )}
+
+                      {/* 上がり牌 */}
+                      {player.finishTile && (
+                        <div className="bg-green-50 rounded-lg p-2 border border-green-200">
+                          <p className="text-xs sm:text-sm text-gray-700 mb-2 font-bold">
+                            ✨ 上がり牌:
+                          </p>
+                          <div className="flex justify-start">
+                            {renderTile(player.finishTile)}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
         </div>
 
         {/* 攻め列・受け列 */}

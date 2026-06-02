@@ -6,6 +6,9 @@ import React from 'react';
 import { PlayingCard } from './card/Card';
 import type { TexasHoldemClientState, PlayerAction } from '@/lib/games/texas-holdem/types';
 import { toCommonCard } from '@/lib/games/texas-holdem/types';
+import { CompactPlayerCard } from '@/components/ui/CompactPlayerCard';
+import { FoldButton, CheckButton, CallButton, RaiseButton, AllInButton } from '@/components/ui/IconButton';
+import { Modal } from '@/components/ui/Modal';
 
 export interface TexasHoldemBoardProps {
   gameState: TexasHoldemClientState;
@@ -27,6 +30,7 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
   disabled = false,
 }) => {
   const [raiseAmount, setRaiseAmount] = React.useState(gameState.minRaise);
+  const [showRaiseModal, setShowRaiseModal] = React.useState(false);
 
   // プレイヤーを自分と相手に分ける
   const myPlayer = gameState.players.find(p => p.id === gameState.myPlayerId);
@@ -40,47 +44,65 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
     }
   };
 
+  // レイズ実行
+  const handleRaiseConfirm = () => {
+    onAction('raise', raiseAmount);
+    setShowRaiseModal(false);
+  };
+
+  // 最大チップ数を計算（プログレスバー用）
+  const maxChips = Math.max(...gameState.players.map(p => p.chips));
+
   // (変換関数は toCommonCard を使用)
 
   return (
     <div className="w-full h-full flex flex-col bg-gradient-to-br from-green-800 to-green-900 p-4 overflow-hidden">
       {/* 対戦相手エリア */}
-      <div className="flex-1 flex items-start justify-around mb-4 overflow-x-auto">
-        {opponents.map((player, index) => (
-          <div
-            key={player.id}
-            className={`flex flex-col items-center space-y-2 px-2 ${
-              gameState.currentTurn === player.position ? 'ring-4 ring-yellow-400 rounded-lg p-2' : ''
-            }`}
-          >
-            <div className="bg-white rounded-lg px-3 py-1 text-sm font-semibold shadow-md">
-              <div className="text-gray-900">{player.name}</div>
-              <div className="text-gray-600 text-xs">💰 {player.chips}</div>
-              {player.currentBet > 0 && (
-                <div className="text-blue-600 text-xs">ベット: {player.currentBet}</div>
-              )}
-            </div>
+      <div className="mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 max-w-6xl mx-auto">
+          {opponents.map((player) => {
+            // ディーラーボタンの判定
+            const isDealer = gameState.dealerButton === player.position;
+            // ポジション表示（SB/BBはディーラーボタンの次/次の次）
+            let positionLabel = '';
+            const sbPosition = (gameState.dealerButton + 1) % gameState.players.length;
+            const bbPosition = (gameState.dealerButton + 2) % gameState.players.length;
+            if (player.position === sbPosition) positionLabel = 'SB';
+            else if (player.position === bbPosition) positionLabel = 'BB';
+            else if (isDealer) positionLabel = 'BTN';
 
-            {/* 相手のカード（裏向き） */}
-            <div className="flex gap-1">
-              {player.holeCards && player.isActive ? (
-                <>
-                  <PlayingCard faceDown size="small" />
-                  <PlayingCard faceDown size="small" />
-                </>
-              ) : (
-                <div className="text-white text-xs">フォールド</div>
-              )}
-            </div>
-
-            {/* アクション表示 */}
-            {player.action && (
-              <div className="text-white text-xs bg-black bg-opacity-50 px-2 py-1 rounded">
-                {player.action.toUpperCase()}
+            return (
+              <div key={player.id} className="relative">
+                <CompactPlayerCard
+                  name={player.name}
+                  chips={player.chips}
+                  maxChips={maxChips}
+                  bet={player.currentBet}
+                  isActive={gameState.currentTurn === player.position}
+                  isFolded={!player.isActive}
+                  isDealer={isDealer}
+                  avatar="🃏"
+                  position={positionLabel}
+                />
+                {/* 相手のカード（裏向き） */}
+                <div className="flex gap-1 mt-2 justify-center">
+                  {player.holeCards && player.isActive ? (
+                    <>
+                      <PlayingCard faceDown size="small" />
+                      <PlayingCard faceDown size="small" />
+                    </>
+                  ) : null}
+                </div>
+                {/* アクション表示 */}
+                {player.action && (
+                  <div className="text-white text-xs bg-black bg-opacity-70 px-2 py-1 rounded text-center mt-1">
+                    {player.action.toUpperCase()}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        ))}
+            );
+          })}
+        </div>
       </div>
 
       {/* 中央エリア（コミュニティカード＋ポット） */}
@@ -120,14 +142,16 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
       {/* 自分のエリア */}
       <div className="flex flex-col items-center space-y-4">
         {/* 自分の情報 */}
-        <div className={`bg-white rounded-lg px-6 py-3 shadow-lg ${
-          gameState.isMyTurn ? 'ring-4 ring-yellow-400' : ''
-        }`}>
-          <div className="text-gray-900 font-bold text-lg">{myPlayer?.name} (YOU)</div>
-          <div className="text-gray-600">💰 チップ: {myPlayer?.chips}</div>
-          {myPlayer && myPlayer.currentBet > 0 && (
-            <div className="text-blue-600">現在のベット: {myPlayer.currentBet}</div>
-          )}
+        <div className="max-w-md w-full">
+          <CompactPlayerCard
+            name={`${myPlayer?.name || ''} (YOU)`}
+            chips={myPlayer?.chips || 0}
+            maxChips={maxChips}
+            bet={myPlayer?.currentBet}
+            isActive={gameState.isMyTurn}
+            isFolded={myPlayer ? !myPlayer.isActive : false}
+            avatar="👤"
+          />
         </div>
 
         {/* 自分のカード */}
@@ -147,61 +171,51 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
 
         {/* アクションボタン */}
         {gameState.isMyTurn && !disabled && (
-          <div className="flex flex-wrap gap-2 justify-center">
+          <div className="flex gap-2 sm:gap-3 justify-center flex-wrap">
             {gameState.canFold && (
-              <button
+              <FoldButton
                 onClick={() => onAction('fold')}
-                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow-md transition-colors"
-              >
-                フォールド
-              </button>
+                showTooltip={true}
+                size="lg"
+              />
             )}
 
             {gameState.canCheck && (
-              <button
+              <CheckButton
                 onClick={() => onAction('check')}
-                className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg shadow-md transition-colors"
-              >
-                チェック
-              </button>
+                showTooltip={true}
+                size="lg"
+              />
             )}
 
             {gameState.canCall && (
-              <button
-                onClick={() => onAction('call')}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition-colors"
-              >
-                コール ({gameState.callAmount})
-              </button>
-            )}
-
-            {gameState.canRaise && (
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  value={raiseAmount}
-                  onChange={handleRaiseChange}
-                  min={gameState.minRaise}
-                  max={myPlayer?.chips || 0}
-                  step={gameState.minRaise}
-                  className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-gray-900"
+              <div className="flex flex-col items-center gap-1">
+                <CallButton
+                  onClick={() => onAction('call')}
+                  showTooltip={true}
+                  size="lg"
                 />
-                <button
-                  onClick={() => onAction('raise', raiseAmount)}
-                  className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-md transition-colors"
-                >
-                  レイズ
-                </button>
+                <span className="text-white text-xs font-semibold">{gameState.callAmount}</span>
               </div>
             )}
 
+            {gameState.canRaise && (
+              <RaiseButton
+                onClick={() => setShowRaiseModal(true)}
+                showTooltip={true}
+                size="lg"
+              />
+            )}
+
             {myPlayer && myPlayer.chips > 0 && (
-              <button
-                onClick={() => onAction('allin')}
-                className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg shadow-md transition-colors"
-              >
-                オールイン ({myPlayer.chips})
-              </button>
+              <div className="flex flex-col items-center gap-1">
+                <AllInButton
+                  onClick={() => onAction('allin')}
+                  showTooltip={true}
+                  size="lg"
+                />
+                <span className="text-white text-xs font-semibold">{myPlayer.chips}</span>
+              </div>
             )}
           </div>
         )}
@@ -228,6 +242,90 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
           </div>
         )}
       </div>
+
+      {/* レイズモーダル */}
+      <Modal
+        isOpen={showRaiseModal}
+        onClose={() => setShowRaiseModal(false)}
+        title="レイズ額を入力"
+        showCloseButton={true}
+      >
+        <div className="space-y-4">
+          {/* スライダー */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              レイズ額: 💰 {raiseAmount.toLocaleString()}
+            </label>
+            <input
+              type="range"
+              value={raiseAmount}
+              onChange={handleRaiseChange}
+              min={gameState.minRaise}
+              max={myPlayer?.chips || 0}
+              step={gameState.minRaise}
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+            />
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <span>最小: {gameState.minRaise}</span>
+              <span>最大: {myPlayer?.chips || 0}</span>
+            </div>
+          </div>
+
+          {/* 数値入力 */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              直接入力
+            </label>
+            <input
+              type="number"
+              value={raiseAmount}
+              onChange={handleRaiseChange}
+              min={gameState.minRaise}
+              max={myPlayer?.chips || 0}
+              step={gameState.minRaise}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          {/* クイックアクション */}
+          <div className="flex gap-2 justify-between">
+            <button
+              onClick={() => setRaiseAmount(gameState.minRaise)}
+              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-900 text-sm rounded-lg transition-colors"
+            >
+              最小
+            </button>
+            <button
+              onClick={() => setRaiseAmount(Math.floor((gameState.minRaise + (myPlayer?.chips || 0)) / 2))}
+              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-900 text-sm rounded-lg transition-colors"
+            >
+              1/2 ポット
+            </button>
+            <button
+              onClick={() => setRaiseAmount(myPlayer?.chips || 0)}
+              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-900 text-sm rounded-lg transition-colors"
+            >
+              オールイン
+            </button>
+          </div>
+
+          {/* 実行ボタン */}
+          <div className="flex gap-3 justify-end pt-4 border-t border-gray-200">
+            <button
+              onClick={() => setShowRaiseModal(false)}
+              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg font-semibold transition-colors"
+            >
+              キャンセル
+            </button>
+            <button
+              onClick={handleRaiseConfirm}
+              className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors"
+            >
+              レイズ実行
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
