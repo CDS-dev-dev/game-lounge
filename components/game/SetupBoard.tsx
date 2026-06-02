@@ -135,46 +135,46 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      {/* タイマー */}
+    <div className="space-y-2 sm:space-y-3">
+      {/* タイマー（コンパクト） */}
       {timeLimit && !isTimedOut && (
         <div
           className={`
-          text-center p-4 rounded-lg font-mono text-4xl font-bold
+          text-center p-2 sm:p-3 rounded-lg font-mono text-xl sm:text-2xl font-bold
           ${remainingTime <= 10 ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}
           ${remainingTime <= 5 ? 'animate-pulse' : ''}
         `}
         >
-          残り時間: {Math.floor(remainingTime / 60)}:{String(remainingTime % 60).padStart(2, '0')}
+          残り {Math.floor(remainingTime / 60)}:{String(remainingTime % 60).padStart(2, '0')}
         </div>
       )}
 
       {isTimedOut && (
-        <div className="text-center p-4 rounded-lg bg-yellow-100 text-yellow-900 font-bold">
-          時間切れ！残りの駒をランダム配置しました
+        <div className="text-center p-2 rounded-lg bg-yellow-100 text-yellow-900 text-sm font-bold">
+          時間切れ！ランダム配置しました
         </div>
       )}
 
-      {/* 駒タイプ選択 */}
-      <div className="grid grid-cols-2 gap-2 sm:gap-4">
+      {/* 駒タイプ選択（コンパクト） */}
+      <div className="grid grid-cols-2 gap-2">
         <button
           onClick={() => setSelectedType('good')}
           disabled={isTimedOut}
           className={`
-            p-3 sm:p-6 rounded-xl border-2 sm:border-4 transition-all
+            p-2 sm:p-3 rounded-lg border-2 transition-all
             ${
               selectedType === 'good'
-                ? 'border-blue-500 bg-blue-50 ring-2 sm:ring-4 ring-blue-200'
+                ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
                 : 'border-gray-300 bg-white hover:border-blue-300'
             }
             ${isTimedOut ? 'opacity-50 cursor-not-allowed' : ''}
           `}
         >
-          <div className="text-4xl sm:text-6xl mb-1 sm:mb-2">👻</div>
-          <div className="text-base sm:text-xl font-bold text-gray-900">Good駒</div>
-          <div className="text-xs sm:text-sm text-gray-700 mt-1 sm:mt-2">残り: {4 - goodCount} / 4</div>
+          <div className="text-2xl sm:text-3xl mb-1">👻</div>
+          <div className="text-xs sm:text-sm font-bold text-gray-900">Good</div>
+          <div className="text-[10px] sm:text-xs text-gray-700">残り {4 - goodCount}/4</div>
           {/* プログレスバー */}
-          <div className="mt-1 sm:mt-2 h-1.5 sm:h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="mt-1 h-1 bg-gray-200 rounded-full overflow-hidden">
             <div
               className="h-full bg-blue-500 transition-all"
               style={{ width: `${(goodCount / 4) * 100}%` }}
@@ -186,20 +186,20 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
           onClick={() => setSelectedType('bad')}
           disabled={isTimedOut}
           className={`
-            p-3 sm:p-6 rounded-xl border-2 sm:border-4 transition-all
+            p-2 sm:p-3 rounded-lg border-2 transition-all
             ${
               selectedType === 'bad'
-                ? 'border-red-500 bg-red-50 ring-2 sm:ring-4 ring-red-200'
+                ? 'border-red-500 bg-red-50 ring-2 ring-red-200'
                 : 'border-gray-300 bg-white hover:border-red-300'
             }
             ${isTimedOut ? 'opacity-50 cursor-not-allowed' : ''}
           `}
         >
-          <div className="text-4xl sm:text-6xl mb-1 sm:mb-2">😈</div>
-          <div className="text-base sm:text-xl font-bold text-gray-900">Bad駒</div>
-          <div className="text-xs sm:text-sm text-gray-700 mt-1 sm:mt-2">残り: {4 - badCount} / 4</div>
+          <div className="text-2xl sm:text-3xl mb-1">😈</div>
+          <div className="text-xs sm:text-sm font-bold text-gray-900">Bad</div>
+          <div className="text-[10px] sm:text-xs text-gray-700">残り {4 - badCount}/4</div>
           {/* プログレスバー */}
-          <div className="mt-1 sm:mt-2 h-1.5 sm:h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="mt-1 h-1 bg-gray-200 rounded-full overflow-hidden">
             <div
               className="h-full bg-red-500 transition-all"
               style={{ width: `${(badCount / 4) * 100}%` }}
@@ -208,14 +208,9 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
         </button>
       </div>
 
-      {/* ヒント */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 sm:p-4 text-xs sm:text-sm text-blue-900">
-        <p className="font-semibold mb-1 sm:mb-2">💡 操作方法</p>
-        <ul className="space-y-0.5 sm:space-y-1 list-disc list-inside">
-          <li>盤面の<strong>下側2行（緑色）</strong>に駒を配置</li>
-          <li>配置済みの駒をクリックして種類を変更（👻 ⇔ 😈）</li>
-          <li>上のボタンで配置する駒の種類を選択</li>
-        </ul>
+      {/* ヒント（コンパクト） */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 text-[10px] sm:text-xs text-blue-900">
+        <p className="font-semibold mb-1">💡 下側2行（緑色）に配置。タップで種類変更</p>
       </div>
 
       {/* 盤面 */}
@@ -260,15 +255,21 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
         </div>
       </div>
 
-      {/* アクションボタン */}
-      <div className="flex gap-2 sm:gap-4 justify-center">
-        <Button variant="secondary" onClick={handleRandomSetup} disabled={isTimedOut}>
-          ランダム配置
+      {/* アクションボタン（コンパクト） */}
+      <div className="flex gap-2 justify-center">
+        <Button
+          variant="secondary"
+          onClick={handleRandomSetup}
+          disabled={isTimedOut}
+          className="text-xs sm:text-sm py-1.5 sm:py-2"
+        >
+          ランダム
         </Button>
         <Button
           variant="primary"
           onClick={handleCompleteClick}
           disabled={setup.length !== 8 || goodCount !== 4 || isTimedOut}
+          className="text-xs sm:text-sm py-1.5 sm:py-2"
         >
           配置完了
         </Button>

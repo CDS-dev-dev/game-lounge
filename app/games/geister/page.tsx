@@ -34,104 +34,58 @@ export default function GeisterModePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       <GameHeader title="ガイスター" />
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-6 sm:pb-12 px-3 sm:px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8 sm:mb-12">
-            <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">ガイスター</h1>
-            <p className="text-sm sm:text-base text-gray-100">プレイモードを選択してください</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 px-3 sm:px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-4 sm:mb-6">
+            <h1 className="text-xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">ガイスター</h1>
+            <p className="text-xs sm:text-sm text-gray-200">プレイモードを選択</p>
           </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* コンパクトなモード選択：3列配置 */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-3 sm:mb-4">
           {/* オンライン対戦 */}
-          <Card className="hover:shadow-xl transition-shadow duration-200 border-2 border-indigo-500 bg-white/95">
-            <CardHeader>
-              <h2 className="text-2xl font-bold text-slate-900">🌐 オンライン対戦</h2>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-700 mb-4 font-medium">
-                世界中のプレイヤーと対戦
-              </p>
-              <p className="text-sm text-slate-600 mb-6 font-medium leading-relaxed">
-                • 自動マッチング<br />
-                • リアルタイム対戦<br />
-                • ランダムマッチ
-              </p>
-              <Button
-                variant="primary"
-                className="w-full"
-                onClick={() => router.push('/games/geister/online')}
-              >
-                オンライン対戦を開始
-              </Button>
-            </CardContent>
-          </Card>
+          <button
+            onClick={() => router.push('/games/geister/online')}
+            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95 border-2 border-indigo-500"
+          >
+            <div className="text-2xl sm:text-4xl mb-1 sm:mb-2">🌐</div>
+            <h2 className="text-xs sm:text-base font-bold text-slate-900 mb-0.5 sm:mb-1">オンライン</h2>
+            <p className="text-[9px] sm:text-xs text-slate-600">世界中と対戦</p>
+          </button>
 
           {/* ローカル対戦 */}
-          <Card className="hover:shadow-xl transition-shadow duration-200 bg-white/95">
-            <CardHeader>
-              <h2 className="text-2xl font-bold text-slate-900">👥 ローカル対戦</h2>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-700 mb-4 font-medium">
-                同じ端末で2人対戦
-              </p>
-              <p className="text-sm text-slate-600 mb-6 font-medium leading-relaxed">
-                • 交互に操作<br />
-                • 1つの端末で対戦<br />
-                • オフライン対応
-              </p>
-              <Button
-                variant="primary"
-                className="w-full"
-                onClick={() => router.push('/games/geister/local')}
-              >
-                ローカル対戦を開始
-              </Button>
-            </CardContent>
-          </Card>
+          <button
+            onClick={() => router.push('/games/geister/local')}
+            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95"
+          >
+            <div className="text-2xl sm:text-4xl mb-1 sm:mb-2">👥</div>
+            <h2 className="text-xs sm:text-base font-bold text-slate-900 mb-0.5 sm:mb-1">ローカル</h2>
+            <p className="text-[9px] sm:text-xs text-slate-600">同じ端末で</p>
+          </button>
 
           {/* CPU対戦 */}
-          <Card className="hover:shadow-xl transition-shadow duration-200 bg-white/95">
-            <CardHeader>
-              <h2 className="text-2xl font-bold text-slate-900">🤖 CPU対戦</h2>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-700 mb-4 font-medium">
-                コンピュータと対戦
-              </p>
-              <p className="text-sm text-slate-600 mb-6 font-medium leading-relaxed">
-                • 一人プレイ<br />
-                • 強いAI<br />
-                • 練習に最適
-              </p>
-              <Button
-                variant="primary"
-                className="w-full"
-                onClick={() => router.push('/games/geister/cpu')}
-              >
-                CPU対戦を開始
-              </Button>
-            </CardContent>
-          </Card>
+          <button
+            onClick={() => router.push('/games/geister/cpu')}
+            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95"
+          >
+            <div className="text-2xl sm:text-4xl mb-1 sm:mb-2">🤖</div>
+            <h2 className="text-xs sm:text-base font-bold text-slate-900 mb-0.5 sm:mb-1">CPU</h2>
+            <p className="text-[9px] sm:text-xs text-slate-600">一人で練習</p>
+          </button>
         </div>
 
-        <Card className="mb-8 bg-white/95">
-          <CardHeader>
-            <h3 className="text-xl font-bold text-slate-900">ガイスターとは？</h3>
-          </CardHeader>
-          <CardContent className="text-sm space-y-2">
-            <p className="text-slate-700 font-medium leading-relaxed">
-              ガイスターは、青いお化け👻と赤い悪魔😈を使った心理戦ボードゲームです。
-              相手の駒の種類は見えないため、ブラフや読み合いが重要になります。
+        {/* ゲーム説明（コンパクト） */}
+        <Card className="bg-white/95">
+          <CardContent className="py-2 sm:py-3 px-3 sm:px-4">
+            <p className="text-xs sm:text-sm text-slate-700 mb-2">
+              👻と😈を使った心理戦ゲーム。相手の駒の種類は見えません。
             </p>
-            <div className="mt-4">
-              <Link
-                href="/games/geister/rules"
-                className="text-indigo-600 hover:text-indigo-500 underline font-semibold"
-              >
-                詳しいルールを見る →
-              </Link>
-            </div>
+            <Link
+              href="/games/geister/rules"
+              className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-500 underline font-semibold"
+            >
+              ルールを見る →
+            </Link>
           </CardContent>
         </Card>
 

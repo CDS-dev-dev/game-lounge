@@ -12,109 +12,45 @@ export default function GamesPage() {
   return (
     <>
       <GameHeader title="ゲーム選択" showBackToHome />
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-6 sm:pb-12 px-3 sm:px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8 sm:mb-12">
-            <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">ゲーム選択</h1>
-            <p className="text-sm sm:text-base text-gray-100">オンライン対戦を始めましょう</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-16 sm:pt-20 pb-4 px-3 sm:px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-4 sm:mb-6">
+            <h1 className="text-xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">ゲーム選択</h1>
+            <p className="text-xs sm:text-sm text-gray-200">遊びたいゲームをタップ</p>
           </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* コンパクトなゲームカード：2列配置 */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 max-w-2xl mx-auto">
           {/* ガイスター */}
-          <Card className="hover:shadow-xl transition-shadow duration-200 bg-white/95">
-            <CardHeader>
-              <h2 className="text-2xl font-bold text-slate-900">ガイスター</h2>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-700 mb-4 font-medium">
-                青いお化け👻と赤い悪魔😈を使った心理戦ボードゲーム
-              </p>
-              <p className="text-sm text-slate-600 mb-4 font-medium">プレイ人数: 2人</p>
-              <div className="flex flex-col gap-2">
-                <Button
-                  variant="primary"
-                  className="w-full"
-                  onClick={() => router.push('/games/geister')}
-                >
-                  遊ぶ
-                </Button>
-                <Link
-                  href="/games/geister/rules"
-                  className="block w-full bg-slate-200 hover:bg-slate-300 text-slate-900 text-center font-semibold px-4 py-2 rounded-lg transition-colors duration-200"
-                >
-                  ルールを見る
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          <button
+            onClick={() => router.push('/games/geister')}
+            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95"
+          >
+            <div className="text-3xl sm:text-5xl mb-2">👻</div>
+            <h2 className="text-sm sm:text-lg font-bold text-slate-900 mb-1">ガイスター</h2>
+            <p className="text-[10px] sm:text-xs text-slate-600">心理戦ゲーム</p>
+          </button>
 
           {/* 立体四目並べ */}
-          <Card className="hover:shadow-xl transition-shadow duration-200 bg-white/95">
-            <CardHeader>
-              <h2 className="text-2xl font-bold text-slate-900">立体四目並べ</h2>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-700 mb-4 font-medium">
-                4×4×4の立体空間で4つ揃える戦略ゲーム
-              </p>
-              <p className="text-sm text-slate-600 mb-4 font-medium">プレイ人数: 2人</p>
-              <div className="flex flex-col gap-2">
-                <Button
-                  variant="primary"
-                  className="w-full"
-                  onClick={() => router.push('/games/connect4')}
-                >
-                  遊ぶ
-                </Button>
-                <Link
-                  href="/games/connect4/rules"
-                  className="block w-full bg-slate-200 hover:bg-slate-300 text-slate-900 text-center font-semibold px-4 py-2 rounded-lg transition-colors duration-200"
-                >
-                  ルールを見る
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          <button
+            onClick={() => router.push('/games/connect4')}
+            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95"
+          >
+            <div className="text-3xl sm:text-5xl mb-2">🎯</div>
+            <h2 className="text-sm sm:text-lg font-bold text-slate-900 mb-1">立体四目並べ</h2>
+            <p className="text-[10px] sm:text-xs text-slate-600">3D戦略ゲーム</p>
+          </button>
 
           {/* 中国象棋 */}
-          <Card className="hover:shadow-xl transition-shadow duration-200 bg-white/95">
-            <CardHeader>
-              <h2 className="text-2xl font-bold text-slate-900">中国象棋</h2>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-700 mb-4 font-medium">
-                中国伝統の将棋ゲーム。楚河漢界と7種類の駒
-              </p>
-              <p className="text-sm text-slate-600 mb-4 font-medium">プレイ人数: 2人</p>
-              <div className="flex flex-col gap-2">
-                <Button
-                  variant="primary"
-                  className="w-full"
-                  onClick={() => router.push('/games/xiangqi')}
-                >
-                  遊ぶ
-                </Button>
-                <Link
-                  href="/games/xiangqi/rules"
-                  className="block w-full bg-slate-200 hover:bg-slate-300 text-slate-900 text-center font-semibold px-4 py-2 rounded-lg transition-colors duration-200"
-                >
-                  ルールを見る
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          <button
+            onClick={() => router.push('/games/xiangqi')}
+            className="bg-white/95 rounded-lg p-3 sm:p-4 hover:bg-white transition-all hover:scale-105 active:scale-95"
+          >
+            <div className="text-3xl sm:text-5xl mb-2">♟️</div>
+            <h2 className="text-sm sm:text-lg font-bold text-slate-900 mb-1">中国象棋</h2>
+            <p className="text-[10px] sm:text-xs text-slate-600">伝統将棋</p>
+          </button>
         </div>
-
-        <Card className="mt-12 max-w-2xl mx-auto bg-white/95">
-          <CardHeader>
-            <h3 className="text-xl font-bold text-slate-900">遊び方</h3>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm text-slate-700 font-medium">
-            <p>1. 遊びたいゲームを選択</p>
-            <p>2. プレイモード（オンライン対戦など）を選択</p>
-            <p>3. ゲーム開始！</p>
-          </CardContent>
-        </Card>
 
       </div>
     </div>
