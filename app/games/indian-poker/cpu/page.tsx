@@ -10,7 +10,6 @@ import {
   dealCards,
   processBettingAction,
   toClientState,
-  canPlayerAct,
 } from '@/lib/games/indian-poker/engine';
 import { decideAIAction } from '@/lib/games/indian-poker/ai';
 import type { IndianPokerState, IndianPokerClientState, Difficulty, BettingAction } from '@/lib/games/indian-poker/types';
@@ -77,8 +76,7 @@ export default function IndianPokerCpuPage() {
 
     while (
       currentState.status === 'betting' &&
-      currentState.players[currentState.currentTurn].isCPU &&
-      canPlayerAct(currentState, currentState.players[currentState.currentTurn].id)
+      currentState.players[currentState.currentTurn].isCPU
     ) {
       await new Promise((resolve) => setSafeTimeout(() => resolve(undefined), 800));
 
