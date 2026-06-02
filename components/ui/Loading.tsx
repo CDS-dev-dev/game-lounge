@@ -17,10 +17,12 @@ export const Loading: React.FC<LoadingProps> = ({
   const content = (
     <Card className={fullScreen ? 'bg-white/95' : ''}>
       <CardContent className="py-12 text-center">
-        <div className="flex justify-center mb-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+        <div role="status" aria-live="polite">
+          <div className="flex justify-center mb-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+          </div>
+          <p className="text-slate-900 text-base sm:text-lg font-semibold">{message}</p>
         </div>
-        <p className="text-slate-900 text-lg font-semibold">{message}</p>
       </CardContent>
     </Card>
   );

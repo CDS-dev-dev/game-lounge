@@ -30,7 +30,7 @@ export const Toast: React.FC<ToastProps> = ({
     return () => clearTimeout(timer);
   }, [duration, onClose]);
 
-  const baseClasses = 'px-6 py-4 rounded-lg shadow-lg transition-all duration-300 max-w-md';
+  const baseClasses = 'px-3 sm:px-6 py-2 sm:py-4 rounded-lg shadow-lg transition-all duration-300 max-w-md text-sm sm:text-base';
 
   const typeClasses = {
     success: 'bg-green-600 text-white',

@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
@@ -22,6 +22,7 @@ import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useGameHistory } from '@/lib/hooks/useGameHistory';
+import { TEXT_SIZE } from '@/lib/constants/ui-scale';
 
 type LocalGamePhase = 'playing' | 'turnChange' | 'finished';
 
@@ -42,7 +43,7 @@ export default function Connect4LocalPage() {
   const gameHistory = useGameHistory<{ state: Connect4State; player: PlayerRole }>();
 
   // 駒を配置
-  const handleCellClick = (pos: Position3D) => {
+  const handleCellClick = useCallback((pos: Position3D) => {
     if (phase !== 'playing') return;
 
     try {
@@ -80,10 +81,10 @@ export default function Connect4LocalPage() {
       console.error('Move error:', error);
       showToast(formatGameError(error), 'error');
     }
-  };
+  }, [phase, currentPlayer, gameHistory, gameState, showToast]);
 
   // 待った（1手戻す）
-  const handleUndo = () => {
+  const handleUndo = useCallback(() => {
     const previousEntry = gameHistory.undo();
     if (!previousEntry) {
       showToast('これ以上戻せません', 'error');
@@ -94,22 +95,22 @@ export default function Connect4LocalPage() {
     setCurrentPlayer(previousEntry.player);
     setPhase('playing');
     showToast('1手戻しました', 'info');
-  };
+  }, [gameHistory, showToast]);
 
   // ターン交代画面から戻る
-  const handleReadyForTurn = () => {
+  const handleReadyForTurn = useCallback(() => {
     setPhase('playing');
-  };
+  }, []);
 
   // リプレイ
-  const handleReplay = () => {
+  const handleReplay = useCallback(() => {
     let state = createInitialState(GAME_ID, PLAYER1_ID);
     state = joinPlayer2(state, PLAYER2_ID);
     setGameState(state);
     setCurrentPlayer('player1');
     setPhase('playing');
     gameHistory.clearHistory();
-  };
+  }, [gameHistory]);
 
   const playerId = currentPlayer === 'player1' ? PLAYER1_ID : PLAYER2_ID;
   const clientState = toClientState(gameState, playerId);
@@ -134,7 +135,7 @@ export default function Connect4LocalPage() {
         {phase === 'turnChange' && (
           <Card className="bg-white/95">
             <CardContent className="py-12 text-center">
-              <h2 className="text-3xl font-bold text-slate-900 mb-6">
+              <h2 className={`${TEXT_SIZE.heading2} font-bold text-slate-900 mb-6 break-words`}>
                 Player {currentPlayer === 'player1' ? '1 🔵' : '2 🔴'} の番です
               </h2>
               <p className="text-slate-700 mb-8">

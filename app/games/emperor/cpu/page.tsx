@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -27,6 +27,7 @@ import {
   SIDE_NAMES,
   SIDE_COLORS,
 } from '@/lib/games/emperor/constants';
+import { TEXT_SIZE, MIN_TAP_AREA } from '@/lib/constants/ui-scale';
 
 type GamePhase = 'setup' | 'playing' | 'battleResult' | 'setEnd' | 'finished';
 
@@ -42,7 +43,7 @@ export default function EmperorCpuPage() {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
   // ゲーム開始
-  const handleStartGame = () => {
+  const handleStartGame = useCallback(() => {
     try {
       let newState = createInitialState(GAME_ID, difficulty);
       newState = startSet(newState);
@@ -52,10 +53,10 @@ export default function EmperorCpuPage() {
       console.error('Game start error:', error);
       showToast(formatGameError(error), 'error');
     }
-  };
+  }, [difficulty, showToast]);
 
   // カード選択
-  const handleCardSelect = async (cardId: string) => {
+  const handleCardSelect = useCallback(async (cardId: string) => {
     if (!gameState || phase !== 'playing') return;
 
     try {
@@ -89,10 +90,10 @@ export default function EmperorCpuPage() {
       console.error('Card select error:', error);
       showToast(formatGameError(error), 'error');
     }
-  };
+  }, [gameState, phase, difficulty, showToast]);
 
   // 次のセットへ
-  const handleNextSet = () => {
+  const handleNextSet = useCallback(() => {
     if (!gameState) return;
 
     try {
@@ -109,14 +110,14 @@ export default function EmperorCpuPage() {
       console.error('Next set error:', error);
       showToast(formatGameError(error), 'error');
     }
-  };
+  }, [gameState, showToast]);
 
   // リセット
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setPhase('setup');
     setGameState(null);
     setSelectedCardId(null);
-  };
+  }, []);
 
   const clientState = gameState ? toClientState(gameState, PLAYER_ID) : null;
   const myPlayer = clientState?.myPlayer;
@@ -142,20 +143,26 @@ export default function EmperorCpuPage() {
                     <Button
                       onClick={() => setDifficulty('easy')}
                       variant={difficulty === 'easy' ? 'primary' : 'secondary'}
+                      className={MIN_TAP_AREA}
+                      aria-label="かんたんモードを選択"
                     >
-                      かんたん
+                      <span className={TEXT_SIZE.body}>かんたん</span>
                     </Button>
                     <Button
                       onClick={() => setDifficulty('medium')}
                       variant={difficulty === 'medium' ? 'primary' : 'secondary'}
+                      className={MIN_TAP_AREA}
+                      aria-label="ふつうモードを選択"
                     >
-                      ふつう
+                      <span className={TEXT_SIZE.body}>ふつう</span>
                     </Button>
                     <Button
                       onClick={() => setDifficulty('hard')}
                       variant={difficulty === 'hard' ? 'primary' : 'secondary'}
+                      className={MIN_TAP_AREA}
+                      aria-label="むずかしいモードを選択"
                     >
-                      むずかしい
+                      <span className={TEXT_SIZE.body}>むずかしい</span>
                     </Button>
                   </div>
                 </div>

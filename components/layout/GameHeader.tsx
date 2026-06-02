@@ -5,6 +5,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
+import { TEXT_SIZE, MIN_TAP_AREA } from '@/lib/constants/ui-scale';
 
 interface GameHeaderProps {
   title?: string;
@@ -50,7 +51,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
               </svg>
             </Link>
             {title && (
-              <h1 className="text-base sm:text-xl font-bold text-white truncate">
+              <h1 className={`${TEXT_SIZE.body} sm:${TEXT_SIZE.heading3} font-bold text-white line-clamp-1`}>
                 {title}
               </h1>
             )}
@@ -63,7 +64,8 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
                 variant="secondary"
                 size="sm"
                 onClick={() => router.push(backUrl)}
-                className="text-xs sm:text-sm whitespace-nowrap"
+                aria-label={`${backLabel}に戻る`}
+                className={`${TEXT_SIZE.label} whitespace-nowrap ${MIN_TAP_AREA}`}
               >
                 {backLabel}
               </Button>
@@ -73,7 +75,8 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
                 variant="secondary"
                 size="sm"
                 onClick={() => router.push('/games')}
-                className="text-xs sm:text-sm whitespace-nowrap"
+                aria-label="ゲーム選択に戻る"
+                className={`${TEXT_SIZE.label} whitespace-nowrap ${MIN_TAP_AREA}`}
               >
                 ゲーム選択
               </Button>
@@ -83,7 +86,8 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
                 variant="secondary"
                 size="sm"
                 onClick={() => router.push('/')}
-                className="text-xs sm:text-sm whitespace-nowrap"
+                aria-label="ホームに戻る"
+                className={`${TEXT_SIZE.label} whitespace-nowrap ${MIN_TAP_AREA}`}
               >
                 ホーム
               </Button>

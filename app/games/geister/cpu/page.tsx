@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
@@ -46,7 +46,7 @@ export default function GeisterCpuPage() {
   const [playerSetup, setPlayerSetup] = useState<PieceSetup[]>([]);
 
   // 先攻後攻選択
-  const handleOrderSelect = (order: 'first' | 'second') => {
+  const handleOrderSelect = useCallback((order: 'first' | 'second') => {
     setPlayerOrder(order);
 
     // ゲーム状態を初期化
@@ -77,7 +77,7 @@ export default function GeisterCpuPage() {
 
     setGameState(newState);
     setPhase('setup');
-  };
+  }, []);
 
   // プレイヤーの配置完了
   const handlePlayerSetupComplete = async (setup: PieceSetup[]) => {
@@ -125,7 +125,7 @@ export default function GeisterCpuPage() {
   };
 
   // 待った機能（プレイヤーの手とCPUの手の2手戻す）
-  const handleUndo = () => {
+  const handleUndo = useCallback(() => {
     const previousState = gameHistory.undo(2);
     if (!previousState) {
       showToast('待ったできません', 'error');
@@ -136,10 +136,10 @@ export default function GeisterCpuPage() {
     setSelectedPiece(null);
     setValidMoves([]);
     showToast('1手戻しました', 'success');
-  };
+  }, [gameHistory, showToast]);
 
   // プレイヤーの駒選択
-  const handlePieceClick = (pieceId: string) => {
+  const handlePieceClick = useCallback((pieceId: string) => {
     const playerRole = playerOrder === 'first' ? 'player1' : 'player2';
     if (phase !== 'playing' || gameState.currentTurn !== playerRole) {
       return;
@@ -148,10 +148,10 @@ export default function GeisterCpuPage() {
     setSelectedPiece(pieceId);
     const moves = getValidMoves(gameState, PLAYER_ID, pieceId);
     setValidMoves(moves);
-  };
+  }, [phase, gameState, playerOrder]);
 
   // プレイヤーの移動
-  const handleMove = async (to: Position) => {
+  const handleMove = useCallback(async (to: Position) => {
     if (!selectedPiece || phase !== 'playing') {
       return;
     }
@@ -201,10 +201,10 @@ export default function GeisterCpuPage() {
       setValidMoves([]);
       setPhase('playing');
     }
-  };
+  }, [selectedPiece, phase, gameState, gameHistory, setSafeTimeout, showToast]);
 
   // リプレイ
-  const handleReplay = () => {
+  const handleReplay = useCallback(() => {
     setPhase('orderSelect');
     setPlayerOrder(null);
     setGameState(createInitialState(GAME_ID, PLAYER_ID));
@@ -212,7 +212,7 @@ export default function GeisterCpuPage() {
     setValidMoves([]);
     setPlayerSetup([]);
     gameHistory.clearHistory();
-  };
+  }, [gameHistory]);
 
   // CPU対戦用のクライアント状態を作成
   const createCpuClientState = (state: GeisterState): GeisterClientState => {
@@ -364,8 +364,8 @@ export default function GeisterCpuPage() {
 
         {/* CPU思考中インジケーター（画面サイズを変えない固定配置） */}
         {phase === 'cpuThinking' && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <Card className="bg-white/95">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 pointer-events-none">
+            <Card className="bg-white/95 pointer-events-auto">
               <CardContent className="py-6 px-8 text-center">
                 <div className="flex justify-center mb-3">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>

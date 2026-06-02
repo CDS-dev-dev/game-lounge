@@ -220,7 +220,7 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
                 onFocus={() => setFocusedCell({ x: internalX, y: internalY })}
                 tabIndex={isFocused ? 0 : -1}
                 className={`
-                  w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center border-2 cursor-pointer transition-all touch-manipulation
+                  w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 flex items-center justify-center border-2 cursor-pointer transition-all touch-manipulation focus:ring-4 focus:ring-blue-400
                   ${isEscape ? 'bg-yellow-200 border-yellow-400' : 'bg-amber-50 border-amber-300'}
                   ${isLastFrom ? 'bg-yellow-100 border-yellow-300' : ''}
                   ${isLastTo ? 'ring-2 ring-yellow-500' : ''}

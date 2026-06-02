@@ -194,7 +194,7 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
                       tabIndex={isFocused ? 0 : -1}
                       className={`
                         w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center relative
-                        cursor-pointer transition-all duration-150
+                        cursor-pointer transition-all duration-150 focus:ring-4 focus:ring-blue-400
                         ${selected ? 'bg-yellow-200' : ''}
                         ${valid ? 'bg-green-100' : ''}
                         ${isLastFrom ? 'bg-blue-100' : ''}

@@ -173,8 +173,8 @@ export const Connect4Board: React.FC<Connect4BoardProps> = ({
                           onFocus={() => setFocusedCell(pos)}
                           tabIndex={isFocused ? 0 : -1}
                           className={`
-                            w-12 h-12 sm:w-16 sm:h-16 rounded-lg border-2 flex items-center justify-center
-                            transition-all duration-200
+                            w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-lg border-2 flex items-center justify-center
+                            transition-all duration-200 focus:ring-4 focus:ring-blue-400
                             ${
                               piece
                                 ? `bg-slate-600 border-slate-500 ${

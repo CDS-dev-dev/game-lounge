@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
@@ -21,6 +21,7 @@ import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useGameHistory } from '@/lib/hooks/useGameHistory';
+import { TEXT_SIZE } from '@/lib/constants/ui-scale';
 
 type LocalGamePhase = 'setup-p1' | 'setup-p2-interstitial' | 'setup-p2' | 'playing' | 'turnChange' | 'finished';
 
@@ -76,17 +77,17 @@ export default function GeisterLocalPage() {
   };
 
   // 中間画面から配置画面へ
-  const handleReadyForSetup = () => {
+  const handleReadyForSetup = useCallback(() => {
     setPhase('setup-p2');
-  };
+  }, []);
 
   // 中間画面からゲームへ
-  const handleReadyForTurn = () => {
+  const handleReadyForTurn = useCallback(() => {
     setPhase('playing');
-  };
+  }, []);
 
   // 駒選択
-  const handlePieceClick = (pieceId: string) => {
+  const handlePieceClick = useCallback((pieceId: string) => {
     if (phase !== 'playing') {
       return;
     }
@@ -95,10 +96,10 @@ export default function GeisterLocalPage() {
     setSelectedPiece(pieceId);
     const moves = getValidMoves(gameState, playerId, pieceId);
     setValidMoves(moves);
-  };
+  }, [phase, currentPlayer, gameState]);
 
   // 移動
-  const handleMove = (to: Position) => {
+  const handleMove = useCallback((to: Position) => {
     if (!selectedPiece || phase !== 'playing') {
       return;
     }
@@ -133,10 +134,10 @@ export default function GeisterLocalPage() {
       setSelectedPiece(null);
       setValidMoves([]);
     }
-  };
+  }, [selectedPiece, phase, currentPlayer, gameState, gameHistory, showToast]);
 
   // 待った（1手戻す）
-  const handleUndo = () => {
+  const handleUndo = useCallback(() => {
     const previousEntry = gameHistory.undo();
     if (!previousEntry) {
       showToast('これ以上戻せません', 'error');
@@ -149,10 +150,10 @@ export default function GeisterLocalPage() {
     setValidMoves([]);
     setPhase('playing');
     showToast('1手戻しました', 'info');
-  };
+  }, [gameHistory, showToast]);
 
   // リプレイ
-  const handleReplay = () => {
+  const handleReplay = useCallback(() => {
     setPhase('setup-p1');
     const initial = createInitialState(GAME_ID, PLAYER1_ID);
     setGameState({
@@ -169,7 +170,7 @@ export default function GeisterLocalPage() {
     setPlayer1Setup([]);
     setPlayer2Setup([]);
     gameHistory.clearHistory();
-  };
+  }, [gameHistory]);
 
   const playerId = currentPlayer === 'player1' ? PLAYER1_ID : PLAYER2_ID;
   const clientState = phase === 'playing' || phase === 'finished'
@@ -251,7 +252,7 @@ export default function GeisterLocalPage() {
         {phase === 'turnChange' && (
           <Card>
             <CardContent className="py-12 text-center">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              <h2 className={`${TEXT_SIZE.heading2} font-bold text-gray-900 mb-6 break-words`}>
                 Player {currentPlayer === 'player1' ? '1' : '2'} の番です
               </h2>
               <p className="text-gray-700 mb-8">

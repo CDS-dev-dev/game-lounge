@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
@@ -26,6 +26,7 @@ import { GameHeader } from '@/components/layout/GameHeader';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
 import { useGameHistory } from '@/lib/hooks/useGameHistory';
+import { TEXT_SIZE, MIN_TAP_AREA, PADDING } from '@/lib/constants/ui-scale';
 
 type CpuGamePhase = 'difficulty-select' | 'order-select' | 'playing' | 'cpuThinking' | 'finished';
 type Difficulty = 'easy' | 'medium' | 'hard';
@@ -45,10 +46,10 @@ export default function Connect4CpuPage() {
   const [gameState, setGameState] = useState<Connect4State | null>(null);
 
   // 難易度選択
-  const handleDifficultySelect = (selectedDifficulty: Difficulty) => {
+  const handleDifficultySelect = useCallback((selectedDifficulty: Difficulty) => {
     setDifficulty(selectedDifficulty);
     setPhase('order-select');
-  };
+  }, []);
 
   // 先攻後攻選択してゲーム開始
   const startGame = async (order: 'first' | 'second') => {
@@ -80,7 +81,7 @@ export default function Connect4CpuPage() {
   };
 
   // 待った機能（プレイヤーの手とCPUの手の2手戻す）
-  const handleUndo = () => {
+  const handleUndo = useCallback(() => {
     const previousState = gameHistory.undo(2);
     if (!previousState) {
       showToast('待ったできません', 'error');
@@ -89,10 +90,10 @@ export default function Connect4CpuPage() {
 
     setGameState(previousState);
     showToast('1手戻しました', 'success');
-  };
+  }, [gameHistory, showToast]);
 
   // プレイヤーの手
-  const handleCellClick = async (pos: Position3D) => {
+  const handleCellClick = useCallback(async (pos: Position3D) => {
     if (!gameState || phase !== 'playing') return;
 
     const playerRole = playerOrder === 'first' ? 'player1' : 'player2';
@@ -158,15 +159,15 @@ export default function Connect4CpuPage() {
     } catch (error) {
       showToast(formatGameError(error), 'error');
     }
-  };
+  }, [gameState, phase, playerOrder, gameHistory, setSafeTimeout, difficulty, showToast]);
 
   // リプレイ
-  const handleReplay = () => {
+  const handleReplay = useCallback(() => {
     setPhase('difficulty-select');
     setPlayerOrder(null);
     setGameState(null);
     gameHistory.clearHistory();
-  };
+  }, [gameHistory]);
 
   const clientState: Connect4ClientState | null = gameState
     ? toClientState(gameState, PLAYER_ID)
@@ -201,34 +202,37 @@ export default function Connect4CpuPage() {
                   <Button
                     variant="primary"
                     onClick={() => handleDifficultySelect('easy')}
-                    className="py-8 text-lg"
+                    className={`${PADDING.button} ${MIN_TAP_AREA}`}
+                    aria-label="簡単モードを選択"
                   >
                     <div>
-                      <div className="text-3xl mb-2">😊</div>
-                      <div>初級</div>
-                      <div className="text-xs mt-1 opacity-70">初心者向け</div>
+                      <div className="text-2xl sm:text-3xl mb-2" role="img" aria-hidden="true">😊</div>
+                      <div className={`${TEXT_SIZE.body} font-bold mb-1`}>初級</div>
+                      <div className={TEXT_SIZE.caption}>初心者向け</div>
                     </div>
                   </Button>
                   <Button
                     variant="primary"
                     onClick={() => handleDifficultySelect('medium')}
-                    className="py-8 text-lg"
+                    className={`${PADDING.button} ${MIN_TAP_AREA}`}
+                    aria-label="普通モードを選択"
                   >
                     <div>
-                      <div className="text-3xl mb-2">🤔</div>
-                      <div>中級</div>
-                      <div className="text-xs mt-1 opacity-70">標準</div>
+                      <div className="text-2xl sm:text-3xl mb-2" role="img" aria-hidden="true">🤔</div>
+                      <div className={`${TEXT_SIZE.body} font-bold mb-1`}>中級</div>
+                      <div className={TEXT_SIZE.caption}>標準</div>
                     </div>
                   </Button>
                   <Button
                     variant="primary"
                     onClick={() => handleDifficultySelect('hard')}
-                    className="py-8 text-lg"
+                    className={`${PADDING.button} ${MIN_TAP_AREA}`}
+                    aria-label="難しいモードを選択"
                   >
                     <div>
-                      <div className="text-3xl mb-2">🔥</div>
-                      <div>上級</div>
-                      <div className="text-xs mt-1 opacity-70">挑戦者向け</div>
+                      <div className="text-2xl sm:text-3xl mb-2" role="img" aria-hidden="true">🔥</div>
+                      <div className={`${TEXT_SIZE.body} font-bold mb-1`}>上級</div>
+                      <div className={TEXT_SIZE.caption}>挑戦者向け</div>
                     </div>
                   </Button>
                 </div>
@@ -289,8 +293,8 @@ export default function Connect4CpuPage() {
 
         {/* CPU思考中インジケーター（固定配置） */}
         {phase === 'cpuThinking' && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <Card className="bg-white/95">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 pointer-events-none">
+            <Card className="bg-white/95 pointer-events-auto">
               <CardContent className="py-6 px-8 text-center">
                 <div className="flex justify-center mb-3">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
