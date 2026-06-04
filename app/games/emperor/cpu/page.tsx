@@ -1,4 +1,4 @@
-// エンペラーゲーム（カイジのEカード）CPU対戦ページ
+﻿// エンペラーゲーム（カイジのEカード）CPU対戦ページ
 
 'use client';
 
@@ -7,18 +7,18 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
+import { PlaySetupCard, SetupOptionButton } from '@/components/game/PlaySetup';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs';
 import {
   createInitialState,
   startSet,
   selectPlayerCard,
-  selectCpuCard,
   executeBattle,
   nextSet,
   toClientState,
 } from '@/lib/games/emperor/engine';
 import { calculateCpuCard } from '@/lib/games/emperor/ai';
-import type { EmperorState, EmperorClientState, ECard } from '@/lib/games/emperor/types';
+import type { EmperorState } from '@/lib/games/emperor/types';
 import { useToast } from '@/components/ui/Toast';
 import { formatGameError } from '@/lib/utils/error-handler';
 import {
@@ -28,7 +28,6 @@ import {
   SIDE_NAMES,
   SIDE_COLORS,
 } from '@/lib/games/emperor/constants';
-import { TEXT_SIZE, MIN_TAP_AREA } from '@/lib/constants/ui-scale';
 import { logger } from '@/lib/utils/logger';
 
 type GamePhase = 'setup' | 'playing' | 'battleResult' | 'setEnd' | 'finished';
@@ -126,41 +125,44 @@ export default function EmperorCpuPage() {
   const opponentPlayer = clientState?.opponentPlayer;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-4 sm:pb-8 px-3 sm:px-4">
+    <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
       <GameHeader title="エンペラーゲーム - CPU対戦" />
 
       <main className="container mx-auto px-4 py-8">
         {phase === 'setup' && (
-          <div className="max-w-2xl mx-auto">
-            <Card className="bg-white/95">
-              <CardHeader>
-                <h2 className="text-2xl font-bold text-slate-900">ゲーム設定</h2>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold mb-2 text-slate-700">難易度</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {(['easy', 'medium', 'hard'] as const).map((level) => (
-                      <Button
-                        key={level}
-                        onClick={() => setDifficulty(level)}
-                        variant={difficulty === level ? 'primary' : 'secondary'}
-                        className={MIN_TAP_AREA}
-                      >
-                        {level === 'easy' ? 'かんたん' : level === 'medium' ? 'ふつう' : 'むずかしい'}
-                      </Button>
-                    ))}
-                  </div>
+          <PlaySetupCard
+            title="ゲーム設定"
+            subtitle="皇帝・市民・奴隷の相性を読みながら、セットごとの得点を競います。"
+          >
+            <div className="space-y-5">
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-neutral-700">難易度</label>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  {[
+                    { value: 'easy' as const, title: 'かんたん', description: '素直な選択が多め', tone: 'green' as const },
+                    { value: 'medium' as const, title: 'ふつう', description: '標準的に読み合う', tone: 'amber' as const },
+                    { value: 'hard' as const, title: 'むずかしい', description: 'カード残数を重視', tone: 'red' as const },
+                  ].map((item) => (
+                    <SetupOptionButton
+                      key={item.value}
+                      title={item.title}
+                      description={item.description}
+                      selected={difficulty === item.value}
+                      onClick={() => setDifficulty(item.value)}
+                      tone={item.tone}
+                    />
+                  ))}
                 </div>
-                <Button onClick={handleStartGame} variant="primary" className="w-full">
-                  ゲーム開始
-                </Button>
-                <Link href="/games/emperor">
-                  <Button variant="secondary" className="w-full">戻る</Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+
+              <Button onClick={handleStartGame} variant="primary" className="w-full">
+                ゲーム開始
+              </Button>
+              <Link href="/games/emperor">
+                <Button variant="secondary" className="w-full">戻る</Button>
+              </Link>
+            </div>
+          </PlaySetupCard>
         )}
 
         {(phase === 'playing' || phase === 'battleResult' || phase === 'setEnd') && clientState && myPlayer && opponentPlayer && (

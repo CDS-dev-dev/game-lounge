@@ -11,6 +11,7 @@ interface ButtonProps {
   disabled?: boolean;
   loading?: boolean;
   className?: string;
+  type?: 'button' | 'submit' | 'reset';
   'aria-label'?: string;
   asChild?: boolean;
 }
@@ -23,6 +24,7 @@ export const Button: React.FC<ButtonProps> = ({
   disabled = false,
   loading = false,
   className = '',
+  type = 'button',
   'aria-label': ariaLabel,
   asChild = false,
 }) => {
@@ -44,13 +46,15 @@ export const Button: React.FC<ButtonProps> = ({
 
   // asChildの場合、childrenが単一のReact要素であることを期待し、そのpropsにclassNameを追加
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children as React.ReactElement<any>, {
-      className: `${(children as any).props.className || ''} ${classes}`.trim(),
+    const child = children as React.ReactElement<{ className?: string }>;
+    return React.cloneElement(child, {
+      className: `${child.props.className || ''} ${classes}`.trim(),
     });
   }
 
   return (
     <button
+      type={type}
       onClick={onClick}
       disabled={disabled || loading}
       aria-label={ariaLabel}

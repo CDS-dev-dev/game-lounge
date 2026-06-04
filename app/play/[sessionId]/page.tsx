@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
@@ -17,9 +17,12 @@ import {
   getOrCreatePlayerId,
   subscribeToGameSession,
 } from '@/lib/supabase/gameState';
+import { isSupabaseConfigured } from '@/lib/supabase/client';
 import type { GeisterState, GeisterClientState, Position } from '@/lib/games/geister/types';
 import { BOARD_SIZE } from '@/lib/games/geister/constants';
 import { RulesSummary } from '@/components/game/RulesSummary';
+import { GameHeader } from '@/components/layout/GameHeader';
+import { ModeUnavailable } from '@/components/game/ModeUnavailable';
 import { logger } from '@/lib/utils/logger';
 
 export default function PlayPage() {
@@ -27,6 +30,7 @@ export default function PlayPage() {
   const params = useParams();
   const gameId = params.sessionId as string;
   const { showToast } = useToast();
+  const onlineReady = isSupabaseConfigured();
 
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [gameState, setGameState] = useState<GeisterState | null>(null);
@@ -36,6 +40,8 @@ export default function PlayPage() {
 
   // ゲーム状態の読み込みとリアルタイム更新
   useEffect(() => {
+    if (!onlineReady) return;
+
     const initGame = async () => {
       try {
         const pid = await getOrCreatePlayerId();
@@ -84,7 +90,7 @@ export default function PlayPage() {
     return () => {
       unsubscribePromise?.then((unsub) => unsub?.());
     };
-  }, [gameId, router]);
+  }, [gameId, onlineReady, router, showToast]);
 
   const handlePieceClick = (pieceId: string) => {
     if (!gameState || !clientState || !playerId) return;
@@ -130,7 +136,6 @@ export default function PlayPage() {
       if (newState.status === 'finished') {
         setTimeout(() => {
           const isWinner = newState.winner === clientState.myRole;
-          const winnerText = isWinner ? 'あなた' : '相手';
           const reasonText =
             newState.winReason === 'escape'
               ? '青いお化け👻を脱出させた'
@@ -157,9 +162,28 @@ export default function PlayPage() {
     }
   };
 
+  if (!onlineReady) {
+    return (
+      <>
+        <GameHeader title="オンライン対戦" showBackToGames={false} />
+        <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20">
+          <ModeUnavailable
+            gameName="ガイスター"
+            modeLabel="オンライン対戦"
+            backHref="/games/geister"
+            alternatives={[
+              { href: '/games/geister/cpu', label: 'CPU対戦を始める', type: 'cpu' },
+              { href: '/games/geister/local', label: 'ローカル対戦を始める', type: 'local' },
+            ]}
+          />
+        </div>
+      </>
+    );
+  }
+
   if (!clientState || !gameState) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4">
+      <div className="min-h-screen app-bg board-pattern flex items-center justify-center px-4">
         <Card className="text-center">
           <CardContent className="py-12">
             <div className="flex justify-center mb-4">
@@ -179,7 +203,7 @@ export default function PlayPage() {
     const opponentReady = clientState.setupReady[opponentRole];
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4">
+      <div className="min-h-screen app-bg board-pattern flex items-center justify-center px-4">
         <Card className="max-w-md">
           <CardHeader>
             <h2 className="text-2xl font-bold text-center">配置待ち</h2>
@@ -213,7 +237,7 @@ export default function PlayPage() {
   const opponentRole = clientState.myRole === 'player1' ? 'player2' : 'player1';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 sm:py-8 px-2 sm:px-4">
+    <div className="min-h-screen app-bg board-pattern py-4 sm:py-8 px-2 sm:px-4">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-2xl sm:text-4xl font-bold text-white text-center mb-3 sm:mb-6">
           ガイスター（オンライン対戦）

@@ -3,6 +3,10 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 // Supabaseクライアントの遅延初期化
 let supabaseInstance: SupabaseClient | null = null;
 
+export function isSupabaseConfigured(): boolean {
+  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+}
+
 function getSupabaseClient(): SupabaseClient {
   if (supabaseInstance) {
     return supabaseInstance;
@@ -12,7 +16,6 @@ function getSupabaseClient(): SupabaseClient {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('Supabase環境変数が設定されていません');
     throw new Error('Supabase URL or Anon Key is missing in environment variables');
   }
 
@@ -36,6 +39,7 @@ function getSupabaseClient(): SupabaseClient {
 export const supabase = new Proxy({} as SupabaseClient, {
   get(_target, prop) {
     const client = getSupabaseClient();
-    return (client as any)[prop];
+    const value = Reflect.get(client, prop);
+    return typeof value === 'function' ? value.bind(client) : value;
   },
 });

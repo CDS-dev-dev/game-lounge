@@ -1,4 +1,4 @@
-// エンペラーゲーム（カイジのEカード）ルール説明ページ
+﻿// エンペラーゲーム（カイジのEカード）ルール説明ページ
 
 'use client';
 
@@ -10,7 +10,7 @@ import { POINTS } from '@/lib/games/emperor/constants';
 
 export default function EmperorRulesPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-4 sm:pb-8 px-3 sm:px-4">
+    <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
       <GameHeader title="エンペラーゲーム - ルール説明" />
 
       <main className="container mx-auto px-4 py-8">

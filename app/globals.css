@@ -30,6 +30,31 @@ body {
   box-sizing: border-box;
 }
 
+.app-bg {
+  background-color: #101318;
+  background-image: linear-gradient(135deg, #101318 0%, #13221f 42%, #241719 100%);
+}
+
+.app-bg-soft {
+  background:
+    linear-gradient(135deg, #f7f5ef 0%, #eef5f2 48%, #f6eee8 100%);
+}
+
+.board-pattern {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.app-bg.board-pattern {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(135deg, #101318 0%, #13221f 42%, #241719 100%);
+  background-size: 48px 48px, 48px 48px, auto;
+}
+
 /* アニメーション定義 */
 @keyframes fadeIn {
   from {

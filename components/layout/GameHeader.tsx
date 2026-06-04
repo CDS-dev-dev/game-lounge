@@ -4,8 +4,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/Button';
-import { TEXT_SIZE, MIN_TAP_AREA } from '@/lib/constants/ui-scale';
+import { ArrowLeft, Home, LayoutGrid } from 'lucide-react';
 import { Z_INDEX } from '@/lib/constants/z-index';
 
 interface GameHeaderProps {
@@ -26,75 +25,64 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   icon,
 }) => {
   const router = useRouter();
+  const actionClasses =
+    'inline-flex h-10 min-w-10 items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/10 px-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-teal-300 focus:ring-offset-2 focus:ring-offset-neutral-950 sm:h-11 sm:px-4 sm:text-sm';
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-slate-900/95 backdrop-blur-sm border-b border-slate-700" style={{ zIndex: Z_INDEX.HEADER }}>
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
+    <header className="fixed top-0 left-0 right-0 bg-neutral-950/95 backdrop-blur-md border-b border-white/10" style={{ zIndex: Z_INDEX.HEADER }}>
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 py-1.5 sm:py-2.5">
         <div className="flex items-center justify-between gap-2">
           {/* 左側：タイトル */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Link
               href="/"
-              className="text-white hover:text-gray-300 transition-colors flex-shrink-0"
+              className="inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg text-white transition-colors hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-teal-300 focus:ring-offset-2 focus:ring-offset-neutral-950 sm:h-11 sm:w-11"
               aria-label="ホームに戻る"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 sm:h-6 sm:w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                />
-              </svg>
+              <Home className="h-5 w-5" aria-hidden="true" />
             </Link>
             {title && (
-              <h1 className={`${TEXT_SIZE.body} sm:${TEXT_SIZE.heading3} font-bold text-white line-clamp-1 flex items-center gap-2`}>
+              <div className="flex min-w-0 items-center gap-2 font-bold text-white">
                 {icon && <span className="flex-shrink-0">{icon}</span>}
-                <span>{title}</span>
-              </h1>
+                <span className="truncate text-sm leading-tight sm:text-lg">{title}</span>
+              </div>
             )}
           </div>
 
           {/* 右側：ナビゲーションボタン */}
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             {backUrl && backLabel && (
-              <Button
-                variant="secondary"
-                size="sm"
+              <button
+                type="button"
                 onClick={() => router.push(backUrl)}
                 aria-label={`${backLabel}に戻る`}
-                className={`${TEXT_SIZE.label} whitespace-nowrap ${MIN_TAP_AREA}`}
+                className={actionClasses}
               >
-                {backLabel}
-              </Button>
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden sm:inline">{backLabel}</span>
+              </button>
             )}
             {showBackToGames && (
-              <Button
-                variant="secondary"
-                size="sm"
+              <button
+                type="button"
                 onClick={() => router.push('/games')}
                 aria-label="ゲーム選択に戻る"
-                className={`${TEXT_SIZE.label} whitespace-nowrap ${MIN_TAP_AREA}`}
+                className={actionClasses}
               >
-                ゲーム選択
-              </Button>
+                <LayoutGrid className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden sm:inline">ゲーム選択</span>
+              </button>
             )}
             {showBackToHome && (
-              <Button
-                variant="secondary"
-                size="sm"
+              <button
+                type="button"
                 onClick={() => router.push('/')}
                 aria-label="ホームに戻る"
-                className={`${TEXT_SIZE.label} whitespace-nowrap ${MIN_TAP_AREA}`}
+                className={actionClasses}
               >
-                ホーム
-              </Button>
+                <Home className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden sm:inline">ホーム</span>
+              </button>
             )}
           </div>
         </div>

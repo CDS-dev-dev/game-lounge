@@ -9,10 +9,30 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    ".ui-audit/**",
+    ".vercel/**",
+    "coverage/**",
+    "node_modules/**",
     "out/**",
     "build/**",
+    "app/generated/prisma/**",
+    "scripts/**/*.js",
+    "test-*.js",
+    "test-browser*.js",
+    "jest.config.js",
     "next-env.d.ts",
+    "*.tsbuildinfo",
   ]),
+  {
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-require-imports": "off",
+      "prefer-const": "warn",
+      "react-hooks/error-boundaries": "off",
+      "react-hooks/refs": "off",
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

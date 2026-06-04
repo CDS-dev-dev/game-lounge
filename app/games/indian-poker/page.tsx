@@ -1,8 +1,7 @@
-// インディアンポーカー - モード選択ページ
+﻿// インディアンポーカー - モード選択ページ
 
 'use client';
 
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Script from 'next/script';
 import { Card, CardContent } from '@/components/ui/Card';
@@ -12,8 +11,6 @@ import { TEXT_SIZE, CARD_BG, PADDING } from '@/lib/constants/ui-scale';
 import { Gamepad2 } from 'lucide-react';
 
 export default function IndianPokerModePage() {
-  const router = useRouter();
-
   // 構造化データ（Game）
   const structuredData = {
     '@context': 'https://schema.org',
@@ -45,7 +42,7 @@ export default function IndianPokerModePage() {
         title="インディアンポーカー"
         icon={<Gamepad2 className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />}
       />
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-8 px-4">
+      <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-8 px-4">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-4 sm:mb-6">
             <h1 className={`${TEXT_SIZE.heading1} font-bold text-white mb-1 sm:mb-2`}>
@@ -62,8 +59,9 @@ export default function IndianPokerModePage() {
                 type: 'online',
                 title: 'オンライン',
                 emoji: '🌐',
-                description: '世界中と対戦',
+                description: '準備中',
                 href: '/games/indian-poker/online',
+                disabled: true,
               },
               {
                 type: 'local',

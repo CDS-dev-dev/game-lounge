@@ -30,6 +30,13 @@ const COLOR_CLASSES: Record<string, string> = {
   green: 'bg-green-500 border-green-600',
 };
 
+const COLOR_LABELS: Record<string, string> = {
+  red: '赤',
+  blue: '青',
+  yellow: '黄',
+  green: '緑',
+};
+
 export const BoardTab: React.FC<BoardTabProps> = ({
   gameState,
   onRollDice,
@@ -43,10 +50,10 @@ export const BoardTab: React.FC<BoardTabProps> = ({
   return (
     <div className="flex flex-col items-center gap-4">
       {/* ゲーム情報 */}
-      <div className="w-full bg-gray-800 rounded-lg p-4">
+      <div className="w-full rounded-lg border border-neutral-200 bg-white/95 p-4 shadow-lg">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="text-sm">
-            <span className="font-bold">ラウンド {gameState.round + 1}</span>
+          <div className="text-sm text-neutral-700">
+            <span className="font-bold text-neutral-950">ラウンド {gameState.round + 1}</span>
             <span className="mx-2">|</span>
             <span>現在のターン: {currentPlayer.name}</span>
           </div>
@@ -56,7 +63,7 @@ export const BoardTab: React.FC<BoardTabProps> = ({
               ${COLOR_CLASSES[currentPlayer.color]}
             `}
           >
-            {currentPlayer.color}
+            {COLOR_LABELS[currentPlayer.color] || currentPlayer.color}
           </div>
         </div>
       </div>
@@ -65,7 +72,7 @@ export const BoardTab: React.FC<BoardTabProps> = ({
       {gameState.isMyTurn && gameState.diceValue === 0 && (
         <button
           onClick={onRollDice}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+          className="w-full rounded-lg bg-teal-700 px-6 py-3 font-bold text-white transition-colors hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300"
           disabled={!gameState.canOperate}
         >
           🎲 サイコロを振る
@@ -73,32 +80,32 @@ export const BoardTab: React.FC<BoardTabProps> = ({
       )}
 
       {gameState.diceValue > 0 && (
-        <div className="bg-gray-800 rounded-lg p-4 text-center">
+        <div className="rounded-lg border border-neutral-200 bg-white/95 p-4 text-center shadow-lg">
           <div className="text-4xl mb-2">🎲</div>
-          <div className="text-2xl font-bold">{gameState.diceValue}</div>
+          <div className="text-2xl font-bold text-neutral-950">{gameState.diceValue}</div>
         </div>
       )}
 
       {/* 建設モード表示 */}
       {buildMode && (
-        <div className="w-full bg-blue-900 border-2 border-blue-500 rounded-lg p-3 text-center">
-          <div className="font-bold text-blue-200">
+        <div className="w-full rounded-lg border border-teal-300 bg-teal-50 p-3 text-center">
+          <div className="font-bold text-teal-950">
             {buildMode === 'road' && '🛤️ 道路建設モード'}
             {buildMode === 'village' && '🏘️ 村建設モード'}
             {buildMode === 'town' && '🏛️ 町建設モード'}
           </div>
           {buildMode === 'road' && roadStart && (
-            <div className="text-xs text-blue-300 mt-1">
+            <div className="text-xs text-teal-700 mt-1">
               開始地点選択済み。終了地点をクリックしてください。
             </div>
           )}
           {buildMode === 'road' && !roadStart && (
-            <div className="text-xs text-blue-300 mt-1">
+            <div className="text-xs text-teal-700 mt-1">
               開始地点をクリックしてください。
             </div>
           )}
           {buildMode !== 'road' && (
-            <div className="text-xs text-blue-300 mt-1">
+            <div className="text-xs text-teal-700 mt-1">
               タイルをクリックして配置してください。
             </div>
           )}
@@ -106,7 +113,7 @@ export const BoardTab: React.FC<BoardTabProps> = ({
       )}
 
       {/* ゲームボード */}
-      <div className="grid grid-cols-6 gap-1 bg-gray-800 p-4 rounded-lg">
+      <div className="grid grid-cols-6 gap-1 rounded-lg border border-neutral-900/50 bg-neutral-900/80 p-4 shadow-xl">
         {gameState.board.map((row, y) =>
           row.map((tile, x) => {
             const position = tile.position;
@@ -164,7 +171,7 @@ export const BoardTab: React.FC<BoardTabProps> = ({
       </div>
 
       {/* 道路の表示 */}
-      <div className="text-xs text-gray-400">
+      <div className="text-xs text-neutral-500">
         道路: {gameState.roads.filter((r) => r.owner === myPlayer.id).length}本
       </div>
 

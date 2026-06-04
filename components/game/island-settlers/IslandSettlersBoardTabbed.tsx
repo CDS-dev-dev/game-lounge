@@ -3,6 +3,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { BarChart3, Hammer, Map, Repeat2 } from 'lucide-react';
 import type { IslandSettlersClientState, Position, ResourceType, BuildingType } from '@/lib/games/island-settlers/types';
 import { BUILD_COSTS } from '@/lib/games/island-settlers/constants';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs';
@@ -75,14 +76,26 @@ export const IslandSettlersBoard: React.FC<IslandSettlersBoardProps> = ({
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="mx-auto flex h-full w-full max-w-6xl flex-col">
       <Tabs defaultValue="board" className="flex-1 flex flex-col">
         {/* タブリスト */}
         <TabsList className="flex-shrink-0 overflow-x-auto">
-          <TabsTrigger value="board">🎮 ボード</TabsTrigger>
-          <TabsTrigger value="build">🏗️ 建設</TabsTrigger>
-          <TabsTrigger value="trade">💱 交易</TabsTrigger>
-          <TabsTrigger value="info">📊 情報</TabsTrigger>
+          <TabsTrigger value="board">
+            <Map className="h-4 w-4" aria-hidden="true" />
+            ボード
+          </TabsTrigger>
+          <TabsTrigger value="build">
+            <Hammer className="h-4 w-4" aria-hidden="true" />
+            建設
+          </TabsTrigger>
+          <TabsTrigger value="trade">
+            <Repeat2 className="h-4 w-4" aria-hidden="true" />
+            交易
+          </TabsTrigger>
+          <TabsTrigger value="info">
+            <BarChart3 className="h-4 w-4" aria-hidden="true" />
+            情報
+          </TabsTrigger>
         </TabsList>
 
         {/* タブコンテンツ */}

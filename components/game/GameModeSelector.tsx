@@ -3,10 +3,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { CARD_BG, HOVER_SCALE, MIN_TAP_AREA, TEXT_SIZE } from '@/lib/constants/ui-scale';
-import { Cpu, Users, Globe } from 'lucide-react';
+import { Bot, ChevronRight, Globe2, Users } from 'lucide-react';
 
 export interface GameMode {
   type: 'cpu' | 'local' | 'online';
@@ -41,41 +38,51 @@ export function GameModeSelector({ gameName, modes }: GameModeSelectorProps) {
   const getModeIcon = (type: string) => {
     switch (type) {
       case 'cpu':
-        return <Cpu className="w-10 h-10 sm:w-12 sm:h-12 text-indigo-600" aria-hidden="true" />;
+        return <Bot className="h-6 w-6 text-violet-600" aria-hidden="true" />;
       case 'local':
-        return <Users className="w-10 h-10 sm:w-12 sm:h-12 text-green-600" aria-hidden="true" />;
+        return <Users className="h-6 w-6 text-emerald-600" aria-hidden="true" />;
       case 'online':
-        return <Globe className="w-10 h-10 sm:w-12 sm:h-12 text-blue-600" aria-hidden="true" />;
+        return <Globe2 className="h-6 w-6 text-sky-600" aria-hidden="true" />;
       default:
         return null;
     }
   };
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+    <div className="mb-4 grid gap-3 sm:mb-5 sm:grid-cols-3">
       {modes.map((mode) => (
-        <Card
+        <button
           key={mode.type}
-          className={`${CARD_BG} ${mode.disabled ? 'opacity-60' : HOVER_SCALE}`}
+          type="button"
+          onClick={() => !mode.disabled && router.push(mode.href)}
+          disabled={mode.disabled}
+          aria-label={`${gameName}の${getModeLabel(mode.type)}を開始`}
+          aria-disabled={mode.disabled}
+          className={`group flex min-h-[92px] w-full items-center gap-3 rounded-lg border border-white/10 bg-white/95 p-4 text-left shadow-lg transition-transform focus:outline-none focus:ring-4 focus:ring-teal-300 sm:min-h-[156px] sm:flex-col sm:items-start sm:justify-between ${
+            mode.disabled ? 'cursor-not-allowed opacity-60' : 'hover:-translate-y-0.5 hover:bg-white'
+          }`}
         >
-          <button
-            onClick={() => !mode.disabled && router.push(mode.href)}
-            disabled={mode.disabled}
-            aria-label={`${gameName}の${getModeLabel(mode.type)}を開始`}
-            aria-disabled={mode.disabled}
-            className={`w-full text-center ${MIN_TAP_AREA} flex flex-col items-center justify-center p-3 sm:p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${mode.disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-          >
-            <div className="mb-2">
-              {getModeIcon(mode.type)}
-            </div>
-            <h2 className={`${TEXT_SIZE.title} font-bold text-slate-900 mb-1`}>
+          <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-neutral-100">
+            {getModeIcon(mode.type)}
+          </span>
+          <span className="min-w-0 flex-1 sm:flex-none">
+            <span className="flex items-center gap-2 text-xs font-semibold text-teal-700">
+              {getModeLabel(mode.type)}
+              {mode.disabled && (
+                <span className="rounded-md bg-neutral-200 px-1.5 py-0.5 text-[11px] font-bold text-neutral-600">
+                  準備中
+                </span>
+              )}
+            </span>
+            <span className="mt-0.5 block break-keep text-lg font-bold leading-tight text-neutral-950 sm:text-xl">
               {mode.title}
-            </h2>
-            <p className={`${TEXT_SIZE.caption} text-slate-600`}>
-              {mode.description}
-            </p>
-          </button>
-        </Card>
+            </span>
+            <span className="mt-1 block text-sm leading-5 text-neutral-600">{mode.description}</span>
+          </span>
+          {!mode.disabled && (
+            <ChevronRight className="h-5 w-5 flex-shrink-0 text-neutral-400 transition-transform group-hover:translate-x-0.5 sm:self-end" aria-hidden="true" />
+          )}
+        </button>
       ))}
     </div>
   );

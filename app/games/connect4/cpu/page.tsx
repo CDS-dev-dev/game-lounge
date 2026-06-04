@@ -1,12 +1,12 @@
-// 立体四目並べ CPU対戦ページ
+﻿// 立体四目並べ CPU対戦ページ
 
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { PlaySetupCard, SetupBackLink, SetupOptionButton } from '@/components/game/PlaySetup';
 import {
   createInitialState,
   joinPlayer2,
@@ -21,12 +21,10 @@ import type { Connect4State, Position3D, Connect4ClientState } from '@/lib/games
 import { Connect4Board3D } from '@/components/game/Connect4Board3D';
 import { RulesModal } from '@/components/game/RulesModal';
 import { useToast } from '@/components/ui/Toast';
-import { PLAYER_COLORS } from '@/lib/games/connect4/constants';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
 import { useGameHistory } from '@/lib/hooks/useGameHistory';
-import { TEXT_SIZE, MIN_TAP_AREA, PADDING } from '@/lib/constants/ui-scale';
 import { Z_INDEX } from '@/lib/constants/z-index';
 
 type CpuGamePhase = 'difficulty-select' | 'order-select' | 'playing' | 'cpuThinking' | 'finished';
@@ -187,7 +185,7 @@ export default function Connect4CpuPage() {
         backUrl="/games/connect4"
         backLabel="モード選択"
       />
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-4 sm:pb-8 px-3 sm:px-4">
+      <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
         <div className="max-w-4xl mx-auto">
           {/* ヘッダー */}
           <div className="text-center mb-4 sm:mb-6">
@@ -197,103 +195,62 @@ export default function Connect4CpuPage() {
 
         {/* 難易度選択 */}
         {phase === 'difficulty-select' && (
-          <>
-            <Card className="bg-white/95 max-w-2xl mx-auto">
-              <CardHeader>
-                <h2 className="text-2xl font-bold text-slate-900">難易度を選択</h2>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Button
-                    variant="primary"
-                    onClick={() => handleDifficultySelect('easy')}
-                    className={`${PADDING.button} ${MIN_TAP_AREA}`}
-                    aria-label="簡単モードを選択"
-                  >
-                    <div>
-                      <div className="text-2xl sm:text-3xl mb-2" role="img" aria-hidden="true">😊</div>
-                      <div className={`${TEXT_SIZE.body} font-bold mb-1`}>初級</div>
-                      <div className={TEXT_SIZE.caption}>初心者向け</div>
-                    </div>
-                  </Button>
-                  <Button
-                    variant="primary"
-                    onClick={() => handleDifficultySelect('medium')}
-                    className={`${PADDING.button} ${MIN_TAP_AREA}`}
-                    aria-label="普通モードを選択"
-                  >
-                    <div>
-                      <div className="text-2xl sm:text-3xl mb-2" role="img" aria-hidden="true">🤔</div>
-                      <div className={`${TEXT_SIZE.body} font-bold mb-1`}>中級</div>
-                      <div className={TEXT_SIZE.caption}>標準</div>
-                    </div>
-                  </Button>
-                  <Button
-                    variant="primary"
-                    onClick={() => handleDifficultySelect('hard')}
-                    className={`${PADDING.button} ${MIN_TAP_AREA}`}
-                    aria-label="難しいモードを選択"
-                  >
-                    <div>
-                      <div className="text-2xl sm:text-3xl mb-2" role="img" aria-hidden="true">🔥</div>
-                      <div className={`${TEXT_SIZE.body} font-bold mb-1`}>上級</div>
-                      <div className={TEXT_SIZE.caption}>挑戦者向け</div>
-                    </div>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            <div className="mt-4 text-center">
-              <Link href="/games/connect4" className="text-gray-200 hover:text-white underline text-sm">
-                モード選択に戻る
-              </Link>
+          <PlaySetupCard
+            title="難易度を選択"
+            subtitle="4×4×4の立体盤面で4つ揃えます。初回は3D表示で始まります。"
+          >
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+              {[
+                { value: 'easy' as Difficulty, title: '初級', description: '置ける場所を試しやすい', tone: 'green' as const },
+                { value: 'medium' as Difficulty, title: '中級', description: '標準的な読み合い', tone: 'amber' as const },
+                { value: 'hard' as Difficulty, title: '上級', description: '3Dラインを強く警戒', tone: 'red' as const },
+              ].map((item) => (
+                <SetupOptionButton
+                  key={item.value}
+                  title={item.title}
+                  description={item.description}
+                  selected={difficulty === item.value}
+                  onClick={() => handleDifficultySelect(item.value)}
+                  tone={item.tone}
+                />
+              ))}
             </div>
-          </>
+            <div className="mt-5 text-center">
+              <SetupBackLink href="/games/connect4">モード選択に戻る</SetupBackLink>
+            </div>
+          </PlaySetupCard>
         )}
 
         {/* 先攻後攻選択 */}
         {phase === 'order-select' && (
-          <Card className="bg-white/95 max-w-2xl mx-auto">
-            <CardHeader>
-              <h2 className="text-2xl font-bold text-slate-900 text-center">先攻・後攻を選択</h2>
-              <p className="text-sm text-slate-600 mt-2 text-center">
-                難易度: {difficulty === 'easy' && '😊 初級'}{difficulty === 'medium' && '🤔 中級'}{difficulty === 'hard' && '🔥 上級'}
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button
-                  onClick={() => startGame('first')}
-                  className="p-6 sm:p-8 rounded-xl border-4 border-blue-500 bg-blue-50 hover:bg-blue-100 transition-all hover:scale-105"
-                >
-                  <div className="text-4xl sm:text-6xl mb-3">🔵</div>
-                  <div className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">先攻</div>
-                  <div className="text-sm sm:text-base text-slate-600">
-                    あなたが先に置きます
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => startGame('second')}
-                  className="p-6 sm:p-8 rounded-xl border-4 border-red-500 bg-red-50 hover:bg-red-100 transition-all hover:scale-105"
-                >
-                  <div className="text-4xl sm:text-6xl mb-3">🔴</div>
-                  <div className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">後攻</div>
-                  <div className="text-sm sm:text-base text-slate-600">
-                    CPUが先に置きます
-                  </div>
-                </button>
-              </div>
-              <div className="mt-4 text-center">
-                <button
-                  onClick={() => setPhase('difficulty-select')}
-                  className="text-slate-600 hover:text-slate-900 underline text-sm"
-                >
-                  難易度を変更
-                </button>
-              </div>
-            </CardContent>
-          </Card>
+          <PlaySetupCard
+            title="先攻・後攻を選択"
+            subtitle={`難易度: ${difficulty === 'easy' ? '初級' : difficulty === 'medium' ? '中級' : '上級'}`}
+          >
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <SetupOptionButton
+                title="先攻"
+                description="あなたが先に置きます"
+                onClick={() => startGame('first')}
+                tone="blue"
+              />
+              <SetupOptionButton
+                title="後攻"
+                description="CPUが先に置きます"
+                onClick={() => startGame('second')}
+                tone="red"
+              />
+            </div>
+            <div className="mt-5 text-center">
+              <button
+                type="button"
+                onClick={() => setPhase('difficulty-select')}
+                className="inline-flex min-h-10 items-center justify-center rounded-lg px-3 text-sm font-semibold text-neutral-600 hover:bg-neutral-100 hover:text-neutral-950 focus:outline-none focus:ring-4 focus:ring-teal-300"
+              >
+                難易度を変更
+              </button>
+            </div>
+          </PlaySetupCard>
         )}
 
         {/* CPU思考中インジケーター（固定配置） */}

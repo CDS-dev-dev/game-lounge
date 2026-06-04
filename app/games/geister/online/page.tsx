@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -12,7 +12,9 @@ import {
   loadGameSession,
   subscribeToGameSession
 } from '@/lib/supabase/gameState';
+import { isSupabaseConfigured } from '@/lib/supabase/client';
 import { GameHeader } from '@/components/layout/GameHeader';
+import { ModeUnavailable } from '@/components/game/ModeUnavailable';
 import { logger } from '@/lib/utils/logger';
 
 type MatchingStatus = 'searching' | 'waiting' | 'matched';
@@ -22,6 +24,7 @@ export default function GeisterOnlinePage() {
   const { showToast } = useToast();
   const [matchingStatus, setMatchingStatus] = useState<MatchingStatus>('searching');
   const [gameId, setGameId] = useState<string | null>(null);
+  const onlineReady = isSupabaseConfigured();
 
   const startMatching = useCallback(async () => {
     setMatchingStatus('searching');
@@ -55,13 +58,18 @@ export default function GeisterOnlinePage() {
   }, [router, showToast]);
 
   useEffect(() => {
-    // ページを開いたら自動的にマッチング開始
-    void startMatching();
-  }, [startMatching]);
+    if (!onlineReady) return;
+
+    const timer = window.setTimeout(() => {
+      void startMatching();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [onlineReady, startMatching]);
 
   // ゲーム状態の監視
   useEffect(() => {
-    if (!gameId) return;
+    if (!onlineReady || !gameId) return;
 
     let isMounted = true;
 
@@ -81,7 +89,30 @@ export default function GeisterOnlinePage() {
       isMounted = false;
       unsubscribe();
     };
-  }, [gameId, router]);
+  }, [gameId, onlineReady, router]);
+
+  if (!onlineReady) {
+    return (
+      <>
+        <GameHeader
+          title="ガイスター オンライン対戦"
+          backUrl="/games/geister"
+          backLabel="モード選択"
+        />
+        <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20">
+          <ModeUnavailable
+            gameName="ガイスター"
+            modeLabel="オンライン対戦"
+            backHref="/games/geister"
+            alternatives={[
+              { href: '/games/geister/cpu', label: 'CPU対戦を始める', type: 'cpu' },
+              { href: '/games/geister/local', label: 'ローカル対戦を始める', type: 'local' },
+            ]}
+          />
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -90,7 +121,7 @@ export default function GeisterOnlinePage() {
         backUrl="/games/geister"
         backLabel="モード選択"
       />
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-4 sm:pb-8 px-3 sm:px-4">
+      <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
         <div className="max-w-2xl mx-auto">
         <Card className="text-center">
           <CardHeader>

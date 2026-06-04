@@ -60,8 +60,8 @@ export const TigerDragonBoard: React.FC<TigerDragonBoardProps> = ({
           isBackside
             ? 'bg-gray-700 border-gray-900'
             : getTileColor(tile.type)
-        } ${isSelected ? 'ring-4 ring-yellow-400 scale-110' : ''} ${
-          isSelectable ? 'hover:scale-110 hover:shadow-lg' : ''
+        } ${isSelected ? 'ring-4 ring-amber-300 -translate-y-0.5 shadow-lg' : ''} ${
+          isSelectable ? 'hover:-translate-y-0.5 hover:shadow-lg' : ''
         }`}
         onClick={
           isSelectable ? () => setSelectedTileId(tile.id) : undefined
@@ -141,7 +141,7 @@ export const TigerDragonBoard: React.FC<TigerDragonBoardProps> = ({
       <KeyboardHelpModal shortcuts={keyboardShortcuts} gameName="タイガー＆ドラゴン" />
       <div className="w-full max-w-6xl mx-auto p-2 sm:p-4">
         {/* ゲーム情報 */}
-        <div className="bg-white rounded-lg shadow-lg p-3 sm:p-4 mb-4">
+        <div className="mb-4 rounded-lg border border-neutral-200 bg-white/95 p-3 shadow-lg sm:p-4">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-4">
             <div className="text-center sm:text-left">
               <h2 className="text-lg sm:text-xl font-bold text-gray-800">
@@ -262,11 +262,11 @@ export const TigerDragonBoard: React.FC<TigerDragonBoardProps> = ({
         </div>
 
         {/* 攻め列・受け列 */}
-        <div className="bg-gradient-to-br from-green-700 to-green-900 rounded-lg shadow-lg p-4 sm:p-6 mb-4">
+        <div className="mb-4 rounded-lg border border-emerald-700/50 bg-[radial-gradient(circle_at_center,#16734c_0%,#0d513a_56%,#092d25_100%)] p-4 shadow-lg sm:p-6">
           {/* 攻め列 */}
           <div className="mb-6">
             <h3 className="text-sm sm:text-base font-bold text-white mb-2">攻め列</h3>
-            <div className="bg-white bg-opacity-20 rounded-lg p-3 min-h-24 flex items-center justify-center">
+            <div className="flex min-h-24 items-center justify-center rounded-lg border border-white/10 bg-white/15 p-3">
               {gameState.attackColumn.attackTile ? (
                 <div className="flex flex-col items-center">
                   {renderTile(gameState.attackColumn.attackTile)}
@@ -290,7 +290,7 @@ export const TigerDragonBoard: React.FC<TigerDragonBoardProps> = ({
             <h3 className="text-sm sm:text-base font-bold text-white mb-2">
               受け列（{gameState.defendColumn.length}枚）
             </h3>
-            <div className="bg-white bg-opacity-20 rounded-lg p-3 min-h-24">
+            <div className="min-h-24 rounded-lg border border-white/10 bg-white/15 p-3">
               {gameState.defendColumn.length > 0 ? (
                 <div className="flex flex-wrap gap-2 justify-start">
                   {gameState.defendColumn.slice(-10).map((tile, index) => (
@@ -311,12 +311,12 @@ export const TigerDragonBoard: React.FC<TigerDragonBoardProps> = ({
 
         {/* 自分の手牌 */}
         {myPlayer && (
-          <div className="bg-white rounded-lg shadow-lg p-3 sm:p-4 mb-4">
+          <div className="mb-4 rounded-lg border border-neutral-200 bg-white/95 p-3 shadow-lg sm:p-4">
             <h3 className="text-sm sm:text-base font-bold text-gray-800 mb-3">
               あなたの手牌（{myPlayer.hand.length}枚）
             </h3>
             <div className="flex flex-wrap gap-2 justify-center">
-              {myPlayer.hand.map((tile, index) => {
+              {myPlayer.hand.map((tile) => {
                 const isSelectable =
                   gameState.canAttack ||
                   (gameState.canDefend &&
@@ -340,7 +340,7 @@ export const TigerDragonBoard: React.FC<TigerDragonBoardProps> = ({
                     disabled={!selectedTileId}
                     className={`px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-bold text-sm sm:text-base transition-colors ${
                       selectedTileId
-                        ? 'bg-red-500 hover:bg-red-600 text-white'
+                        ? 'bg-red-700 hover:bg-red-800 text-white'
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                   >
@@ -355,7 +355,7 @@ export const TigerDragonBoard: React.FC<TigerDragonBoardProps> = ({
                       disabled={!selectedTileId || !gameState.defendableTiles.some(t => t.id === selectedTileId)}
                       className={`px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-bold text-sm sm:text-base transition-colors ${
                         selectedTileId && gameState.defendableTiles.some(t => t.id === selectedTileId)
-                          ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                          ? 'bg-slate-800 hover:bg-slate-900 text-white'
                           : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       }`}
                     >
@@ -363,7 +363,7 @@ export const TigerDragonBoard: React.FC<TigerDragonBoardProps> = ({
                     </button>
                     <button
                       onClick={handlePass}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-bold text-sm sm:text-base transition-colors"
+                      className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-amber-700 sm:px-6 sm:py-3 sm:text-base"
                     >
                       パス
                     </button>
@@ -385,7 +385,7 @@ export const TigerDragonBoard: React.FC<TigerDragonBoardProps> = ({
           <div className="flex justify-center">
             <button
               onClick={onEndRound}
-              className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold text-base sm:text-lg transition-colors"
+              className="rounded-lg bg-emerald-700 px-6 py-3 text-base font-bold text-white transition-colors hover:bg-emerald-800 sm:text-lg"
             >
               得点計算へ
             </button>
@@ -393,7 +393,7 @@ export const TigerDragonBoard: React.FC<TigerDragonBoardProps> = ({
         )}
 
         {/* ルール説明（コンパクト） */}
-        <div className="mt-4 bg-gray-100 rounded-lg p-3 sm:p-4">
+        <div className="mt-4 rounded-lg border border-neutral-200 bg-white/90 p-3 sm:p-4">
           <h3 className="text-sm sm:text-base font-bold text-gray-800 mb-2">
             タイガー＆ドラゴンのルール
           </h3>

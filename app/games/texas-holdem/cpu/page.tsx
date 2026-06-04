@@ -1,4 +1,4 @@
-// テキサスホールデム CPU対戦ページ
+﻿// テキサスホールデム CPU対戦ページ
 
 'use client';
 
@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
+import { PlaySetupCard, SetupOptionButton } from '@/components/game/PlaySetup';
 import {
   createInitialState,
   startGame,
@@ -36,6 +37,11 @@ export default function TexasHoldemCpuPage() {
   const [playerCount, setPlayerCount] = useState<number>(4);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [gameState, setGameState] = useState<TexasHoldemState | null>(null);
+
+  const updatePlayerCount = (value: number) => {
+    if (Number.isNaN(value)) return;
+    setPlayerCount(Math.min(9, Math.max(2, value)));
+  };
 
   // ゲーム開始
   const handleStartGame = async () => {
@@ -114,7 +120,7 @@ export default function TexasHoldemCpuPage() {
     if (!gameState || phase !== 'playing') return;
 
     try {
-      let newState = playerAction(gameState, PLAYER_ID, action, raiseAmount);
+      const newState = playerAction(gameState, PLAYER_ID, action, raiseAmount);
       setGameState(newState);
 
       // CPUのターンを処理
@@ -146,7 +152,7 @@ export default function TexasHoldemCpuPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-4 sm:pb-8 px-3 sm:px-4">
+    <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
       <GameHeader
         title="テキサスホールデム - CPU対戦"
         showBackToGames
@@ -155,52 +161,63 @@ export default function TexasHoldemCpuPage() {
       {/* セットアップ画面 */}
       {phase === 'setup' && (
         <div className="container mx-auto p-4">
-          <Card className="max-w-2xl mx-auto">
-            <CardHeader>
-              <h2 className="text-2xl font-bold">ゲーム設定</h2>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* プレイヤー人数 */}
+          <PlaySetupCard
+            title="ゲーム設定"
+            subtitle="CPUテーブルに参加します。人数が増えるほどプリフロップの判断が重くなります。"
+          >
+            <div className="space-y-6">
               <div>
-                <label className="block text-sm font-semibold mb-2">
+                <label className="block text-sm font-semibold text-neutral-700 mb-2">
                   プレイヤー人数（2～9人）
                 </label>
-                <input
-                  type="number"
-                  min={2}
-                  max={9}
-                  value={playerCount}
-                  onChange={(e) => setPlayerCount(parseInt(e.target.value, 10))}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                />
-              </div>
-
-              {/* 難易度 */}
-              <div>
-                <label className="block text-sm font-semibold mb-2">難易度</label>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                   <Button
-                    onClick={() => setDifficulty('easy')}
-                    variant={difficulty === 'easy' ? 'primary' : 'secondary'}
+                    type="button"
+                    variant="secondary"
+                    onClick={() => updatePlayerCount(playerCount - 1)}
+                    className="px-4"
                   >
-                    簡単
+                    -
                   </Button>
+                  <input
+                    type="number"
+                    min={2}
+                    max={9}
+                    value={playerCount}
+                    onChange={(e) => updatePlayerCount(parseInt(e.target.value, 10))}
+                    className="w-full rounded-lg border border-neutral-300 px-4 py-3 text-center text-lg font-bold text-neutral-950 focus:outline-none focus:ring-4 focus:ring-teal-300"
+                  />
                   <Button
-                    onClick={() => setDifficulty('medium')}
-                    variant={difficulty === 'medium' ? 'primary' : 'secondary'}
+                    type="button"
+                    variant="secondary"
+                    onClick={() => updatePlayerCount(playerCount + 1)}
+                    className="px-4"
                   >
-                    普通
-                  </Button>
-                  <Button
-                    onClick={() => setDifficulty('hard')}
-                    variant={difficulty === 'hard' ? 'primary' : 'secondary'}
-                  >
-                    難しい
+                    +
                   </Button>
                 </div>
               </div>
 
-              {/* 開始ボタン */}
+              <div>
+                <label className="block text-sm font-semibold text-neutral-700 mb-2">難易度</label>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  {[
+                    { value: 'easy' as const, title: '簡単', description: 'コール多め', tone: 'green' as const },
+                    { value: 'medium' as const, title: '普通', description: '標準戦略', tone: 'amber' as const },
+                    { value: 'hard' as const, title: '難しい', description: 'ハンド強度を重視', tone: 'red' as const },
+                  ].map((item) => (
+                    <SetupOptionButton
+                      key={item.value}
+                      title={item.title}
+                      description={item.description}
+                      selected={difficulty === item.value}
+                      onClick={() => setDifficulty(item.value)}
+                      tone={item.tone}
+                    />
+                  ))}
+                </div>
+              </div>
+
               <Button onClick={handleStartGame} variant="primary" className="w-full">
                 ゲーム開始
               </Button>
@@ -210,8 +227,8 @@ export default function TexasHoldemCpuPage() {
                   戻る
                 </Button>
               </Link>
-            </CardContent>
-          </Card>
+            </div>
+          </PlaySetupCard>
         </div>
       )}
 

@@ -1,4 +1,4 @@
-// 立体四目並べ ローカル対戦ページ
+﻿// 立体四目並べ ローカル対戦ページ
 
 'use client';
 
@@ -133,7 +133,7 @@ export default function Connect4LocalPage() {
         backUrl="/games/connect4"
         backLabel="モード選択"
       />
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-4 sm:pb-8 px-3 sm:px-4">
+      <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
         <div className="max-w-4xl mx-auto">
           {/* ヘッダー */}
           <div className="text-center mb-4 sm:mb-6">

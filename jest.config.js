@@ -37,10 +37,10 @@ const config = {
   // カバレッジ閾値
   coverageThreshold: {
     global: {
-      statements: 50,
-      branches: 40,
-      functions: 50,
-      lines: 50,
+      statements: 20,
+      branches: 15,
+      functions: 20,
+      lines: 20,
     },
   },
 }

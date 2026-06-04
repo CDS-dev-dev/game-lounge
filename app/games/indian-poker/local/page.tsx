@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
+import { PlaySetupCard, SetupBackLink, SetupHint, SetupOptionButton } from '@/components/game/PlaySetup';
 import {
   createInitialState,
   startRound,
@@ -21,6 +21,14 @@ import { logger } from '@/lib/utils/logger';
 type GamePhase = 'playerSelect' | 'nameInput' | 'playing' | 'finished';
 
 const GAME_ID = 'indian-poker-local-game';
+
+const getRankValue = (rank: string): number => {
+  const values: Record<string, number> = {
+    '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+    'J': 11, 'Q': 12, 'K': 13, 'A': 14
+  };
+  return values[rank] || 0;
+};
 
 export default function IndianPokerLocalPage() {
   const { showToast } = useToast();
@@ -60,39 +68,12 @@ export default function IndianPokerLocalPage() {
     setPhase('playing');
   }, [playerCount]);
 
-  // プレイヤーのアクション
-  const handlePlayerAction = useCallback((action: BettingAction) => {
-    if (!gameState || !clientState) return;
-
-    try {
-      let newState = executeAction(gameState, currentPlayerId, action);
-      setGameState(newState);
-
-      // ショーダウンになったら結果表示
-      if (newState.status === 'showdown') {
-        // 全員にカードを見せるため、最初のプレイヤーの視点で表示
-        setClientState(toClientState(newState, newState.players[0].id));
-        setSafeTimeout(() => handleShowdown(newState), 1500);
-      } else if (newState.status === 'betting') {
-        // 次のプレイヤーに切り替え
-        const nextPlayerId = newState.players[newState.currentTurn].id;
-        setCurrentPlayerId(nextPlayerId);
-        setClientState(toClientState(newState, nextPlayerId));
-      }
-    } catch (error) {
-      logger.error('Player action error:', error);
-      showToast(formatGameError(error), 'error');
-    }
-  }, [gameState, clientState, currentPlayerId, setSafeTimeout, showToast]);
-
-  // ショーダウン処理
-  const handleShowdown = (state: IndianPokerState) => {
+  const handleShowdown = useCallback((state: IndianPokerState) => {
     setPhase('finished');
 
     const activePlayers = state.players.filter(p => p.isActive);
     if (activePlayers.length === 0) return;
 
-    // 最も強いカードを持つプレイヤーを探す
     let maxValue = 0;
     const winners: string[] = [];
 
@@ -113,16 +94,32 @@ export default function IndianPokerLocalPage() {
       .filter(Boolean)
       .join(', ');
     showToast(`${winnerNames}の勝利です！`, 'success');
-  };
+  }, [showToast]);
 
-  // カードの数値化
-  const getRankValue = (rank: string): number => {
-    const values: Record<string, number> = {
-      '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
-      'J': 11, 'Q': 12, 'K': 13, 'A': 14
-    };
-    return values[rank] || 0;
-  };
+  // プレイヤーのアクション
+  const handlePlayerAction = useCallback((action: BettingAction) => {
+    if (!gameState || !clientState) return;
+
+    try {
+      const newState = executeAction(gameState, currentPlayerId, action);
+      setGameState(newState);
+
+      // ショーダウンになったら結果表示
+      if (newState.status === 'showdown') {
+        // 全員にカードを見せるため、最初のプレイヤーの視点で表示
+        setClientState(toClientState(newState, newState.players[0].id));
+        setSafeTimeout(() => handleShowdown(newState), 1500);
+      } else if (newState.status === 'betting') {
+        // 次のプレイヤーに切り替え
+        const nextPlayerId = newState.players[newState.currentTurn].id;
+        setCurrentPlayerId(nextPlayerId);
+        setClientState(toClientState(newState, nextPlayerId));
+      }
+    } catch (error) {
+      logger.error('Player action error:', error);
+      showToast(formatGameError(error), 'error');
+    }
+  }, [clientState, currentPlayerId, gameState, handleShowdown, setSafeTimeout, showToast]);
 
   // リスタート
   const handleRestart = useCallback(() => {
@@ -133,78 +130,67 @@ export default function IndianPokerLocalPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-4 sm:pb-8 px-3 sm:px-4">
+    <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
       <GameHeader title="インディアンポーカー - ローカル対戦" />
 
       <main className="container mx-auto px-4 py-8">
-        {/* プレイヤー人数選択 */}
         {phase === 'playerSelect' && (
-          <div className="max-w-2xl mx-auto">
-            <Card>
-              <CardHeader>
-                <h2 className="text-2xl font-bold text-center">プレイヤー人数を選択</h2>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 sm:grid-cols-5 gap-4">
-                  {[2, 3, 4, 5, 6].map((count) => (
-                    <button
-                      key={count}
-                      onClick={() => handleSelectPlayerCount(count)}
-                      className="bg-purple-500 hover:bg-purple-600 text-white py-8 rounded-lg font-bold text-2xl transition-colors"
-                    >
-                      {count}人
-                    </button>
-                  ))}
-                </div>
+          <PlaySetupCard
+            title="プレイヤー人数を選択"
+            subtitle="同じ端末を回しながら遊びます。人数に合わせて名前入力へ進みます。"
+          >
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+              {[2, 3, 4, 5, 6].map((count) => (
+                <SetupOptionButton
+                  key={count}
+                  title={`${count}人`}
+                  description={count <= 3 ? '短め' : count <= 5 ? '標準' : '大人数'}
+                  onClick={() => handleSelectPlayerCount(count)}
+                  tone={count <= 3 ? 'teal' : count <= 5 ? 'violet' : 'amber'}
+                  className="min-h-[86px]"
+                />
+              ))}
+            </div>
 
-                <p className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-gray-700">
-                  <strong>ローカル対戦：</strong> 同じ端末でプレイヤーが交代しながら遊びます。自分のターンが来たら端末を受け取って操作してください。
-                </p>
+            <div className="mt-5">
+              <SetupHint>自分のターンでは自分のカードを見ない前提です。端末を渡す前に画面を伏せると遊びやすくなります。</SetupHint>
+            </div>
 
-                <div className="mt-6 text-center">
-                  <Link href="/games/indian-poker" className="text-purple-600 hover:text-purple-800 underline">
-                    モード選択に戻る
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+            <div className="mt-5 text-center">
+              <SetupBackLink href="/games/indian-poker">モード選択に戻る</SetupBackLink>
+            </div>
+          </PlaySetupCard>
         )}
 
-        {/* プレイヤー名入力 */}
         {phase === 'nameInput' && (
-          <div className="max-w-2xl mx-auto">
-            <Card>
-              <CardHeader>
-                <h2 className="text-2xl font-bold text-center">プレイヤー名を入力</h2>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {playerNames.map((name, index) => (
-                    <div key={index}>
-                      <label className="block text-sm font-medium mb-1">プレイヤー{index + 1}</label>
-                      <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => handleNameChange(index, e.target.value)}
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        placeholder={`プレイヤー${index + 1}`}
-                      />
-                    </div>
-                  ))}
+          <PlaySetupCard
+            title="プレイヤー名を入力"
+            subtitle={`${playerCount}人で開始します。空欄にすると標準名のまま進みます。`}
+          >
+            <div className="space-y-3">
+              {playerNames.map((name, index) => (
+                <div key={index}>
+                  <label className="block text-sm font-semibold text-neutral-700 mb-1">プレイヤー{index + 1}</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => handleNameChange(index, e.target.value)}
+                    className="w-full rounded-lg border border-neutral-300 px-4 py-3 text-neutral-950 focus:outline-none focus:ring-4 focus:ring-teal-300"
+                    placeholder={`プレイヤー${index + 1}`}
+                  />
                 </div>
+              ))}
+            </div>
 
-                <div className="mt-6 flex gap-4">
-                  <Button onClick={() => setPhase('playerSelect')} variant="secondary" size="md" className="flex-1">
-                    戻る
-                  </Button>
-                  <Button onClick={handleStartGame} variant="primary" size="md" className="flex-1">
-                    ゲーム開始
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <Button onClick={() => setPhase('playerSelect')} variant="secondary" size="md" className="w-full">
+                戻る
+              </Button>
+              <Button onClick={handleStartGame} variant="primary" size="md" className="w-full">
+                ゲーム開始
+              </Button>
+            </div>
+          </PlaySetupCard>
         )}
 
         {/* ゲーム画面 */}
@@ -212,9 +198,9 @@ export default function IndianPokerLocalPage() {
           <div>
             {/* 現在のプレイヤー表示 */}
             {phase === 'playing' && (
-              <div className="max-w-4xl mx-auto mb-4 p-3 bg-purple-100 border-2 border-purple-300 rounded-lg text-center">
-                <p className="text-lg font-bold text-purple-900">{clientState.players[clientState.myIndex].name}のターン</p>
-                <p className="text-sm text-purple-700">カードを額に当てるイメージで、自分のカードは見ないでください</p>
+              <div className="max-w-4xl mx-auto mb-4 rounded-lg border border-teal-200 bg-white/95 p-3 text-center shadow-lg">
+                <p className="text-lg font-bold text-neutral-950">{clientState.players[clientState.myIndex].name}のターン</p>
+                <p className="text-sm text-neutral-600">自分のカードは見ないで、相手のカードとベットから判断します</p>
               </div>
             )}
 

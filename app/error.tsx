@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
@@ -18,7 +18,7 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4">
+    <div className="min-h-screen app-bg board-pattern flex items-center justify-center px-4">
       <Card className="max-w-md w-full">
         <CardHeader>
           <div className="text-center">

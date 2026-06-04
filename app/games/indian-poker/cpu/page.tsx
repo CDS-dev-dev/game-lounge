@@ -1,11 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { IconButton } from '@/components/ui/IconButton';
 import { GameHeader } from '@/components/layout/GameHeader';
+import { PlaySetupCard, SetupBackLink, SetupHint, SetupOptionButton } from '@/components/game/PlaySetup';
 import {
   createInitialState,
   startRound,
@@ -25,6 +24,14 @@ type GamePhase = 'playerSelect' | 'difficultySelect' | 'playing' | 'finished';
 const PLAYER_ID = 'player-human';
 const GAME_ID = 'indian-poker-cpu-game';
 
+const getRankValue = (rank: string): number => {
+  const values: Record<string, number> = {
+    '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
+    'J': 11, 'Q': 12, 'K': 13, 'A': 14
+  };
+  return values[rank] || 0;
+};
+
 export default function IndianPokerCpuPage() {
   const { showToast } = useToast();
   const { setSafeTimeout } = useSafeTimeout();
@@ -34,34 +41,45 @@ export default function IndianPokerCpuPage() {
   const [gameState, setGameState] = useState<IndianPokerState | null>(null);
   const [clientState, setClientState] = useState<IndianPokerClientState | null>(null);
 
-  // プレイヤー人数選択
   const handleSelectPlayerCount = useCallback((count: number) => {
     setPlayerCount(count);
     setPhase('difficultySelect');
   }, []);
 
-  // 難易度選択してゲーム開始
-  const handleStartGame = useCallback((selectedDifficulty: Difficulty) => {
-    setDifficulty(selectedDifficulty);
+  const handleShowdown = useCallback((state: IndianPokerState) => {
+    setPhase('finished');
 
-    const cpuCount = playerCount - 1;
-    let newState = createInitialState(GAME_ID, playerCount, PLAYER_ID, cpuCount, selectedDifficulty);
+    const activePlayers = state.players.filter(p => p.isActive);
+    if (activePlayers.length === 0) return;
 
-    // カードを配る
-    newState = startRound(newState);
+    let maxValue = 0;
+    const winners: string[] = [];
 
-    setGameState(newState);
-    setClientState(toClientState(newState, PLAYER_ID));
-    setPhase('playing');
+    activePlayers.forEach(p => {
+      if (!p.card) return;
+      const rankValue = getRankValue(p.card.rank);
+      if (rankValue > maxValue) {
+        maxValue = rankValue;
+        winners.length = 0;
+        winners.push(p.id);
+      } else if (rankValue === maxValue) {
+        winners.push(p.id);
+      }
+    });
 
-    // 最初のターンがCPUなら自動実行
-    if (newState.players[newState.currentTurn].isCPU) {
-      executeCPUTurns(newState);
+    const isWinner = winners.includes(PLAYER_ID);
+    if (isWinner) {
+      showToast('おめでとうございます！あなたの勝利です！', 'success');
+    } else {
+      const winnerNames = winners
+        .map(id => state.players.find(p => p.id === id)?.name)
+        .filter(Boolean)
+        .join(', ');
+      showToast(`${winnerNames}の勝利です`, 'info');
     }
-  }, [playerCount]);
+  }, [showToast]);
 
-  // CPUターンを連続実行
-  const executeCPUTurns = async (state: IndianPokerState) => {
+  const executeCPUTurns = useCallback(async (state: IndianPokerState) => {
     let currentState = state;
 
     while (
@@ -92,14 +110,31 @@ export default function IndianPokerCpuPage() {
         break;
       }
     }
-  };
+  }, [handleShowdown, setSafeTimeout, showToast]);
+
+  const handleStartGame = useCallback((selectedDifficulty: Difficulty) => {
+    setDifficulty(selectedDifficulty);
+
+    const cpuCount = playerCount - 1;
+    let newState = createInitialState(GAME_ID, playerCount, PLAYER_ID, cpuCount, selectedDifficulty);
+
+    newState = startRound(newState);
+
+    setGameState(newState);
+    setClientState(toClientState(newState, PLAYER_ID));
+    setPhase('playing');
+
+    if (newState.players[newState.currentTurn].isCPU) {
+      executeCPUTurns(newState);
+    }
+  }, [executeCPUTurns, playerCount]);
 
   // プレイヤーのアクション
   const handlePlayerAction = useCallback((action: BettingAction) => {
     if (!gameState || !clientState) return;
 
     try {
-      let newState = executeAction(gameState, PLAYER_ID, action);
+      const newState = executeAction(gameState, PLAYER_ID, action);
       setGameState(newState);
       setClientState(toClientState(newState, PLAYER_ID));
 
@@ -114,51 +149,7 @@ export default function IndianPokerCpuPage() {
       logger.error('Player action error:', error);
       showToast(formatGameError(error), 'error');
     }
-  }, [gameState, clientState, setSafeTimeout, showToast]);
-
-  // ショーダウン処理
-  const handleShowdown = (state: IndianPokerState) => {
-    setPhase('finished');
-
-    const activePlayers = state.players.filter(p => p.isActive);
-    if (activePlayers.length === 0) return;
-
-    // 最も強いカードを持つプレイヤーを探す
-    let maxValue = 0;
-    const winners: string[] = [];
-
-    activePlayers.forEach(p => {
-      if (!p.card) return;
-      const rankValue = getRankValue(p.card.rank);
-      if (rankValue > maxValue) {
-        maxValue = rankValue;
-        winners.length = 0;
-        winners.push(p.id);
-      } else if (rankValue === maxValue) {
-        winners.push(p.id);
-      }
-    });
-
-    const isWinner = winners.includes(PLAYER_ID);
-    if (isWinner) {
-      showToast('おめでとうございます！あなたの勝利です！', 'success');
-    } else {
-      const winnerNames = winners
-        .map(id => state.players.find(p => p.id === id)?.name)
-        .filter(Boolean)
-        .join(', ');
-      showToast(`${winnerNames}の勝利です`, 'info');
-    }
-  };
-
-  // カードの数値化
-  const getRankValue = (rank: string): number => {
-    const values: Record<string, number> = {
-      '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10,
-      'J': 11, 'Q': 12, 'K': 13, 'A': 14
-    };
-    return values[rank] || 0;
-  };
+  }, [clientState, executeCPUTurns, gameState, handleShowdown, setSafeTimeout, showToast]);
 
   // リスタート
   const handleRestart = useCallback(() => {
@@ -168,82 +159,70 @@ export default function IndianPokerCpuPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-4 sm:pb-8 px-3 sm:px-4">
+    <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
       <GameHeader title="インディアンポーカー - CPU対戦" />
 
       <main className="container mx-auto px-4 py-8">
-        {/* プレイヤー人数選択 */}
         {phase === 'playerSelect' && (
-          <div className="max-w-2xl mx-auto">
-            <Card>
-              <CardHeader>
-                <h2 className="text-2xl font-bold text-center">プレイヤー人数を選択</h2>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 sm:grid-cols-5 gap-4">
-                  {[2, 3, 4, 5, 6].map((count) => (
-                    <button
-                      key={count}
-                      onClick={() => handleSelectPlayerCount(count)}
-                      className="bg-purple-500 hover:bg-purple-600 text-white py-8 rounded-lg font-bold text-2xl transition-colors"
-                    >
-                      {count}人
-                    </button>
-                  ))}
-                </div>
+          <PlaySetupCard
+            title="プレイヤー人数を選択"
+            subtitle="人数が増えるほど、見えるカードと降りる判断が複雑になります。"
+          >
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+              {[2, 3, 4, 5, 6].map((count) => (
+                <SetupOptionButton
+                  key={count}
+                  title={`${count}人`}
+                  description={count <= 3 ? '軽め' : count <= 5 ? '標準' : '多人数'}
+                  onClick={() => handleSelectPlayerCount(count)}
+                  tone={count <= 3 ? 'teal' : count <= 5 ? 'violet' : 'amber'}
+                  className="min-h-[86px]"
+                />
+              ))}
+            </div>
 
-                <p className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-gray-700">
-                  <strong>ヒント：</strong> 人数が多いほど心理戦が複雑になります。初心者は3-4人がおすすめです。
-                </p>
+            <div className="mt-5">
+              <SetupHint>初心者は3〜4人がおすすめです。相手のカードを見ながら、自分の強さを推理します。</SetupHint>
+            </div>
 
-                <div className="mt-6 text-center">
-                  <Link href="/games/indian-poker" className="text-purple-600 hover:text-purple-800 underline">
-                    モード選択に戻る
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+            <div className="mt-5 text-center">
+              <SetupBackLink href="/games/indian-poker">モード選択に戻る</SetupBackLink>
+            </div>
+          </PlaySetupCard>
         )}
 
-        {/* 難易度選択 */}
         {phase === 'difficultySelect' && (
-          <div className="max-w-2xl mx-auto">
-            <Card>
-              <CardHeader>
-                <h2 className="text-2xl font-bold text-center">難易度を選択</h2>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-center items-center gap-8">
-                  {[
-                    { difficulty: 'easy' as Difficulty, icon: '🟢', label: '簡単', variant: 'success' as const },
-                    { difficulty: 'medium' as Difficulty, icon: '🟡', label: '普通', variant: 'warning' as const },
-                    { difficulty: 'hard' as Difficulty, icon: '🔴', label: '難しい', variant: 'danger' as const },
-                  ].map(({ difficulty, icon, label, variant }) => (
-                    <div key={difficulty} className="flex flex-col items-center gap-2">
-                      <IconButton
-                        icon={<span className="text-2xl">{icon}</span>}
-                        label={label}
-                        onClick={() => handleStartGame(difficulty)}
-                        variant={variant}
-                        size="lg"
-                      />
-                      <span className="text-sm font-medium">{label}</span>
-                    </div>
-                  ))}
-                </div>
+          <PlaySetupCard
+            title="難易度を選択"
+            subtitle={`${playerCount}人で開始します。CPUの降り方とレイズ判断が変わります。`}
+          >
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {[
+                { value: 'easy' as Difficulty, title: '簡単', description: '控えめに勝負します', tone: 'green' as const },
+                { value: 'medium' as Difficulty, title: '普通', description: '標準的に読み合います', tone: 'amber' as const },
+                { value: 'hard' as Difficulty, title: '難しい', description: '強気な駆け引きあり', tone: 'red' as const },
+              ].map((item) => (
+                <SetupOptionButton
+                  key={item.value}
+                  title={item.title}
+                  description={item.description}
+                  selected={difficulty === item.value}
+                  onClick={() => handleStartGame(item.value)}
+                  tone={item.tone}
+                />
+              ))}
+            </div>
 
-                <div className="mt-6 text-center">
-                  <button
-                    onClick={() => setPhase('playerSelect')}
-                    className="text-purple-600 hover:text-purple-800 underline"
-                  >
-                    人数選択に戻る
-                  </button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+            <div className="mt-5 text-center">
+              <button
+                type="button"
+                onClick={() => setPhase('playerSelect')}
+                className="inline-flex min-h-10 items-center justify-center rounded-lg px-3 text-sm font-semibold text-neutral-600 hover:bg-neutral-100 hover:text-neutral-950 focus:outline-none focus:ring-4 focus:ring-teal-300"
+              >
+                人数選択に戻る
+              </button>
+            </div>
+          </PlaySetupCard>
         )}
 
         {/* ゲーム画面 */}

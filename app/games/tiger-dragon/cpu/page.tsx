@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
+import { PlaySetupCard, SetupBackLink, SetupHint, SetupOptionButton } from '@/components/game/PlaySetup';
 import {
   createInitialState,
   startRound,
@@ -40,19 +40,93 @@ export default function TigerDragonCpuPage() {
   const [clientState, setClientState] = useState<TigerDragonClientState | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // CPUのターン実行
+  const executeCPUTurn = useCallback(async (state: TigerDragonState) => {
+    let currentState = state;
+
+    while (currentState.status === 'playing') {
+      const currentPlayer = currentState.players.find((p) => p.id === currentState.currentPlayerId);
+      if (!currentPlayer || !currentPlayer.isCpu) return;
+
+      setIsProcessing(true);
+
+      try {
+        await new Promise((resolve) => setSafeTimeout(() => resolve(undefined), 1000));
+
+        const aiAction = getAIAction(
+          currentState,
+          currentPlayer.id,
+          currentPlayer.cpuDifficulty || 'medium'
+        );
+
+        let newState = currentState;
+
+        if (aiAction.action === 'attack' && aiAction.tileId) {
+          newState = attack(currentState, currentPlayer.id, aiAction.tileId);
+          showToast(`${currentPlayer.name}が攻めました`, 'info');
+        } else if (aiAction.action === 'defend' && aiAction.tileId) {
+          newState = defend(currentState, currentPlayer.id, aiAction.tileId);
+          showToast(`${currentPlayer.name}が受けました`, 'info');
+        } else if (aiAction.action === 'pass') {
+          newState = pass(currentState, currentPlayer.id);
+          showToast(`${currentPlayer.name}がパスしました`, 'info');
+        }
+
+        setGameState(newState);
+        setClientState(toClientState(newState, PLAYER_ID));
+
+        if (newState.status === 'roundEnd') {
+          setPhase('roundEnd');
+          setIsProcessing(false);
+          return;
+        }
+
+        setIsProcessing(false);
+        currentState = newState;
+      } catch (error) {
+        logger.error('CPU turn error:', error);
+        showToast(formatGameError(error), 'error');
+        setIsProcessing(false);
+        return;
+      }
+    }
+  }, [setSafeTimeout, showToast]);
+
+  // ラウンド開始
+  const startNewRound = useCallback(async (state: TigerDragonState) => {
+    try {
+      setIsProcessing(true);
+      await new Promise((resolve) => setSafeTimeout(() => resolve(undefined), 500));
+
+      const newState = startRound(state);
+      setGameState(newState);
+      setClientState(toClientState(newState, PLAYER_ID));
+      setIsProcessing(false);
+
+      // CPUのターンなら自動実行
+      if (newState.currentPlayerId !== PLAYER_ID) {
+        executeCPUTurn(newState);
+      }
+    } catch (error) {
+      logger.error('Start round error:', error);
+      showToast(formatGameError(error), 'error');
+      setIsProcessing(false);
+    }
+  }, [executeCPUTurn, setSafeTimeout, showToast]);
+
   // ゲーム開始
-  const handleStartGame = useCallback(() => {
+  const handleStartGame = useCallback((selectedDifficulty: 'easy' | 'medium' | 'hard' = difficulty) => {
     // プレイヤーIDと名前を生成
     const playerIds = [PLAYER_ID];
     const playerNames = ['あなた'];
     const cpuFlags = [false];
-    const cpuDifficulties: ('easy' | 'medium' | 'hard')[] = [difficulty];
+    const cpuDifficulties: ('easy' | 'medium' | 'hard')[] = [selectedDifficulty];
 
     for (let i = 1; i < playerCount; i++) {
       playerIds.push(`cpu-${i}`);
       playerNames.push(`CPU ${i}`);
       cpuFlags.push(true);
-      cpuDifficulties.push(difficulty);
+      cpuDifficulties.push(selectedDifficulty);
     }
 
     const newState = createInitialState(
@@ -68,83 +142,7 @@ export default function TigerDragonCpuPage() {
 
     // ラウンド開始
     startNewRound(newState);
-  }, [playerCount, difficulty]);
-
-  // ラウンド開始
-  const startNewRound = useCallback(async (state: TigerDragonState) => {
-    try {
-      setIsProcessing(true);
-      await new Promise((resolve) => setSafeTimeout(() => resolve(undefined), 500));
-
-      let newState = startRound(state);
-      setGameState(newState);
-      setClientState(toClientState(newState, PLAYER_ID));
-      setIsProcessing(false);
-
-      // CPUのターンなら自動実行
-      if (newState.currentPlayerId !== PLAYER_ID) {
-        executeCPUTurn(newState);
-      }
-    } catch (error) {
-      logger.error('Start round error:', error);
-      showToast(formatGameError(error), 'error');
-      setIsProcessing(false);
-    }
-  }, [setSafeTimeout, showToast]);
-
-  // CPUのターン実行
-  const executeCPUTurn = useCallback(async (state: TigerDragonState) => {
-    if (state.status !== 'playing') return;
-
-    const currentPlayer = state.players.find((p) => p.id === state.currentPlayerId);
-    if (!currentPlayer || !currentPlayer.isCpu) return;
-
-    setIsProcessing(true);
-
-    try {
-      await new Promise((resolve) => setSafeTimeout(() => resolve(undefined), 1000));
-
-      const aiAction = getAIAction(
-        state,
-        currentPlayer.id,
-        currentPlayer.cpuDifficulty || 'medium'
-      );
-
-      let newState = state;
-
-      if (aiAction.action === 'attack' && aiAction.tileId) {
-        newState = attack(state, currentPlayer.id, aiAction.tileId);
-        showToast(`${currentPlayer.name}が攻めました`, 'info');
-      } else if (aiAction.action === 'defend' && aiAction.tileId) {
-        newState = defend(state, currentPlayer.id, aiAction.tileId);
-        showToast(`${currentPlayer.name}が受けました`, 'info');
-      } else if (aiAction.action === 'pass') {
-        newState = pass(state, currentPlayer.id);
-        showToast(`${currentPlayer.name}がパスしました`, 'info');
-      }
-
-      setGameState(newState);
-      setClientState(toClientState(newState, PLAYER_ID));
-
-      // ラウンド終了チェック
-      if (newState.status === 'roundEnd') {
-        setPhase('roundEnd');
-        setIsProcessing(false);
-        return;
-      }
-
-      setIsProcessing(false);
-
-      // 次のプレイヤーがCPUなら続行
-      if (newState.currentPlayerId !== PLAYER_ID) {
-        executeCPUTurn(newState);
-      }
-    } catch (error) {
-      logger.error('CPU turn error:', error);
-      showToast(formatGameError(error), 'error');
-      setIsProcessing(false);
-    }
-  }, [setSafeTimeout, showToast]);
+  }, [difficulty, playerCount, startNewRound]);
 
   // 攻めアクション
   const handleAttack = useCallback(async (tileId: string) => {
@@ -152,7 +150,7 @@ export default function TigerDragonCpuPage() {
 
     try {
       setIsProcessing(true);
-      let newState = attack(gameState, PLAYER_ID, tileId);
+      const newState = attack(gameState, PLAYER_ID, tileId);
       setGameState(newState);
       setClientState(toClientState(newState, PLAYER_ID));
 
@@ -182,7 +180,7 @@ export default function TigerDragonCpuPage() {
 
     try {
       setIsProcessing(true);
-      let newState = defend(gameState, PLAYER_ID, tileId);
+      const newState = defend(gameState, PLAYER_ID, tileId);
       setGameState(newState);
       setClientState(toClientState(newState, PLAYER_ID));
 
@@ -212,7 +210,7 @@ export default function TigerDragonCpuPage() {
 
     try {
       setIsProcessing(true);
-      let newState = pass(gameState, PLAYER_ID);
+      const newState = pass(gameState, PLAYER_ID);
       setGameState(newState);
       setClientState(toClientState(newState, PLAYER_ID));
       setIsProcessing(false);
@@ -236,7 +234,7 @@ export default function TigerDragonCpuPage() {
       setIsProcessing(true);
       await new Promise((resolve) => setSafeTimeout(() => resolve(undefined), 1000));
 
-      let newState = endRound(gameState);
+      const newState = endRound(gameState);
       setGameState(newState);
       setClientState(toClientState(newState, PLAYER_ID));
 
@@ -276,109 +274,79 @@ export default function TigerDragonCpuPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-4 sm:pb-8 px-3 sm:px-4">
+    <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
       <GameHeader title="タイガー&ドラゴン - CPU対戦" />
 
       <main className="container mx-auto px-4 py-8">
-        {/* プレイヤー人数選択 */}
         {phase === 'playerSelect' && (
-          <div className="max-w-2xl mx-auto">
-            <Card>
-              <CardHeader>
-                <h2 className="text-2xl font-bold text-center">プレイヤー人数を選択</h2>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  {[2, 3, 4, 5].map((count) => (
-                    <button
-                      key={count}
-                      onClick={() => {
-                        setPlayerCount(count);
-                        setPhase('difficultySelect');
-                      }}
-                      className="bg-blue-500 hover:bg-blue-600 text-white py-8 rounded-lg font-bold text-2xl transition-colors"
-                    >
-                      {count}人
-                    </button>
-                  ))}
-                </div>
+          <PlaySetupCard
+            title="プレイヤー人数を選択"
+            subtitle="人数が増えるほど手牌が少なくなり、早い判断が大事になります。"
+          >
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {[
+                { count: 2, meta: '20枚' },
+                { count: 3, meta: '13枚' },
+                { count: 4, meta: '10枚' },
+                { count: 5, meta: '8枚' },
+              ].map(({ count, meta }) => (
+                <SetupOptionButton
+                  key={count}
+                  title={`${count}人`}
+                  description="配牌"
+                  meta={meta}
+                  onClick={() => {
+                    setPlayerCount(count);
+                    setPhase('difficultySelect');
+                  }}
+                  tone={count <= 3 ? 'teal' : 'amber'}
+                  className="min-h-[104px]"
+                />
+              ))}
+            </div>
 
-                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <p className="text-sm text-gray-700">
-                    <strong>配牌枚数：</strong> 2人=20枚、3人=13枚、4人=10枚、5人=8枚
-                    <br />
-                    スタートプレイヤーは+1枚
-                  </p>
-                </div>
+            <div className="mt-5">
+              <SetupHint tone="warning">スタートプレイヤーは+1枚です。人数が多いほど1手の重みが増えます。</SetupHint>
+            </div>
 
-                <div className="mt-6 text-center">
-                  <Link
-                    href="/games/tiger-dragon"
-                    className="text-blue-600 hover:text-blue-800 underline"
-                  >
-                    モード選択に戻る
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+            <div className="mt-5 text-center">
+              <SetupBackLink href="/games/tiger-dragon">モード選択に戻る</SetupBackLink>
+            </div>
+          </PlaySetupCard>
         )}
 
-        {/* 難易度選択 */}
         {phase === 'difficultySelect' && (
-          <div className="max-w-2xl mx-auto">
-            <Card>
-              <CardHeader>
-                <h2 className="text-2xl font-bold text-center">難易度を選択</h2>
-                <p className="text-sm text-gray-600 text-center mt-2">
-                  {playerCount}人プレイ
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <button
-                    onClick={() => {
-                      setDifficulty('easy');
-                      handleStartGame();
-                    }}
-                    className="bg-green-500 hover:bg-green-600 text-white py-8 rounded-lg font-bold text-xl transition-colors"
-                  >
-                    イージー
-                    <p className="text-sm mt-2">ランダムに行動</p>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setDifficulty('medium');
-                      handleStartGame();
-                    }}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white py-8 rounded-lg font-bold text-xl transition-colors"
-                  >
-                    ノーマル
-                    <p className="text-sm mt-2">基本戦略あり</p>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setDifficulty('hard');
-                      handleStartGame();
-                    }}
-                    className="bg-red-500 hover:bg-red-600 text-white py-8 rounded-lg font-bold text-xl transition-colors"
-                  >
-                    ハード
-                    <p className="text-sm mt-2">高度な戦略</p>
-                  </button>
-                </div>
+          <PlaySetupCard title="難易度を選択" subtitle={`${playerCount}人プレイで開始します。`}>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {[
+                { value: 'easy' as const, title: 'イージー', description: 'ランダム寄りに行動', tone: 'green' as const },
+                { value: 'medium' as const, title: 'ノーマル', description: '基本戦略あり', tone: 'amber' as const },
+                { value: 'hard' as const, title: 'ハード', description: '受け牌を読んで行動', tone: 'red' as const },
+              ].map((item) => (
+                <SetupOptionButton
+                  key={item.value}
+                  title={item.title}
+                  description={item.description}
+                  selected={difficulty === item.value}
+                  onClick={() => {
+                    setDifficulty(item.value);
+                    handleStartGame(item.value);
+                  }}
+                  tone={item.tone}
+                />
+              ))}
+            </div>
 
-                <div className="mt-6 text-center">
-                  <button
-                    onClick={() => setPhase('playerSelect')}
-                    className="text-blue-600 hover:text-blue-800 underline"
-                  >
-                    人数選択に戻る
-                  </button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+            <div className="mt-5 text-center">
+              <button
+                type="button"
+                onClick={() => setPhase('playerSelect')}
+                className="inline-flex min-h-10 items-center justify-center rounded-lg px-3 text-sm font-semibold text-neutral-600 hover:bg-neutral-100 hover:text-neutral-950 focus:outline-none focus:ring-4 focus:ring-teal-300"
+              >
+                人数選択に戻る
+              </button>
+            </div>
+          </PlaySetupCard>
         )}
 
         {/* ゲーム画面 */}

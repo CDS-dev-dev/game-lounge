@@ -1,15 +1,17 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardHeader, CardContent } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import { setupPieces } from '@/lib/games/geister/engine';
 import { loadGameSession, saveGameSession, getOrCreatePlayerId } from '@/lib/supabase/gameState';
+import { isSupabaseConfigured } from '@/lib/supabase/client';
 import type { PieceSetup, PlayerRole } from '@/lib/games/geister/types';
 import { SetupBoard } from '@/components/game/SetupBoard';
+import { GameHeader } from '@/components/layout/GameHeader';
+import { ModeUnavailable } from '@/components/game/ModeUnavailable';
 import { logger } from '@/lib/utils/logger';
 
 const SETUP_TIME_LIMIT = 60; // 60秒
@@ -19,12 +21,15 @@ export default function SetupPage() {
   const params = useParams();
   const gameId = params.gameId as string;
   const { showToast } = useToast();
+  const onlineReady = isSupabaseConfigured();
 
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [setup, setSetup] = useState<PieceSetup[]>([]);
   const [myRole, setMyRole] = useState<PlayerRole | null>(null);
 
   useEffect(() => {
+    if (!onlineReady) return;
+
     const initSetup = async () => {
       try {
         const pid = await getOrCreatePlayerId();
@@ -54,7 +59,7 @@ export default function SetupPage() {
     };
 
     initSetup();
-  }, [gameId, router, showToast]);
+  }, [gameId, onlineReady, router, showToast]);
 
   const handleComplete = async (finalSetup: PieceSetup[]) => {
     if (!playerId) return;
@@ -82,16 +87,35 @@ export default function SetupPage() {
     console.log('時間切れ！ランダム配置が適用されます');
   };
 
+  if (!onlineReady) {
+    return (
+      <>
+        <GameHeader title="オンライン対戦の配置" showBackToGames={false} />
+        <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20">
+          <ModeUnavailable
+            gameName="ガイスター"
+            modeLabel="オンライン対戦の配置"
+            backHref="/games/geister"
+            alternatives={[
+              { href: '/games/geister/cpu', label: 'CPU対戦を始める', type: 'cpu' },
+              { href: '/games/geister/local', label: 'ローカル対戦を始める', type: 'local' },
+            ]}
+          />
+        </div>
+      </>
+    );
+  }
+
   if (!myRole) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen app-bg board-pattern flex items-center justify-center">
         <p className="text-white text-xl">読み込み中...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-4 sm:py-8 px-2 sm:px-4">
+    <div className="min-h-screen app-bg board-pattern py-4 sm:py-8 px-2 sm:px-4">
       <div className="max-w-4xl mx-auto">
         <Card className="mb-3 sm:mb-6">
           <CardHeader>

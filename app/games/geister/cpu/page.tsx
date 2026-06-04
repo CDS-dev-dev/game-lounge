@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
+import { PlaySetupCard, SetupOptionButton } from '@/components/game/PlaySetup';
 import {
   createInitialState,
   setupPieces,
@@ -14,7 +14,7 @@ import {
   getValidMoves,
 } from '@/lib/games/geister/engine';
 import { calculateCpuMove, generateCpuSetup } from '@/lib/games/geister/ai';
-import type { GeisterState, PieceSetup, Position, GeisterClientState, PlayerRole } from '@/lib/games/geister/types';
+import type { GeisterState, PieceSetup, Position, PlayerRole } from '@/lib/games/geister/types';
 import { GeisterBoard } from '@/components/game/GeisterBoard';
 import { SetupBoard } from '@/components/game/SetupBoard';
 import { RulesSummary } from '@/components/game/RulesSummary';
@@ -83,7 +83,6 @@ export default function GeisterCpuPage() {
   // プレイヤーの配置完了
   const handlePlayerSetupComplete = async (setup: PieceSetup[]) => {
     try {
-      const playerRole = playerOrder === 'first' ? 'player1' : 'player2';
       const cpuRole = playerOrder === 'first' ? 'player2' : 'player1';
 
       let newState = setupPieces(gameState, PLAYER_ID, setup);
@@ -298,34 +297,31 @@ export default function GeisterCpuPage() {
         backUrl="/games/geister"
         backLabel="モード選択"
       />
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-3 px-3 sm:px-4">
+      <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-3 px-3 sm:px-4">
         <div className="max-w-3xl mx-auto">
 
         {/* 先攻後攻選択 */}
         {phase === 'orderSelect' && (
-          <Card className="bg-white/95">
-            <CardHeader className="pb-2">
-              <h2 className="text-base sm:text-lg font-bold text-slate-900 text-center">先攻・後攻を選択</h2>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => handleOrderSelect('first')}
-                  className="p-2 sm:p-3 rounded-lg border-2 border-blue-500 bg-blue-50 hover:bg-blue-100 transition-all"
-                >
-                  <div className="text-2xl sm:text-3xl mb-1">⚡</div>
-                  <div className="text-xs sm:text-sm font-bold text-slate-900">先攻</div>
-                </button>
-                <button
-                  onClick={() => handleOrderSelect('second')}
-                  className="p-2 sm:p-3 rounded-lg border-2 border-purple-500 bg-purple-50 hover:bg-purple-100 transition-all"
-                >
-                  <div className="text-2xl sm:text-3xl mb-1">🛡️</div>
-                  <div className="text-xs sm:text-sm font-bold text-slate-900">後攻</div>
-                </button>
-              </div>
-            </CardContent>
-          </Card>
+          <PlaySetupCard
+            title="先攻・後攻を選択"
+            subtitle="先攻はすぐ動けます。後攻はCPUの初手を見てから始まります。"
+            className="max-w-xl"
+          >
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <SetupOptionButton
+                title="先攻"
+                description="あなたが先に動きます"
+                onClick={() => handleOrderSelect('first')}
+                tone="blue"
+              />
+              <SetupOptionButton
+                title="後攻"
+                description="CPUが先に動きます"
+                onClick={() => handleOrderSelect('second')}
+                tone="slate"
+              />
+            </div>
+          </PlaySetupCard>
         )}
 
         {/* 配置フェーズ */}

@@ -134,15 +134,15 @@ export const TabsTrigger: React.FC<TabsTriggerProps> = ({
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       className={`
-        ${MIN_TAP_AREA} px-4 sm:px-6 ${TEXT_SIZE.body} font-semibold
+        ${MIN_TAP_AREA} inline-flex items-center justify-center gap-2 whitespace-nowrap px-4 sm:px-6 ${TEXT_SIZE.body} font-semibold
         transition-all duration-200
         ${
           isSelected
-            ? 'text-indigo-600 border-b-2 border-indigo-600 bg-indigo-50'
+            ? 'text-teal-700 border-b-2 border-teal-600 bg-teal-50'
             : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
         }
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-        focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2
+        focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2
         ${className}
       `}
     >

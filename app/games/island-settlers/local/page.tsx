@@ -1,11 +1,11 @@
-// アイランドセトラーズ ローカル対戦ページ
+﻿// アイランドセトラーズ ローカル対戦ページ
 
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { PlaySetupCard, SetupHint, SetupOptionButton } from '@/components/game/PlaySetup';
 import {
   createInitialState,
   addPlayer,
@@ -163,58 +163,45 @@ export default function IslandSettlersLocalPage() {
   const clientState = getClientState();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-4 sm:pb-8 px-3 sm:px-4">
+    <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
       <GameHeader title="アイランドセトラーズ - ローカル対戦" />
 
       <main className="container mx-auto px-4 py-8">
         {phase === 'setup' && (
-          <div className="max-w-2xl mx-auto space-y-6">
-            <Card>
-              <CardHeader>
-                <h2 className="text-2xl font-bold">ゲーム設定</h2>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* プレイヤー数選択 */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">プレイヤー数</label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Button
-                      onClick={() => setPlayerCount(3)}
-                      variant={playerCount === 3 ? 'primary' : 'secondary'}
-                      size="lg"
-                    >
-                      3人
-                    </Button>
-                    <Button
-                      onClick={() => setPlayerCount(4)}
-                      variant={playerCount === 4 ? 'primary' : 'secondary'}
-                      size="lg"
-                    >
-                      4人
-                    </Button>
-                  </div>
+          <PlaySetupCard
+            title="ゲーム設定"
+            subtitle="同じ端末で順番に操作します。現在プレイヤーの視点で盤面を表示します。"
+          >
+            <div className="space-y-6">
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-neutral-700">プレイヤー数</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <SetupOptionButton
+                    title="3人"
+                    description="ゆったり遊べる"
+                    selected={playerCount === 3}
+                    onClick={() => setPlayerCount(3)}
+                    tone="teal"
+                  />
+                  <SetupOptionButton
+                    title="4人"
+                    description="盤面が競りやすい"
+                    selected={playerCount === 4}
+                    onClick={() => setPlayerCount(4)}
+                    tone="amber"
+                  />
                 </div>
+              </div>
 
-                <Button onClick={startGame} size="lg" className="w-full">
-                  ゲーム開始
-                </Button>
-              </CardContent>
-            </Card>
+              <SetupHint>
+                サイコロで資源を得て、道・村・町を建設します。資源は4:1で交易できます。
+              </SetupHint>
 
-            {/* ルール説明 */}
-            <Card>
-              <CardHeader>
-                <h3 className="text-xl font-bold">ルール</h3>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <p>• サイコロを振って資源を獲得</p>
-                <p>• 道・村・町を建設して領土を拡大</p>
-                <p>• 資源は4:1レートで交易可能</p>
-                <p>• 最初に8点獲得したプレイヤーの勝利</p>
-                <p>• 村=1点、町=2点</p>
-              </CardContent>
-            </Card>
-          </div>
+              <Button onClick={startGame} size="lg" className="w-full">
+                ゲーム開始
+              </Button>
+            </div>
+          </PlaySetupCard>
         )}
 
         {(phase === 'playing' || phase === 'finished') && clientState && (

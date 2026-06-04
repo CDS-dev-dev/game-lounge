@@ -1,19 +1,24 @@
-// エラーハンドリングユーティリティのテスト
+import { formatGameError, getErrorMessage } from '@/lib/utils/error-handler';
 
-import { getErrorMessage, formatGameError } from '@/lib/utils/error-handler';
+function setNodeEnv(value: typeof process.env.NODE_ENV) {
+  Object.defineProperty(process.env, 'NODE_ENV', {
+    value,
+    configurable: true,
+    writable: true,
+  });
+}
 
 describe('error-handler', () => {
   describe('getErrorMessage', () => {
-    it('Errorオブジェクトからメッセージを取得', () => {
-      const error = new Error('テストエラー');
-      expect(getErrorMessage(error)).toBe('テストエラー');
+    it('returns a message from Error instances', () => {
+      expect(getErrorMessage(new Error('test error'))).toBe('test error');
     });
 
-    it('文字列エラーをそのまま返す', () => {
-      expect(getErrorMessage('エラーメッセージ')).toBe('エラーメッセージ');
+    it('returns string errors as-is', () => {
+      expect(getErrorMessage('plain error')).toBe('plain error');
     });
 
-    it('未知の型のエラーはデフォルトメッセージ', () => {
+    it('falls back for unknown error values', () => {
       expect(getErrorMessage(null)).toBe('予期しないエラーが発生しました');
       expect(getErrorMessage(undefined)).toBe('予期しないエラーが発生しました');
       expect(getErrorMessage(123)).toBe('予期しないエラーが発生しました');
@@ -21,24 +26,22 @@ describe('error-handler', () => {
   });
 
   describe('formatGameError', () => {
-    it('開発環境では詳細メッセージを返す', () => {
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'development';
+    const originalEnv = process.env.NODE_ENV;
 
-      const error = new Error('詳細なエラー');
-      expect(formatGameError(error)).toBe('詳細なエラー');
-
-      process.env.NODE_ENV = originalEnv;
+    afterEach(() => {
+      setNodeEnv(originalEnv);
     });
 
-    it('本番環境では一般的なメッセージを返す', () => {
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'production';
+    it('returns detailed messages in development', () => {
+      setNodeEnv('development');
 
-      const error = new Error('詳細なエラー');
-      expect(formatGameError(error)).toBe('詳細なエラー');
+      expect(formatGameError(new Error('detailed error'))).toBe('detailed error');
+    });
 
-      process.env.NODE_ENV = originalEnv;
+    it('keeps the current production fallback behavior', () => {
+      setNodeEnv('production');
+
+      expect(formatGameError(new Error('detailed error'))).toBe('detailed error');
     });
   });
 });

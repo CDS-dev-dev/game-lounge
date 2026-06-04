@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
+import { PlaySetupCard, SetupBackLink, SetupOptionButton } from '@/components/game/PlaySetup';
 import {
   createInitialState,
   startRound,
@@ -53,6 +53,23 @@ export default function TigerDragonLocalPage() {
     setPlayerNames(newNames);
   }, [playerNames]);
 
+  // ラウンド開始
+  const startNewRound = useCallback(async (state: TigerDragonState, viewPlayerId: string) => {
+    try {
+      setIsProcessing(true);
+      await new Promise((resolve) => setSafeTimeout(() => resolve(undefined), 500));
+
+      const newState = startRound(state);
+      setGameState(newState);
+      setClientState(toClientState(newState, viewPlayerId));
+      setIsProcessing(false);
+    } catch (error) {
+      logger.error('Start round error:', error);
+      showToast(formatGameError(error), 'error');
+      setIsProcessing(false);
+    }
+  }, [setSafeTimeout, showToast]);
+
   // ゲーム開始
   const handleStartGame = useCallback(() => {
     const playerIds = playerNames.map((_, i) => `player-${i + 1}`);
@@ -71,24 +88,7 @@ export default function TigerDragonLocalPage() {
 
     // ラウンド開始
     startNewRound(newState, playerIds[0]);
-  }, [playerCount, playerNames]);
-
-  // ラウンド開始
-  const startNewRound = useCallback(async (state: TigerDragonState, viewPlayerId: string) => {
-    try {
-      setIsProcessing(true);
-      await new Promise((resolve) => setSafeTimeout(() => resolve(undefined), 500));
-
-      let newState = startRound(state);
-      setGameState(newState);
-      setClientState(toClientState(newState, viewPlayerId));
-      setIsProcessing(false);
-    } catch (error) {
-      logger.error('Start round error:', error);
-      showToast(formatGameError(error), 'error');
-      setIsProcessing(false);
-    }
-  }, [setSafeTimeout, showToast]);
+  }, [playerCount, playerNames, startNewRound]);
 
   // 攻めアクション
   const handleAttack = useCallback(async (tileId: string) => {
@@ -96,7 +96,7 @@ export default function TigerDragonLocalPage() {
 
     try {
       setIsProcessing(true);
-      let newState = attack(gameState, currentViewPlayerId, tileId);
+      const newState = attack(gameState, currentViewPlayerId, tileId);
       setGameState(newState);
       setClientState(toClientState(newState, currentViewPlayerId));
 
@@ -121,7 +121,7 @@ export default function TigerDragonLocalPage() {
 
     try {
       setIsProcessing(true);
-      let newState = defend(gameState, currentViewPlayerId, tileId);
+      const newState = defend(gameState, currentViewPlayerId, tileId);
       setGameState(newState);
       setClientState(toClientState(newState, currentViewPlayerId));
 
@@ -146,7 +146,7 @@ export default function TigerDragonLocalPage() {
 
     try {
       setIsProcessing(true);
-      let newState = pass(gameState, currentViewPlayerId);
+      const newState = pass(gameState, currentViewPlayerId);
       setGameState(newState);
       setClientState(toClientState(newState, currentViewPlayerId));
       setIsProcessing(false);
@@ -165,7 +165,7 @@ export default function TigerDragonLocalPage() {
       setIsProcessing(true);
       await new Promise((resolve) => setSafeTimeout(() => resolve(undefined), 1000));
 
-      let newState = endRound(gameState);
+      const newState = endRound(gameState);
       setGameState(newState);
       setClientState(toClientState(newState, currentViewPlayerId));
 
@@ -209,77 +209,58 @@ export default function TigerDragonLocalPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-4 sm:pb-8 px-3 sm:px-4">
+    <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
       <GameHeader title="タイガー&ドラゴン - ローカル対戦" />
 
       <main className="container mx-auto px-4 py-8">
-        {/* セットアップ画面 */}
         {phase === 'setup' && (
-          <div className="max-w-2xl mx-auto">
-            <Card>
-              <CardHeader>
-                <h2 className="text-2xl font-bold text-center">ゲーム設定</h2>
-              </CardHeader>
-              <CardContent>
-                {/* プレイヤー人数選択 */}
-                <div className="mb-6">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    プレイヤー人数
-                  </label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {[2, 3, 4, 5].map((count) => (
-                      <button
-                        key={count}
-                        onClick={() => handlePlayerCountChange(count)}
-                        className={`py-3 rounded-lg font-bold transition-colors ${
-                          playerCount === count
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-                        }`}
-                      >
-                        {count}人
-                      </button>
-                    ))}
-                  </div>
+          <PlaySetupCard
+            title="ゲーム設定"
+            subtitle="同じ端末で表示プレイヤーを切り替えながら遊びます。"
+          >
+            <div className="space-y-6">
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-neutral-700">プレイヤー人数</label>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {[2, 3, 4, 5].map((count) => (
+                    <SetupOptionButton
+                      key={count}
+                      title={`${count}人`}
+                      description={count <= 3 ? '手牌多め' : '短期戦'}
+                      selected={playerCount === count}
+                      onClick={() => handlePlayerCountChange(count)}
+                      tone={count <= 3 ? 'teal' : 'amber'}
+                      className="min-h-[92px]"
+                    />
+                  ))}
                 </div>
+              </div>
 
-                {/* プレイヤー名入力 */}
-                <div className="mb-6">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    プレイヤー名
-                  </label>
-                  <div className="space-y-2">
-                    {playerNames.map((name, index) => (
-                      <input
-                        key={index}
-                        type="text"
-                        value={name}
-                        onChange={(e) => handlePlayerNameChange(index, e.target.value)}
-                        placeholder={`プレイヤー${index + 1}`}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    ))}
-                  </div>
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-neutral-700">プレイヤー名</label>
+                <div className="space-y-2">
+                  {playerNames.map((name, index) => (
+                    <input
+                      key={index}
+                      type="text"
+                      value={name}
+                      onChange={(e) => handlePlayerNameChange(index, e.target.value)}
+                      placeholder={`プレイヤー${index + 1}`}
+                      className="w-full rounded-lg border border-neutral-300 px-4 py-3 text-neutral-950 focus:outline-none focus:ring-4 focus:ring-teal-300"
+                    />
+                  ))}
                 </div>
+              </div>
 
-                <button
-                  onClick={handleStartGame}
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-bold text-lg transition-colors"
-                >
-                  ゲーム開始
-                </button>
+              <Button onClick={handleStartGame} className="w-full" size="lg">
+                ゲーム開始
+              </Button>
 
-                <div className="mt-6 text-center">
-                  <Link
-                    href="/games/tiger-dragon"
-                    className="text-blue-600 hover:text-blue-800 underline"
-                  >
-                    モード選択に戻る
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              <div className="text-center">
+                <SetupBackLink href="/games/tiger-dragon">モード選択に戻る</SetupBackLink>
+              </div>
+            </div>
+          </PlaySetupCard>
         )}
 
         {/* ゲーム画面 */}
@@ -288,8 +269,8 @@ export default function TigerDragonLocalPage() {
             <div>
               {/* プレイヤー切り替え */}
               <div className="max-w-6xl mx-auto mb-4">
-                <div className="bg-white rounded-lg shadow-lg p-3">
-                  <p className="text-sm text-gray-600 mb-2 text-center">
+                <div className="rounded-lg border border-neutral-200 bg-white/95 p-3 shadow-lg">
+                  <p className="text-sm text-neutral-600 mb-2 text-center">
                     表示プレイヤー切り替え
                   </p>
                   <div className="flex gap-2 justify-center flex-wrap">
@@ -297,10 +278,10 @@ export default function TigerDragonLocalPage() {
                       <button
                         key={player.id}
                         onClick={() => handleSwitchPlayer(player.id)}
-                        className={`px-4 py-2 rounded-lg font-bold transition-colors ${
+                        className={`min-h-10 px-4 py-2 rounded-lg font-bold transition-colors focus:outline-none focus:ring-4 focus:ring-teal-300 ${
                           currentViewPlayerId === player.id
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                            ? 'bg-neutral-950 text-white'
+                            : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700'
                         }`}
                       >
                         {player.name}

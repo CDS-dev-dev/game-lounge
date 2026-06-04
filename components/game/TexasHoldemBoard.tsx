@@ -56,7 +56,7 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
   // (変換関数は toCommonCard を使用)
 
   return (
-    <div className="w-full min-h-screen flex flex-col bg-gradient-to-br from-green-800 to-green-900 p-4">
+    <div className="mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-6xl flex-col rounded-lg border border-emerald-700/50 bg-[radial-gradient(circle_at_center,#14633f_0%,#0d432f_54%,#07261f_100%)] p-3 shadow-2xl sm:p-4">
       {/* 対戦相手エリア */}
       <div className="mb-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 max-w-6xl mx-auto">
@@ -108,12 +108,12 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
       {/* 中央エリア（コミュニティカード＋ポット） */}
       <div className="flex flex-col items-center space-y-4 mb-4">
         {/* ポット */}
-        <div className="bg-yellow-500 text-black font-bold text-xl px-6 py-3 rounded-full shadow-lg">
-          POT: 💰 {gameState.pot}
+        <div className="rounded-full border border-amber-200 bg-amber-500 px-6 py-3 text-xl font-bold text-neutral-950 shadow-lg">
+          POT: {gameState.pot}
         </div>
 
         {/* コミュニティカード */}
-        <div className="flex gap-2 bg-white bg-opacity-10 p-4 rounded-lg">
+        <div className="flex max-w-full gap-1 overflow-x-auto rounded-lg border border-white/10 bg-white/10 p-3 sm:gap-2 sm:p-4">
           {gameState.status === 'preflop' ? (
             <div className="text-white text-sm">プリフロップ</div>
           ) : (
@@ -171,7 +171,7 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
 
         {/* アクションボタン */}
         {gameState.isMyTurn && !disabled && (
-          <div className="flex gap-2 sm:gap-3 justify-center flex-wrap">
+          <div className="flex justify-center gap-2 rounded-lg border border-white/10 bg-black/20 p-3 shadow-lg sm:gap-3">
             {gameState.canFold && (
               <FoldButton
                 onClick={() => onAction('fold')}

@@ -2,12 +2,12 @@
 
 'use client';
 
-import React, { useRef, useState, Suspense } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import type { Connect4ClientState, Position3D } from '@/lib/games/connect4/types';
-import { BOARD_SIZE, PLAYER_COLORS } from '@/lib/games/connect4/constants';
+import { BOARD_SIZE } from '@/lib/games/connect4/constants';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { Connect4Board } from './Connect4Board';
 
@@ -240,9 +240,11 @@ function Board3D({
 }
 
 export const Connect4Board3D: React.FC<Connect4Board3DProps> = (props) => {
+  const [viewMode, setViewMode] = useState<'2d' | '3d'>('3d');
+
   return (
     <ErrorBoundary
-      fallback={(error, reset) => (
+      fallback={(error) => (
         <div className="w-full">
           <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-4">
             <div className="flex items-start gap-3">
@@ -269,43 +271,78 @@ export const Connect4Board3D: React.FC<Connect4Board3DProps> = (props) => {
         </div>
       )}
     >
-      <div className="relative w-full h-[500px] sm:h-[600px] bg-slate-900 rounded-lg shadow-2xl overflow-hidden">
-        <Canvas>
-          <PerspectiveCamera makeDefault position={[6, 6, 6]} fov={50} />
-
-          {/* カメラコントロール（縦軸中心の回転制限付き） */}
-          <OrbitControls
-            enablePan={false}
-            enableZoom={true}
-            minDistance={5}
-            maxDistance={15}
-            minPolarAngle={0.1} // 真上に近い角度（約6度）
-            maxPolarAngle={Math.PI / 2 - 0.1} // 水平に近い角度（約84度）
-            maxAzimuthAngle={Infinity} // 左右回転は無制限
-            minAzimuthAngle={-Infinity}
-            enableDamping
-            dampingFactor={0.05}
-            target={[0, 0, 0]} // 中心を固定
-          />
-
-          <Suspense fallback={
-            <Html center>
-              <div className="bg-white/90 backdrop-blur-sm px-6 py-4 rounded-lg shadow-lg">
-                <div className="flex items-center gap-3">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                  <p className="text-slate-700 font-medium">3Dボードを読み込み中...</p>
-                </div>
-              </div>
-            </Html>
-          }>
-            <Board3D {...props} />
-          </Suspense>
-        </Canvas>
-
-        {/* 操作説明オーバーレイ */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/60 text-white px-4 py-2 rounded-lg text-xs sm:text-sm backdrop-blur-sm pointer-events-none">
-          🖱️ ドラッグで回転 | 🔍 ホイールでズーム | 💡 青い玉をクリックして配置
+      <div className="space-y-3">
+        <div className="rounded-lg border border-white/10 bg-neutral-950/80 p-2 text-white shadow-lg">
+          <div className="grid grid-cols-2 gap-2" role="tablist" aria-label="盤面表示の切り替え">
+            <button
+              type="button"
+              onClick={() => setViewMode('2d')}
+              role="tab"
+              aria-selected={viewMode === '2d'}
+              className={`min-h-[44px] rounded-md px-4 text-sm font-semibold transition-colors ${
+                viewMode === '2d' ? 'bg-teal-500 text-white' : 'bg-white/10 text-gray-100 hover:bg-white/15'
+              }`}
+            >
+              2D盤面
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('3d')}
+              role="tab"
+              aria-selected={viewMode === '3d'}
+              className={`min-h-[44px] rounded-md px-4 text-sm font-semibold transition-colors ${
+                viewMode === '3d' ? 'bg-teal-500 text-white' : 'bg-white/10 text-gray-100 hover:bg-white/15'
+              }`}
+            >
+              3D表示
+            </button>
+          </div>
         </div>
+
+        {viewMode === '2d' ? (
+          <div className="rounded-lg border border-white/10 bg-neutral-950/60 p-2 sm:p-4">
+            <Connect4Board {...props} />
+          </div>
+        ) : (
+          <div className="relative h-[min(72vh,520px)] min-h-[420px] w-full overflow-hidden rounded-lg border border-white/10 bg-slate-950 shadow-2xl sm:h-[600px]">
+            <Canvas>
+              <PerspectiveCamera makeDefault position={[6, 6, 6]} fov={50} />
+
+              {/* カメラコントロール（縦軸中心の回転制限付き） */}
+              <OrbitControls
+                enablePan={false}
+                enableZoom={true}
+                minDistance={5}
+                maxDistance={15}
+                minPolarAngle={0.1} // 真上に近い角度（約6度）
+                maxPolarAngle={Math.PI / 2 - 0.1} // 水平に近い角度（約84度）
+                maxAzimuthAngle={Infinity} // 左右回転は無制限
+                minAzimuthAngle={-Infinity}
+                enableDamping
+                dampingFactor={0.05}
+                target={[0, 0, 0]} // 中心を固定
+              />
+
+              <Suspense fallback={
+                <Html center>
+                  <div className="rounded-lg bg-white/90 px-6 py-4 shadow-lg backdrop-blur-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-teal-600"></div>
+                      <p className="font-medium text-slate-700">3Dボードを読み込み中...</p>
+                    </div>
+                  </div>
+                </Html>
+              }>
+                <Board3D {...props} />
+              </Suspense>
+            </Canvas>
+
+            {/* 操作説明オーバーレイ */}
+            <div className="pointer-events-none absolute bottom-3 left-1/2 w-[calc(100%-24px)] max-w-lg -translate-x-1/2 rounded-lg bg-black/65 px-3 py-2 text-center text-xs text-white backdrop-blur-sm sm:text-sm">
+              ドラッグで回転 / ホイールでズーム / 青い玉をクリック
+            </div>
+          </div>
+        )}
       </div>
     </ErrorBoundary>
   );

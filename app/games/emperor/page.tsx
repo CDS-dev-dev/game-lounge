@@ -1,4 +1,4 @@
-// エンペラーゲーム（カイジのEカード）メインページ
+﻿// エンペラーゲーム（カイジのEカード）メインページ
 
 'use client';
 
@@ -12,7 +12,7 @@ import { Crown } from 'lucide-react';
 
 export default function EmperorPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-8 px-4">
+    <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-8 px-4">
       <GameHeader
         title="エンペラーゲーム（Eカード）"
         icon={<Crown className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />}

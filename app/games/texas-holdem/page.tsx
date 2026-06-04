@@ -1,4 +1,4 @@
-// テキサスホールデム メインページ（モード選択）
+﻿// テキサスホールデム メインページ（モード選択）
 
 import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
@@ -14,7 +14,7 @@ export const metadata = {
 
 export default function TexasHoldemPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-8 px-4">
+    <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-8 px-4">
       <GameHeader
         title="テキサスホールデム"
         showBackToGames

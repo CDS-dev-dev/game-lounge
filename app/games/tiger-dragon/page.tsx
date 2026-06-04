@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -17,7 +17,7 @@ export default function TigerDragonGamePage() {
         title="タイガー&ドラゴン"
         icon={<Flame className="w-5 h-5 sm:w-6 sm:h-6 text-orange-400" />}
       />
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-8 px-4">
+      <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-8 px-4">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-4 sm:mb-6">
             <h1 className={`${TEXT_SIZE.heading1} font-bold text-white mb-1 sm:mb-2`}>タイガー&ドラゴン 🐯🐉</h1>

@@ -1,12 +1,12 @@
-// 中国象棋 CPU対戦ページ
+﻿// 中国象棋 CPU対戦ページ
 
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { PlaySetupCard, SetupBackLink, SetupOptionButton } from '@/components/game/PlaySetup';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/Accordion';
 import {
   createInitialState,
@@ -184,7 +184,7 @@ export default function XiangqiCpuPage() {
         backUrl="/games/xiangqi"
         backLabel="モード選択"
       />
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-20 sm:pt-24 pb-4 sm:pb-8 px-3 sm:px-4">
+      <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
         <div className="max-w-5xl mx-auto">
           {/* ヘッダー */}
           <div className="text-center mb-4 sm:mb-6 md:mb-8">
@@ -194,103 +194,63 @@ export default function XiangqiCpuPage() {
 
         {/* 難易度選択 */}
         {phase === 'difficulty-select' && (
-          <>
-            <Card className="bg-white/95 max-w-2xl mx-auto">
-              <CardHeader>
-                <h2 className="text-2xl font-bold text-slate-900">難易度を選択</h2>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Button
-                    variant="primary"
-                    onClick={() => handleDifficultySelect('easy')}
-                    className="py-8 text-lg"
-                  >
-                    <div>
-                      <div className="text-3xl mb-2">😊</div>
-                      <div>初級</div>
-                      <div className="text-xs mt-1 opacity-70">初心者向け</div>
-                    </div>
-                  </Button>
-                  <Button
-                    variant="primary"
-                    onClick={() => handleDifficultySelect('medium')}
-                    className="py-8 text-lg"
-                  >
-                    <div>
-                      <div className="text-3xl mb-2">🤔</div>
-                      <div>中級</div>
-                      <div className="text-xs mt-1 opacity-70">標準</div>
-                    </div>
-                  </Button>
-                  <Button
-                    variant="primary"
-                    onClick={() => handleDifficultySelect('hard')}
-                    className="py-8 text-lg"
-                  >
-                    <div>
-                      <div className="text-3xl mb-2">🔥</div>
-                      <div>上級</div>
-                      <div className="text-xs mt-1 opacity-70">挑戦者向け</div>
-                    </div>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            <div className="mt-4 text-center">
-              <Link href="/games/xiangqi" className="text-gray-200 hover:text-white underline text-sm">
-                モード選択に戻る
-              </Link>
+          <PlaySetupCard
+            title="難易度を選択"
+            subtitle="駒の動きが独特なので、最初は初級か中級がおすすめです。"
+          >
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+              {[
+                { value: 'easy' as Difficulty, title: '初級', description: '取り合いを試しやすい', tone: 'green' as const },
+                { value: 'medium' as Difficulty, title: '中級', description: '標準的な読み合い', tone: 'amber' as const },
+                { value: 'hard' as Difficulty, title: '上級', description: '守りも強め', tone: 'red' as const },
+              ].map((item) => (
+                <SetupOptionButton
+                  key={item.value}
+                  title={item.title}
+                  description={item.description}
+                  selected={difficulty === item.value}
+                  onClick={() => handleDifficultySelect(item.value)}
+                  tone={item.tone}
+                />
+              ))}
             </div>
-          </>
+            <div className="mt-5 text-center">
+              <SetupBackLink href="/games/xiangqi">モード選択に戻る</SetupBackLink>
+            </div>
+          </PlaySetupCard>
         )}
 
         {/* 先攻後攻選択 */}
         {phase === 'order-select' && (
-          <Card className="bg-white/95 max-w-2xl mx-auto">
-            <CardHeader>
-              <h2 className="text-2xl font-bold text-slate-900 text-center">紅・黒を選択</h2>
-              <p className="text-sm text-slate-600 mt-2 text-center">
-                難易度: {difficulty === 'easy' && '😊 初級'}{difficulty === 'medium' && '🤔 中級'}{difficulty === 'hard' && '🔥 上級'}
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button
-                  onClick={() => startGame('red')}
-                  aria-label="紅（先攻）でゲームを開始"
-                  className="p-6 sm:p-8 rounded-xl border-4 border-red-500 bg-red-50 hover:bg-red-100 transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                >
-                  <div className="text-4xl sm:text-6xl mb-3" role="img" aria-hidden="true">🔴</div>
-                  <div className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">紅（先攻）</div>
-                  <div className="text-sm sm:text-base text-slate-600">
-                    あなたが先に動きます
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => startGame('black')}
-                  aria-label="黒（後攻）でゲームを開始"
-                  className="p-6 sm:p-8 rounded-xl border-4 border-slate-700 bg-slate-50 hover:bg-slate-100 transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-slate-700 focus:ring-offset-2"
-                >
-                  <div className="text-4xl sm:text-6xl mb-3" role="img" aria-hidden="true">⚫</div>
-                  <div className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">黒（後攻）</div>
-                  <div className="text-sm sm:text-base text-slate-600">
-                    CPUが先に動きます
-                  </div>
-                </button>
-              </div>
-              <div className="mt-4 text-center">
-                <button
-                  onClick={() => setPhase('difficulty-select')}
-                  aria-label="難易度選択画面に戻る"
-                  className="text-slate-600 hover:text-slate-900 underline text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 rounded px-2 py-1"
-                >
-                  難易度を変更
-                </button>
-              </div>
-            </CardContent>
-          </Card>
+          <PlaySetupCard
+            title="紅・黒を選択"
+            subtitle={`難易度: ${difficulty === 'easy' ? '初級' : difficulty === 'medium' ? '中級' : '上級'}`}
+          >
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <SetupOptionButton
+                title="紅（先攻）"
+                description="あなたが先に動きます"
+                onClick={() => startGame('red')}
+                tone="red"
+              />
+              <SetupOptionButton
+                title="黒（後攻）"
+                description="CPUが先に動きます"
+                onClick={() => startGame('black')}
+                tone="slate"
+              />
+            </div>
+            <div className="mt-5 text-center">
+              <button
+                type="button"
+                onClick={() => setPhase('difficulty-select')}
+                aria-label="難易度選択画面に戻る"
+                className="inline-flex min-h-10 items-center justify-center rounded-lg px-3 text-sm font-semibold text-neutral-600 hover:bg-neutral-100 hover:text-neutral-950 focus:outline-none focus:ring-4 focus:ring-teal-300"
+              >
+                難易度を変更
+              </button>
+            </div>
+          </PlaySetupCard>
         )}
 
         {/* CPU思考中インジケーター（固定オーバーレイ） */}
