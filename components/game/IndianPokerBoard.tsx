@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { PlayingCard } from '@/components/game/card/Card';
 import type { IndianPokerClientState, BettingAction } from '@/lib/games/indian-poker/types';
 import { PLAYER_COLORS } from '@/lib/games/indian-poker/constants';
+import { Modal } from '@/components/ui/Modal';
 import {
   ActionButton,
   ActionButtonGroup,
@@ -24,6 +25,7 @@ interface IndianPokerBoardProps {
 
 export function IndianPokerBoard({ state, onAction, disabled = false }: IndianPokerBoardProps) {
   const [raiseAmount, setRaiseAmount] = useState<number>(state.minRaise);
+  const [showRaiseModal, setShowRaiseModal] = useState(false);
   const myPlayer = state.players[state.myIndex];
   const opponents = state.players.filter((_, index) => index !== state.myIndex);
   const currentPlayer = state.players[state.currentTurn];
@@ -38,11 +40,6 @@ export function IndianPokerBoard({ state, onAction, disabled = false }: IndianPo
   // アクションボタンの表示
   const renderActionButtons = () => {
     if (!state.canOperate || disabled) return null;
-
-    const raiseMax = Math.max(
-      state.minRaise,
-      Math.min(state.myChips - state.callAmount, Math.max(state.minRaise, state.pot))
-    );
 
     return (
       <BottomActionArea>
@@ -69,35 +66,12 @@ export function IndianPokerBoard({ state, onAction, disabled = false }: IndianPo
           <ActionButton tone="ghost" onClick={() => onAction && onAction({ type: 'fold' })}>
             フォールド
           </ActionButton>
+          {state.canRaise && (
+            <ActionButton tone="warning" onClick={() => setShowRaiseModal(true)}>
+              レイズ
+            </ActionButton>
+          )}
         </ActionButtonGroup>
-
-        {state.canRaise && (
-          <div className="mt-2 rounded-lg border border-neutral-200 bg-white p-2.5 shadow-sm">
-            <div className="mb-2 flex items-center justify-between gap-3">
-              <label htmlFor="indian-raise" className="text-sm font-semibold text-neutral-700">
-                レイズ額
-              </label>
-              <span className="min-w-[64px] text-right text-sm font-bold text-neutral-950">{raiseAmount}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <input
-                id="indian-raise"
-                type="range"
-                min={state.minRaise}
-                max={raiseMax}
-                value={Math.min(raiseAmount, raiseMax)}
-                onChange={(e) => setRaiseAmount(Number(e.target.value))}
-                className="h-2 flex-1 cursor-pointer accent-amber-600"
-              />
-              <button
-                onClick={() => onAction && onAction({ type: 'raise', amount: Math.min(raiseAmount, raiseMax) })}
-                className="min-h-10 rounded-lg bg-amber-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-amber-700 focus:outline-none focus:ring-4 focus:ring-amber-300"
-              >
-                レイズ
-              </button>
-            </div>
-          </div>
-        )}
       </BottomActionArea>
     );
   };
@@ -158,7 +132,7 @@ export function IndianPokerBoard({ state, onAction, disabled = false }: IndianPo
     <GameScreen>
       <GameStatePanel
         title={state.canOperate ? 'あなたの判断です' : '相手のアクション待ち'}
-        subtitle="自分のカードは見えません。相手のカードとベット額から押し引きを決めます。"
+        subtitle={undefined}
         status={state.status === 'showdown' ? 'ショーダウン' : state.status === 'finished' ? '終了' : `Round ${state.round}`}
         items={[
           { label: 'ポット', value: state.pot.toLocaleString(), emphasis: true },
@@ -187,14 +161,12 @@ export function IndianPokerBoard({ state, onAction, disabled = false }: IndianPo
         <aside className="space-y-3">
           <PlayerStatusCard
             name={`${myPlayer?.name || 'あなた'} (YOU)`}
-            chips={myPlayer?.chips || 0}
-            bet={myPlayer?.currentBet || 0}
             isActive={state.canOperate}
-            note="このカードは相手だけに見えています"
+            note={undefined}
             action={state.canOperate ? 'あなたの番' : '待機'}
           >
             <div className="flex justify-center">
-              <PlayingCard card={myPlayer?.card} faceDown size="large" />
+              <PlayingCard card={myPlayer?.card} faceDown size="small" />
             </div>
           </PlayerStatusCard>
 
@@ -209,6 +181,51 @@ export function IndianPokerBoard({ state, onAction, disabled = false }: IndianPo
       </section>
 
       {renderActionButtons()}
+      <Modal
+        isOpen={showRaiseModal}
+        onClose={() => setShowRaiseModal(false)}
+        title="レイズ額を決める"
+        showCloseButton
+      >
+        {(() => {
+          const raiseMax = Math.max(
+            state.minRaise,
+            Math.min(state.myChips - state.callAmount, Math.max(state.minRaise, state.pot))
+          );
+
+          return (
+            <div className="space-y-4">
+              <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+                <div className="text-xs font-semibold text-neutral-500">レイズ額</div>
+                <div className="mt-1 text-2xl font-bold text-neutral-950">{Math.min(raiseAmount, raiseMax)}</div>
+              </div>
+              <input
+                id="indian-raise"
+                type="range"
+                min={state.minRaise}
+                max={raiseMax}
+                value={Math.min(raiseAmount, raiseMax)}
+                onChange={(e) => setRaiseAmount(Number(e.target.value))}
+                className="h-2 w-full cursor-pointer accent-amber-600"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <ActionButton tone="ghost" onClick={() => setShowRaiseModal(false)}>
+                  キャンセル
+                </ActionButton>
+                <ActionButton
+                  tone="warning"
+                  onClick={() => {
+                    onAction?.({ type: 'raise', amount: Math.min(raiseAmount, raiseMax) });
+                    setShowRaiseModal(false);
+                  }}
+                >
+                  レイズする
+                </ActionButton>
+              </div>
+            </div>
+          );
+        })()}
+      </Modal>
     </GameScreen>
   );
 }

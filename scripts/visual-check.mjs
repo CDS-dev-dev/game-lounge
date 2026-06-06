@@ -119,12 +119,35 @@ try {
           .map((el) => (el.textContent || '').replace(/\s+/g, ' ').trim())
           .filter(Boolean)
           .slice(-12);
+        const actionArea = document.querySelector('[data-game-action-area]');
+        const ownHand = document.querySelector('[data-own-hand]');
+        const rectOf = (el) => {
+          if (!el) return null;
+          const rect = el.getBoundingClientRect();
+          return {
+            top: rect.top,
+            right: rect.right,
+            bottom: rect.bottom,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height,
+          };
+        };
+        const intersects = (a, b) => {
+          if (!a || !b) return false;
+          return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+        };
+        const actionRect = rectOf(actionArea);
+        const ownHandRect = rectOf(ownHand);
         return {
           url: location.pathname,
           innerHeight,
           scrollHeight: document.documentElement.scrollHeight,
           bodyText: document.body.innerText.slice(0, 500),
           actionLabels,
+          actionRect,
+          ownHandRect,
+          actionOverlapsOwnHand: intersects(actionRect, ownHandRect),
         };
       });
       const screenshot = path.join(outDir, `${testCase.name}-${viewport.name}.png`);
@@ -134,6 +157,9 @@ try {
         viewport: viewport.name,
         screenshot,
         overflow: metrics.scrollHeight - metrics.innerHeight,
+        actionOverlapsOwnHand: metrics.actionOverlapsOwnHand,
+        actionRect: metrics.actionRect,
+        ownHandRect: metrics.ownHandRect,
         labels: metrics.actionLabels,
       });
       await page.close();

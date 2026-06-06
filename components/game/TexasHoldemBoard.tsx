@@ -96,7 +96,7 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
         title={gameState.isMyTurn ? 'あなたの判断です' : '相手のアクション待ち'}
         subtitle={
           gameState.isMyTurn
-            ? '必要額を確認して、下の操作エリアから選んでください。'
+            ? undefined
             : `${currentPlayer?.name || '相手'}が行動しています。`
         }
         status={phaseLabels[gameState.status]}
@@ -108,17 +108,17 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
         ]}
       />
 
-      <section className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="flex min-h-0 flex-col gap-3">
-          <section className="rounded-lg border border-emerald-900/50 bg-[radial-gradient(circle_at_center,#11613f_0%,#0b3f2d_65%,#06231d_100%)] p-3 shadow-2xl sm:p-4">
-            <div className="mb-3 flex items-center justify-between gap-2">
+      <section className="grid min-h-0 min-w-0 flex-1 gap-2 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="flex min-h-0 min-w-0 flex-col gap-2">
+          <section className="min-w-0 rounded-lg border border-emerald-900/50 bg-[radial-gradient(circle_at_center,#11613f_0%,#0b3f2d_65%,#06231d_100%)] p-2 shadow-2xl sm:p-4">
+            <div className="mb-2 flex items-center justify-between gap-2 sm:mb-3">
               <h2 className="text-sm font-bold text-white sm:text-base">場のカード</h2>
               <span className="rounded-md bg-white/15 px-3 py-1 text-xs font-bold text-white">
                 {phaseLabels[gameState.status]}
               </span>
             </div>
 
-            <div className="flex min-h-24 items-center justify-center gap-2 overflow-x-auto rounded-lg border border-white/15 bg-black/20 p-2 sm:min-h-32 sm:gap-3 sm:p-3">
+            <div className="flex min-h-20 items-center justify-center gap-2 overflow-x-auto rounded-lg border border-white/15 bg-black/20 p-2 sm:min-h-32 sm:gap-3 sm:p-3">
               {communityCards.length ? (
                 communityCards.map((card, index) => (
                   <PlayingCard key={`${card.id}-${index}`} card={toCommonCard(card)} size="medium" />
@@ -164,26 +164,28 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
           </section>
         </div>
 
-        <aside className="min-h-0 space-y-3">
+        <aside className="min-h-0 min-w-0 space-y-2 sm:space-y-3">
           <PlayerStatusCard
             name={`${myPlayer?.name || 'あなた'} (YOU)`}
-            chips={myPlayer?.chips || 0}
-            bet={myPlayer?.currentBet || 0}
             isActive={gameState.isMyTurn}
             isFolded={myPlayer ? !myPlayer.isActive : false}
-            note={gameState.isMyTurn ? 'ここから操作します' : '相手の手番です'}
+            note={gameState.isMyTurn ? undefined : '相手の手番です'}
             action={gameState.isMyTurn ? 'あなたの番' : '待機'}
           >
-            <div className="flex justify-center gap-2 lg:[&>button]:h-28 lg:[&>button]:w-20">
+            <div data-own-hand className="flex justify-center gap-2">
               {myPlayer?.holeCards ? (
                 <>
-                  <PlayingCard card={toCommonCard(myPlayer.holeCards[0])} size="large" />
-                  <PlayingCard card={toCommonCard(myPlayer.holeCards[1])} size="large" />
+                  <span className="sm:hidden"><PlayingCard card={toCommonCard(myPlayer.holeCards[0])} size="small" /></span>
+                  <span className="sm:hidden"><PlayingCard card={toCommonCard(myPlayer.holeCards[1])} size="small" /></span>
+                  <span className="hidden sm:block"><PlayingCard card={toCommonCard(myPlayer.holeCards[0])} size="medium" /></span>
+                  <span className="hidden sm:block"><PlayingCard card={toCommonCard(myPlayer.holeCards[1])} size="medium" /></span>
                 </>
               ) : (
                 <>
-                  <PlayingCard faceDown size="large" />
-                  <PlayingCard faceDown size="large" />
+                  <span className="sm:hidden"><PlayingCard faceDown size="small" /></span>
+                  <span className="sm:hidden"><PlayingCard faceDown size="small" /></span>
+                  <span className="hidden sm:block"><PlayingCard faceDown size="medium" /></span>
+                  <span className="hidden sm:block"><PlayingCard faceDown size="medium" /></span>
                 </>
               )}
             </div>

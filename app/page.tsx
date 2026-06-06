@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
+import { GameVisualIcon } from '@/components/game/GameVisualIcon';
 import { TEXT_SIZE, MIN_TAP_AREA } from '@/lib/constants/ui-scale';
-import { Bot, Box, ChevronRight, Ghost, Palmtree, Swords } from 'lucide-react';
+import { Bot, ChevronRight, Swords } from 'lucide-react';
 
 export default function Home() {
   const featuredGames = [
@@ -9,8 +10,7 @@ export default function Home() {
       href: '/games/geister',
       title: 'ガイスター',
       label: '心理戦',
-      Icon: Ghost,
-      color: 'text-indigo-500',
+      visual: 'geister' as const,
       primaryHref: '/games/geister/cpu',
       cta: 'CPUで遊ぶ',
     },
@@ -18,8 +18,7 @@ export default function Home() {
       href: '/games/connect4',
       title: '立体四目並べ',
       label: '3D戦略',
-      Icon: Box,
-      color: 'text-sky-500',
+      visual: 'connect4' as const,
       primaryHref: '/games/connect4/cpu',
       cta: 'CPUで遊ぶ',
     },
@@ -27,8 +26,7 @@ export default function Home() {
       href: '/games/island-settlers',
       title: 'アイランドセトラーズ',
       label: '開拓戦略',
-      Icon: Palmtree,
-      color: 'text-emerald-500',
+      visual: 'island' as const,
       primaryHref: '/games/island-settlers/cpu',
       cta: 'CPUで遊ぶ',
     },
@@ -71,15 +69,13 @@ export default function Home() {
         </section>
 
         <section aria-label="おすすめゲーム" className="grid gap-3">
-          {featuredGames.map(({ href, primaryHref, title, label, cta, Icon, color }) => (
+          {featuredGames.map(({ href, primaryHref, title, label, cta, visual }) => (
             <div
               key={href}
               className="grid min-h-[124px] gap-3 rounded-lg border border-white/10 bg-white/95 p-4 shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-white sm:grid-cols-[1fr_auto]"
             >
               <Link href={href} className="group flex min-w-0 items-center gap-4 text-left">
-                <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-neutral-100">
-                  <Icon className={`h-8 w-8 ${color}`} aria-hidden="true" />
-                </span>
+                <GameVisualIcon game={visual} label={`${title}のアイコン`} className="h-16 w-16" />
                 <span className="min-w-0">
                   <span className="block text-sm font-semibold text-teal-700">{label}</span>
                   <span className="mt-1 block text-xl font-bold text-neutral-950">{title}</span>

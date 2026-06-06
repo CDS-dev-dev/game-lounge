@@ -2,8 +2,9 @@
 
 import { useRouter } from 'next/navigation';
 import { GameHeader } from '@/components/layout/GameHeader';
+import { GameVisualIcon } from '@/components/game/GameVisualIcon';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
-import { Bot, Box, Crown, Flame, Gamepad2, Ghost, Globe2, Palmtree, Spade, Users } from 'lucide-react';
+import { Bot, Globe2, Users } from 'lucide-react';
 
 const games = [
   {
@@ -13,8 +14,7 @@ const games = [
     description: '見えない駒の正体を読み合う、短時間で濃い駆け引き。',
     modes: ['オンライン', 'ローカル', 'CPU'],
     primaryMode: 'CPU',
-    Icon: Ghost,
-    accent: 'text-indigo-500',
+    visual: 'geister' as const,
   },
   {
     href: '/games/connect4',
@@ -23,8 +23,7 @@ const games = [
     description: '4×4×4の空間でラインを作る、立体的な四目並べ。',
     modes: ['ローカル', 'CPU'],
     primaryMode: 'CPU',
-    Icon: Box,
-    accent: 'text-sky-500',
+    visual: 'connect4' as const,
   },
   {
     href: '/games/xiangqi',
@@ -33,8 +32,7 @@ const games = [
     description: '中国伝統の将棋。広い盤面で相手の将を追い詰めます。',
     modes: ['ローカル', 'CPU'],
     primaryMode: 'CPU',
-    Icon: Crown,
-    accent: 'text-rose-500',
+    visual: 'xiangqi' as const,
   },
   {
     href: '/games/emperor',
@@ -43,8 +41,7 @@ const games = [
     description: '皇帝・市民・奴隷の読み合いで勝負するカードゲーム。',
     modes: ['CPU'],
     primaryMode: 'CPU',
-    Icon: Crown,
-    accent: 'text-amber-500',
+    visual: 'emperor' as const,
   },
   {
     href: '/games/island-settlers',
@@ -53,8 +50,7 @@ const games = [
     description: '資源を集め、道と町を広げて島の支配を競います。',
     modes: ['ローカル', 'CPU'],
     primaryMode: 'CPU',
-    Icon: Palmtree,
-    accent: 'text-emerald-500',
+    visual: 'island' as const,
   },
   {
     href: '/games/texas-holdem',
@@ -63,8 +59,7 @@ const games = [
     description: '共通カードを使って手役とベットで勝負します。',
     modes: ['CPU'],
     primaryMode: 'CPU',
-    Icon: Spade,
-    accent: 'text-neutral-800',
+    visual: 'texas' as const,
   },
   {
     href: '/games/tiger-dragon',
@@ -73,8 +68,7 @@ const games = [
     description: '攻めと受けを切り替えながら手牌を読み合います。',
     modes: ['ローカル', 'CPU'],
     primaryMode: 'CPU',
-    Icon: Flame,
-    accent: 'text-orange-500',
+    visual: 'tiger' as const,
   },
   {
     href: '/games/indian-poker',
@@ -83,8 +77,7 @@ const games = [
     description: '自分だけカードが見えない状態で相手の反応を読みます。',
     modes: ['ローカル', 'CPU'],
     primaryMode: 'CPU',
-    Icon: Gamepad2,
-    accent: 'text-purple-500',
+    visual: 'indian' as const,
   },
 ];
 
@@ -117,7 +110,7 @@ export default function GamesPage() {
           </section>
 
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {visibleGames.map(({ href, title, genre, description, modes, primaryMode, Icon, accent }) => (
+            {visibleGames.map(({ href, title, genre, description, modes, primaryMode, visual }) => (
               <article
                 key={href}
                 className="group flex min-h-[210px] flex-col rounded-lg border border-white/10 bg-white/95 p-4 text-left shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-white"
@@ -128,9 +121,7 @@ export default function GamesPage() {
                   aria-label={`${title}のモード選択を開く`}
                   className="flex items-start gap-3 text-left focus:outline-none focus:ring-4 focus:ring-teal-300"
                 >
-                  <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-neutral-100">
-                    <Icon className={`h-7 w-7 ${accent}`} aria-hidden="true" />
-                  </span>
+                  <GameVisualIcon game={visual} label={`${title}のアイコン`} className="h-14 w-14" />
                   <span className="min-w-0">
                     <span className="block text-xs font-semibold text-teal-700">{genre}</span>
                     <span className="mt-1 block break-keep text-xl font-bold leading-tight text-neutral-950">{title}</span>
