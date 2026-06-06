@@ -20,6 +20,7 @@ import { calculateCpuMove } from '@/lib/games/connect4/ai';
 import type { Connect4State, Position3D, Connect4ClientState } from '@/lib/games/connect4/types';
 import { Connect4Board3D } from '@/components/game/Connect4Board3D';
 import { RulesModal } from '@/components/game/RulesModal';
+import { GameStatePanel } from '@/components/game/GamePlayUI';
 import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { formatGameError } from '@/lib/utils/error-handler';
@@ -185,13 +186,15 @@ export default function Connect4CpuPage() {
         backUrl="/games/connect4"
         backLabel="モード選択"
       />
-      <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
+      <div className="min-h-screen app-bg board-pattern pt-16 pb-3 px-3 sm:pt-20 sm:px-4">
         <div className="max-w-4xl mx-auto">
           {/* ヘッダー */}
+          {phase !== 'playing' && phase !== 'cpuThinking' && phase !== 'finished' && (
           <div className="text-center mb-4 sm:mb-6">
             <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2">立体四目並べ CPU対戦</h1>
             <p className="text-sm sm:text-base text-gray-200">4×4×4の立体空間で4つ揃えよう！</p>
           </div>
+          )}
 
         {/* 難易度選択 */}
         {phase === 'difficulty-select' && (
@@ -270,24 +273,32 @@ export default function Connect4CpuPage() {
         {/* ゲームプレイ */}
         {(phase === 'playing' || phase === 'finished' || phase === 'cpuThinking') && clientState && (
           <>
-            <Card className="mb-3 sm:mb-4 bg-white/95">
-              <CardContent className="py-2 sm:py-3">
-                <div className="flex justify-between items-center flex-wrap gap-2">
-                  <div>
-                    <p className="text-xs sm:text-sm text-slate-600 font-medium">ターン</p>
-                    <p className="text-base sm:text-xl font-bold text-slate-900">
-                      {gameState && gameState.currentTurn === (playerOrder === 'first' ? 'player1' : 'player2') ? '🔵 あなた' : '🔴 CPU'}
-                    </p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs sm:text-sm text-slate-600 font-medium">難易度</p>
-                    <p className="text-sm sm:text-base font-semibold text-slate-900">
-                      {difficulty === 'easy' && '😊 初級'}
-                      {difficulty === 'medium' && '🤔 中級'}
-                      {difficulty === 'hard' && '🔥 上級'}
-                    </p>
-                  </div>
-                  <div className="flex gap-2 items-center">
+            <div className="mb-2">
+              <GameStatePanel
+                title={gameState && gameState.currentTurn === (playerOrder === 'first' ? 'player1' : 'player2') ? 'あなたの番です' : 'CPUの番です'}
+                subtitle="青い配置候補を選び、3Dラインを作ります。"
+                status={phase === 'cpuThinking' ? 'CPU思考中' : '4つ揃えたら勝ち'}
+                items={[
+                  {
+                    label: 'ターン',
+                    value: gameState && gameState.currentTurn === (playerOrder === 'first' ? 'player1' : 'player2') ? 'あなた' : 'CPU',
+                    emphasis: true,
+                  },
+                  {
+                    label: '難易度',
+                    value: difficulty === 'easy' ? '初級' : difficulty === 'medium' ? '中級' : '上級',
+                  },
+                  {
+                    label: 'あなた',
+                    value: `${clientState.myPiecesCount}個`,
+                  },
+                  {
+                    label: 'CPU',
+                    value: `${clientState.opponentPiecesCount}個`,
+                  },
+                ]}
+              />
+              <div className="mt-2 flex justify-end gap-2">
                     {/* ルールボタン */}
                     <RulesModal gameName="立体四目並べ">
                       <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 text-sm">
@@ -319,10 +330,8 @@ export default function Connect4CpuPage() {
                         ↩️ 待った
                       </Button>
                     )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             <Connect4Board3D
               gameState={clientState}

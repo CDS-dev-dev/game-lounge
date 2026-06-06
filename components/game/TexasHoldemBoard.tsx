@@ -6,9 +6,16 @@ import React from 'react';
 import { PlayingCard } from './card/Card';
 import type { TexasHoldemClientState, PlayerAction } from '@/lib/games/texas-holdem/types';
 import { toCommonCard } from '@/lib/games/texas-holdem/types';
-import { CompactPlayerCard } from '@/components/ui/CompactPlayerCard';
-import { FoldButton, CheckButton, CallButton, RaiseButton, AllInButton } from '@/components/ui/IconButton';
 import { Modal } from '@/components/ui/Modal';
+import {
+  ActionButton,
+  ActionButtonGroup,
+  BottomActionArea,
+  GameLog,
+  GameScreen,
+  GameStatePanel,
+  PlayerStatusCard,
+} from '@/components/game/GamePlayUI';
 
 export interface TexasHoldemBoardProps {
   gameState: TexasHoldemClientState;
@@ -16,316 +23,301 @@ export interface TexasHoldemBoardProps {
   disabled?: boolean;
 }
 
-/**
- * テキサスホールデムのゲームボード
- *
- * レイアウト:
- * - 上部: 対戦相手の情報とカード
- * - 中央: コミュニティカードとポット
- * - 下部: 自分のカードとアクションボタン
- */
+const phaseLabels: Record<TexasHoldemClientState['status'], string> = {
+  waiting: '待機中',
+  preflop: 'プリフロップ',
+  flop: 'フロップ',
+  turn: 'ターン',
+  river: 'リバー',
+  showdown: 'ショーダウン',
+  finished: '終了',
+};
+
+const actionLabels: Record<Exclude<PlayerAction, null>, string> = {
+  fold: 'フォールド',
+  check: 'チェック',
+  call: 'コール',
+  raise: 'レイズ',
+  allin: 'オールイン',
+};
+
+function getPositionLabel(
+  playerPosition: number,
+  dealerButton: number,
+  playerCount: number
+) {
+  const sbPosition = (dealerButton + 1) % playerCount;
+  const bbPosition = (dealerButton + 2) % playerCount;
+  if (playerPosition === dealerButton) return 'BTN';
+  if (playerPosition === sbPosition) return 'SB';
+  if (playerPosition === bbPosition) return 'BB';
+  return '';
+}
+
 export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
   gameState,
   onAction,
   disabled = false,
 }) => {
-  const [raiseAmount, setRaiseAmount] = React.useState(gameState.minRaise);
+  const myPlayer = gameState.players.find((p) => p.id === gameState.myPlayerId);
+  const opponents = gameState.players.filter((p) => p.id !== gameState.myPlayerId);
   const [showRaiseModal, setShowRaiseModal] = React.useState(false);
+  const [raiseAmount, setRaiseAmount] = React.useState(gameState.minRaise);
 
-  // プレイヤーを自分と相手に分ける
-  const myPlayer = gameState.players.find(p => p.id === gameState.myPlayerId);
-  const opponents = gameState.players.filter(p => p.id !== gameState.myPlayerId);
+  React.useEffect(() => {
+    setRaiseAmount((current) =>
+      Math.max(gameState.minRaise, Math.min(current, myPlayer?.chips || gameState.minRaise))
+    );
+  }, [gameState.minRaise, myPlayer?.chips]);
 
-  // レイズ額の調整
+  const currentPlayer = gameState.players.find((p) => p.position === gameState.currentTurn);
+  const isActionAvailable = gameState.isMyTurn && !disabled && gameState.status !== 'showdown';
+  const communityCards = gameState.communityCards;
+  const missingCommunityCards = Math.max(0, 5 - communityCards.length);
+  const latestActions = gameState.players
+    .filter((player) => player.action)
+    .map((player) => `${player.name}: ${actionLabels[player.action as Exclude<PlayerAction, null>]}`);
+
   const handleRaiseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10);
-    if (!isNaN(value)) {
+    const value = Number(e.target.value);
+    if (!Number.isNaN(value)) {
       setRaiseAmount(Math.max(gameState.minRaise, Math.min(value, myPlayer?.chips || 0)));
     }
   };
 
-  // レイズ実行
   const handleRaiseConfirm = () => {
     onAction('raise', raiseAmount);
     setShowRaiseModal(false);
   };
 
-  // 最大チップ数を計算（プログレスバー用）
-  const maxChips = Math.max(...gameState.players.map(p => p.chips));
-
-  // (変換関数は toCommonCard を使用)
-
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-6xl flex-col rounded-lg border border-emerald-700/50 bg-[radial-gradient(circle_at_center,#14633f_0%,#0d432f_54%,#07261f_100%)] p-3 shadow-2xl sm:p-4">
-      {/* 対戦相手エリア */}
-      <div className="mb-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 max-w-6xl mx-auto">
-          {opponents.map((player) => {
-            // ディーラーボタンの判定
-            const isDealer = gameState.dealerButton === player.position;
-            // ポジション表示（SB/BBはディーラーボタンの次/次の次）
-            let positionLabel = '';
-            const sbPosition = (gameState.dealerButton + 1) % gameState.players.length;
-            const bbPosition = (gameState.dealerButton + 2) % gameState.players.length;
-            if (player.position === sbPosition) positionLabel = 'SB';
-            else if (player.position === bbPosition) positionLabel = 'BB';
-            else if (isDealer) positionLabel = 'BTN';
+    <GameScreen>
+      <GameStatePanel
+        title={gameState.isMyTurn ? 'あなたの判断です' : '相手のアクション待ち'}
+        subtitle={
+          gameState.isMyTurn
+            ? '必要額を確認して、下の操作エリアから選んでください。'
+            : `${currentPlayer?.name || '相手'}が行動しています。`
+        }
+        status={phaseLabels[gameState.status]}
+        items={[
+          { label: 'ポット', value: gameState.pot.toLocaleString(), emphasis: true },
+          { label: '必要コール', value: gameState.callAmount.toLocaleString(), emphasis: gameState.isMyTurn },
+          { label: '現在ベット', value: gameState.currentBet.toLocaleString() },
+          { label: 'あなたのチップ', value: (myPlayer?.chips || 0).toLocaleString() },
+        ]}
+      />
 
-            return (
-              <div key={player.id} className="relative">
-                <CompactPlayerCard
+      <section className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="flex min-h-0 flex-col gap-3">
+          <section className="rounded-lg border border-emerald-900/50 bg-[radial-gradient(circle_at_center,#11613f_0%,#0b3f2d_65%,#06231d_100%)] p-3 shadow-2xl sm:p-4">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <h2 className="text-sm font-bold text-white sm:text-base">場のカード</h2>
+              <span className="rounded-md bg-white/15 px-3 py-1 text-xs font-bold text-white">
+                {phaseLabels[gameState.status]}
+              </span>
+            </div>
+
+            <div className="flex min-h-24 items-center justify-center gap-2 overflow-x-auto rounded-lg border border-white/15 bg-black/20 p-2 sm:min-h-32 sm:gap-3 sm:p-3">
+              {communityCards.length ? (
+                communityCards.map((card, index) => (
+                  <PlayingCard key={`${card.id}-${index}`} card={toCommonCard(card)} size="medium" />
+                ))
+              ) : (
+                <div className="rounded-md border border-dashed border-white/30 px-4 py-3 text-sm font-semibold text-white/80">
+                  まだ場札はありません
+                </div>
+              )}
+              {communityCards.length > 0 &&
+                Array.from({ length: missingCommunityCards }).map((_, index) => (
+                  <PlayingCard key={`empty-${index}`} card={null} size="medium" className="bg-white/70" />
+                ))}
+            </div>
+          </section>
+
+          <section className="flex min-h-0 gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-3">
+            {opponents.map((player) => (
+              <div key={player.id} className="w-44 shrink-0 sm:w-auto">
+                <PlayerStatusCard
                   name={player.name}
                   chips={player.chips}
-                  maxChips={maxChips}
                   bet={player.currentBet}
                   isActive={gameState.currentTurn === player.position}
                   isFolded={!player.isActive}
-                  isDealer={isDealer}
-                  avatar="🃏"
-                  position={positionLabel}
-                />
-                {/* 相手のカード（裏向き） */}
-                <div className="flex gap-1 mt-2 justify-center">
-                  {player.holeCards && player.isActive ? (
-                    <>
-                      <PlayingCard faceDown size="small" />
-                      <PlayingCard faceDown size="small" />
-                    </>
-                  ) : null}
-                </div>
-                {/* アクション表示 */}
-                {player.action && (
-                  <div className="text-white text-xs bg-black bg-opacity-70 px-2 py-1 rounded text-center mt-1">
-                    {player.action.toUpperCase()}
+                  position={getPositionLabel(player.position, gameState.dealerButton, gameState.players.length)}
+                  action={player.action ? actionLabels[player.action as Exclude<PlayerAction, null>] : '待機'}
+                  note={!player.isActive ? '降りています' : gameState.currentTurn === player.position ? '行動中' : '参加中'}
+                >
+                  <div className="hidden justify-center gap-1 sm:flex">
+                    {player.holeCards && player.isActive ? (
+                      <>
+                        <PlayingCard faceDown size="small" />
+                        <PlayingCard faceDown size="small" />
+                      </>
+                    ) : (
+                      <span className="text-xs font-semibold text-neutral-500">カードなし</span>
+                    )}
                   </div>
-                )}
+                </PlayerStatusCard>
               </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* 中央エリア（コミュニティカード＋ポット） */}
-      <div className="flex flex-col items-center space-y-4 mb-4">
-        {/* ポット */}
-        <div className="rounded-full border border-amber-200 bg-amber-500 px-6 py-3 text-xl font-bold text-neutral-950 shadow-lg">
-          POT: {gameState.pot}
+            ))}
+          </section>
         </div>
 
-        {/* コミュニティカード */}
-        <div className="flex max-w-full gap-1 overflow-x-auto rounded-lg border border-white/10 bg-white/10 p-3 sm:gap-2 sm:p-4">
-          {gameState.status === 'preflop' ? (
-            <div className="text-white text-sm">プリフロップ</div>
-          ) : (
-            <>
-              {gameState.communityCards.map((card, index) => (
-                <PlayingCard key={`${card.id}-${index}`} card={toCommonCard(card)} size="medium" />
-              ))}
-              {/* 未公開のカード枠 */}
-              {Array.from({ length: 5 - gameState.communityCards.length }).map((_, i) => (
-                <PlayingCard key={`empty-${i}`} card={null} size="medium" />
-              ))}
-            </>
-          )}
-        </div>
-
-        {/* ゲームステータス */}
-        <div className="text-white text-sm font-semibold">
-          {gameState.status === 'preflop' && 'プリフロップ'}
-          {gameState.status === 'flop' && 'フロップ'}
-          {gameState.status === 'turn' && 'ターン'}
-          {gameState.status === 'river' && 'リバー'}
-          {gameState.status === 'showdown' && 'ショーダウン'}
-        </div>
-      </div>
-
-      {/* 自分のエリア */}
-      <div className="flex flex-col items-center space-y-4">
-        {/* 自分の情報 */}
-        <div className="max-w-md w-full">
-          <CompactPlayerCard
-            name={`${myPlayer?.name || ''} (YOU)`}
+        <aside className="min-h-0 space-y-3">
+          <PlayerStatusCard
+            name={`${myPlayer?.name || 'あなた'} (YOU)`}
             chips={myPlayer?.chips || 0}
-            maxChips={maxChips}
-            bet={myPlayer?.currentBet}
+            bet={myPlayer?.currentBet || 0}
             isActive={gameState.isMyTurn}
             isFolded={myPlayer ? !myPlayer.isActive : false}
-            avatar="👤"
-          />
-        </div>
+            note={gameState.isMyTurn ? 'ここから操作します' : '相手の手番です'}
+            action={gameState.isMyTurn ? 'あなたの番' : '待機'}
+          >
+            <div className="flex justify-center gap-2 lg:[&>button]:h-28 lg:[&>button]:w-20">
+              {myPlayer?.holeCards ? (
+                <>
+                  <PlayingCard card={toCommonCard(myPlayer.holeCards[0])} size="large" />
+                  <PlayingCard card={toCommonCard(myPlayer.holeCards[1])} size="large" />
+                </>
+              ) : (
+                <>
+                  <PlayingCard faceDown size="large" />
+                  <PlayingCard faceDown size="large" />
+                </>
+              )}
+            </div>
+          </PlayerStatusCard>
 
-        {/* 自分のカード */}
-        <div className="flex gap-2">
-          {myPlayer?.holeCards ? (
-            <>
-              <PlayingCard card={toCommonCard(myPlayer.holeCards[0])} size="large" />
-              <PlayingCard card={toCommonCard(myPlayer.holeCards[1])} size="large" />
-            </>
-          ) : (
-            <>
-              <PlayingCard faceDown size="large" />
-              <PlayingCard faceDown size="large" />
-            </>
-          )}
-        </div>
-
-        {/* アクションボタン */}
-        {gameState.isMyTurn && !disabled && (
-          <div className="flex justify-center gap-2 rounded-lg border border-white/10 bg-black/20 p-3 shadow-lg sm:gap-3">
-            {gameState.canFold && (
-              <FoldButton
-                onClick={() => onAction('fold')}
-                showTooltip={true}
-                size="lg"
-              />
-            )}
-
-            {gameState.canCheck && (
-              <CheckButton
-                onClick={() => onAction('check')}
-                showTooltip={true}
-                size="lg"
-              />
-            )}
-
-            {gameState.canCall && (
-              <div className="flex flex-col items-center gap-1">
-                <CallButton
-                  onClick={() => onAction('call')}
-                  showTooltip={true}
-                  size="lg"
-                />
-                <span className="text-white text-xs font-semibold">{gameState.callAmount}</span>
-              </div>
-            )}
-
-            {gameState.canRaise && (
-              <RaiseButton
-                onClick={() => setShowRaiseModal(true)}
-                showTooltip={true}
-                size="lg"
-              />
-            )}
-
-            {myPlayer && myPlayer.chips > 0 && (
-              <div className="flex flex-col items-center gap-1">
-                <AllInButton
-                  onClick={() => onAction('allin')}
-                  showTooltip={true}
-                  size="lg"
-                />
-                <span className="text-white text-xs font-semibold">{myPlayer.chips}</span>
-              </div>
-            )}
+          <div className="hidden sm:block">
+            <GameLog items={latestActions} />
           </div>
-        )}
+        </aside>
+      </section>
 
-        {/* 待機中メッセージ */}
-        {!gameState.isMyTurn && gameState.status !== 'showdown' && (
-          <div className="text-white text-sm">相手のターンを待っています...</div>
-        )}
-
-        {/* 勝者表示 */}
-        {gameState.status === 'showdown' && gameState.winners.length > 0 && (
-          <div className="bg-white rounded-lg p-4 shadow-lg max-w-md">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">勝者</h3>
+      {gameState.status === 'showdown' && gameState.winners.length > 0 && (
+        <section className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
+          <h2 className="text-lg font-bold text-emerald-950">勝者</h2>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
             {gameState.winners.map((winner, index) => {
-              const winnerPlayer = gameState.players.find(p => p.id === winner.playerId);
+              const winnerPlayer = gameState.players.find((p) => p.id === winner.playerId);
               return (
-                <div key={index} className="mb-2">
-                  <div className="font-semibold text-gray-900">{winnerPlayer?.name}</div>
-                  <div className="text-sm text-gray-600">{winner.hand.description}</div>
-                  <div className="text-sm text-green-600">獲得: 💰 {winner.amount}</div>
+                <div key={index} className="rounded-md bg-white p-3">
+                  <div className="font-bold text-neutral-950">{winnerPlayer?.name}</div>
+                  <div className="text-sm text-neutral-600">{winner.hand.description}</div>
+                  <div className="mt-1 text-sm font-bold text-emerald-700">
+                    獲得 {winner.amount.toLocaleString()}
+                  </div>
                 </div>
               );
             })}
           </div>
-        )}
-      </div>
+        </section>
+      )}
 
-      {/* レイズモーダル */}
+      {isActionAvailable ? (
+        <BottomActionArea>
+          <ActionButtonGroup
+            title="次にできる操作"
+            subtitle={`コール ${gameState.callAmount.toLocaleString()} / 最小レイズ ${gameState.minRaise.toLocaleString()}`}
+          >
+            {gameState.canFold ? (
+              <ActionButton tone="ghost" onClick={() => onAction('fold')}>
+                フォールド
+              </ActionButton>
+            ) : null}
+            {gameState.canCheck ? (
+              <ActionButton tone="primary" onClick={() => onAction('check')}>
+                チェック
+              </ActionButton>
+            ) : null}
+            {gameState.canCall ? (
+              <ActionButton tone="primary" onClick={() => onAction('call')}>
+                コール {gameState.callAmount.toLocaleString()}
+              </ActionButton>
+            ) : null}
+            {gameState.canRaise ? (
+              <ActionButton tone="warning" onClick={() => setShowRaiseModal(true)}>
+                レイズ
+              </ActionButton>
+            ) : null}
+            {myPlayer && myPlayer.chips > 0 ? (
+              <ActionButton tone="danger" onClick={() => onAction('allin')}>
+                オールイン
+              </ActionButton>
+            ) : null}
+          </ActionButtonGroup>
+        </BottomActionArea>
+      ) : (
+        <div className="rounded-lg border border-neutral-200 bg-white p-3 text-center text-sm font-semibold text-neutral-700 shadow-sm">
+          {gameState.status === 'showdown' ? '結果を確認しています' : '相手の行動を待っています'}
+        </div>
+      )}
+
       <Modal
         isOpen={showRaiseModal}
         onClose={() => setShowRaiseModal(false)}
-        title="レイズ額を入力"
-        showCloseButton={true}
+        title="レイズ額を決める"
+        showCloseButton
       >
         <div className="space-y-4">
-          {/* スライダー */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              レイズ額: 💰 {raiseAmount.toLocaleString()}
-            </label>
-            <input
-              type="range"
-              value={raiseAmount}
-              onChange={handleRaiseChange}
-              min={gameState.minRaise}
-              max={myPlayer?.chips || 0}
-              step={gameState.minRaise}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
-            />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>最小: {gameState.minRaise}</span>
-              <span>最大: {myPlayer?.chips || 0}</span>
-            </div>
-          </div>
+          <GameStatePanel
+            title="レイズ"
+            subtitle="最小額以上、あなたのチップ以内で指定してください。"
+            items={[
+              { label: '指定額', value: raiseAmount.toLocaleString(), emphasis: true },
+              { label: '最小', value: gameState.minRaise.toLocaleString() },
+              { label: '最大', value: (myPlayer?.chips || 0).toLocaleString() },
+              { label: 'ポット', value: gameState.pot.toLocaleString() },
+            ]}
+            className="shadow-none"
+          />
 
-          {/* 数値入力 */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              直接入力
-            </label>
-            <input
-              type="number"
-              value={raiseAmount}
-              onChange={handleRaiseChange}
-              min={gameState.minRaise}
-              max={myPlayer?.chips || 0}
-              step={gameState.minRaise}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
+          <input
+            type="range"
+            value={raiseAmount}
+            onChange={handleRaiseChange}
+            min={gameState.minRaise}
+            max={myPlayer?.chips || 0}
+            step={gameState.minRaise}
+            className="h-2 w-full cursor-pointer accent-amber-600"
+          />
 
-          {/* クイックアクション */}
-          <div className="flex gap-2 justify-between">
-            <button
-              onClick={() => setRaiseAmount(gameState.minRaise)}
-              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-900 text-sm rounded-lg transition-colors"
-            >
+          <input
+            type="number"
+            value={raiseAmount}
+            onChange={handleRaiseChange}
+            min={gameState.minRaise}
+            max={myPlayer?.chips || 0}
+            step={gameState.minRaise}
+            className="min-h-11 w-full rounded-lg border border-neutral-300 px-3 text-neutral-950 focus:outline-none focus:ring-4 focus:ring-amber-300"
+          />
+
+          <div className="grid grid-cols-3 gap-2">
+            <ActionButton tone="ghost" onClick={() => setRaiseAmount(gameState.minRaise)}>
               最小
-            </button>
-            <button
-              onClick={() => setRaiseAmount(Math.floor((gameState.minRaise + (myPlayer?.chips || 0)) / 2))}
-              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-900 text-sm rounded-lg transition-colors"
+            </ActionButton>
+            <ActionButton
+              tone="ghost"
+              onClick={() => setRaiseAmount(Math.max(gameState.minRaise, Math.floor(gameState.pot / 2)))}
             >
-              1/2 ポット
-            </button>
-            <button
-              onClick={() => setRaiseAmount(myPlayer?.chips || 0)}
-              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-900 text-sm rounded-lg transition-colors"
-            >
-              オールイン
-            </button>
+              1/2
+            </ActionButton>
+            <ActionButton tone="ghost" onClick={() => setRaiseAmount(myPlayer?.chips || 0)}>
+              最大
+            </ActionButton>
           </div>
 
-          {/* 実行ボタン */}
-          <div className="flex gap-3 justify-end pt-4 border-t border-gray-200">
-            <button
-              onClick={() => setShowRaiseModal(false)}
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg font-semibold transition-colors"
-            >
+          <div className="grid grid-cols-2 gap-2 pt-2">
+            <ActionButton tone="ghost" onClick={() => setShowRaiseModal(false)}>
               キャンセル
-            </button>
-            <button
-              onClick={handleRaiseConfirm}
-              className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors"
-            >
-              レイズ実行
-            </button>
+            </ActionButton>
+            <ActionButton tone="warning" onClick={handleRaiseConfirm}>
+              レイズする
+            </ActionButton>
           </div>
         </div>
       </Modal>
-    </div>
+    </GameScreen>
   );
 };

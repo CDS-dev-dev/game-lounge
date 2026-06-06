@@ -271,15 +271,15 @@ export const Connect4Board3D: React.FC<Connect4Board3DProps> = (props) => {
         </div>
       )}
     >
-      <div className="space-y-3">
-        <div className="rounded-lg border border-white/10 bg-neutral-950/80 p-2 text-white shadow-lg">
+      <div className="space-y-2">
+        <div className="rounded-lg border border-white/10 bg-neutral-950/80 p-1.5 text-white shadow-lg">
           <div className="grid grid-cols-2 gap-2" role="tablist" aria-label="盤面表示の切り替え">
             <button
               type="button"
               onClick={() => setViewMode('2d')}
               role="tab"
               aria-selected={viewMode === '2d'}
-              className={`min-h-[44px] rounded-md px-4 text-sm font-semibold transition-colors ${
+              className={`min-h-10 rounded-md px-4 text-sm font-semibold transition-colors ${
                 viewMode === '2d' ? 'bg-teal-500 text-white' : 'bg-white/10 text-gray-100 hover:bg-white/15'
               }`}
             >
@@ -290,7 +290,7 @@ export const Connect4Board3D: React.FC<Connect4Board3DProps> = (props) => {
               onClick={() => setViewMode('3d')}
               role="tab"
               aria-selected={viewMode === '3d'}
-              className={`min-h-[44px] rounded-md px-4 text-sm font-semibold transition-colors ${
+              className={`min-h-10 rounded-md px-4 text-sm font-semibold transition-colors ${
                 viewMode === '3d' ? 'bg-teal-500 text-white' : 'bg-white/10 text-gray-100 hover:bg-white/15'
               }`}
             >
@@ -304,7 +304,7 @@ export const Connect4Board3D: React.FC<Connect4Board3DProps> = (props) => {
             <Connect4Board {...props} />
           </div>
         ) : (
-          <div className="relative h-[min(72vh,520px)] min-h-[420px] w-full overflow-hidden rounded-lg border border-white/10 bg-slate-950 shadow-2xl sm:h-[600px]">
+          <div className="relative h-[calc(100svh-20rem)] min-h-[300px] w-full overflow-hidden rounded-lg border border-white/10 bg-slate-950 shadow-2xl sm:h-[calc(100svh-16rem)] sm:min-h-[460px]">
             <Canvas>
               <PerspectiveCamera makeDefault position={[6, 6, 6]} fov={50} />
 

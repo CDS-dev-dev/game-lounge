@@ -4,7 +4,6 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import {
@@ -20,6 +19,7 @@ import type { Connect4State, Position3D, PlayerRole } from '@/lib/games/connect4
 import { Connect4Board3D } from '@/components/game/Connect4Board3D';
 import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
+import { GameStatePanel } from '@/components/game/GamePlayUI';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useGameHistory } from '@/lib/hooks/useGameHistory';
 import { TEXT_SIZE } from '@/lib/constants/ui-scale';
@@ -133,13 +133,15 @@ export default function Connect4LocalPage() {
         backUrl="/games/connect4"
         backLabel="モード選択"
       />
-      <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
+      <div className="min-h-screen app-bg board-pattern pt-16 pb-3 px-3 sm:pt-20 sm:px-4">
         <div className="max-w-4xl mx-auto">
           {/* ヘッダー */}
+          {phase !== 'playing' && phase !== 'finished' && (
           <div className="text-center mb-4 sm:mb-6">
             <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2">立体四目並べ ローカル対戦</h1>
             <p className="text-gray-200">同じ端末で2人対戦</p>
           </div>
+          )}
 
         {/* ターン交代画面 */}
         {phase === 'turnChange' && (
@@ -162,23 +164,25 @@ export default function Connect4LocalPage() {
         {/* ゲームプレイ */}
         {phase === 'playing' && (
           <>
-            <Card className="mb-6 bg-white/95">
-              <CardContent className="py-4">
-                <div className="flex justify-between items-center flex-wrap gap-2">
-                  <div>
-                    <p className="text-sm text-slate-600 font-medium">現在のターン</p>
-                    <p className="text-xl font-bold text-slate-900">
-                      Player {currentPlayer === 'player1' ? '1 🔵' : '2 🔴'}
-                    </p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm text-slate-600 font-medium">配置した駒</p>
-                    <p className="text-lg font-semibold text-slate-900">
-                      🔵 {clientState.myRole === 'player1' ? clientState.myPiecesCount : clientState.opponentPiecesCount} /
-                      🔴 {clientState.myRole === 'player2' ? clientState.myPiecesCount : clientState.opponentPiecesCount}
-                    </p>
-                  </div>
-                  {/* 待ったボタン */}
+            <div className="mb-2">
+              <GameStatePanel
+                title={`Player ${currentPlayer === 'player1' ? '1' : '2'} の番です`}
+                subtitle="青い配置候補を選び、4つ並ぶ3Dラインを作ります。"
+                status="ローカル対戦"
+                items={[
+                  { label: 'ターン', value: currentPlayer === 'player1' ? 'Player 1' : 'Player 2', emphasis: true },
+                  {
+                    label: 'Player 1',
+                    value: `${clientState.myRole === 'player1' ? clientState.myPiecesCount : clientState.opponentPiecesCount}個`,
+                  },
+                  {
+                    label: 'Player 2',
+                    value: `${clientState.myRole === 'player2' ? clientState.myPiecesCount : clientState.opponentPiecesCount}個`,
+                  },
+                  { label: '目的', value: '4つ揃える' },
+                ]}
+              />
+              <div className="mt-2 flex justify-end">
                   {gameHistory.canUndo() && (
                     <Button
                       variant="secondary"
@@ -189,16 +193,7 @@ export default function Connect4LocalPage() {
                       ↩️ 待った
                     </Button>
                   )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* ルール概要 */}
-            <div className="mb-6 bg-indigo-50 border border-indigo-200 rounded-lg p-3 text-sm">
-              <p className="font-semibold text-indigo-900 mb-1">🎯 勝利条件</p>
-              <p className="text-indigo-800">
-                • 縦・横・斜め（3次元含む）のいずれかで<span className="font-bold">4つ揃える</span>
-              </p>
+              </div>
             </div>
 
             <Connect4Board3D

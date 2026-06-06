@@ -11,6 +11,7 @@ import { BoardTab } from './BoardTab';
 import { BuildTab } from './BuildTab';
 import { TradeTab } from './TradeTab';
 import { InfoTab } from './InfoTab';
+import { GameScreen, GameStatePanel } from '@/components/game/GamePlayUI';
 
 interface IslandSettlersBoardProps {
   gameState: IslandSettlersClientState;
@@ -76,7 +77,18 @@ export const IslandSettlersBoard: React.FC<IslandSettlersBoardProps> = ({
   };
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-6xl flex-col">
+    <GameScreen>
+      <GameStatePanel
+        title={gameState.isMyTurn ? 'あなたのターンです' : `${gameState.players[gameState.currentTurn].name}のターン`}
+        subtitle={gameState.diceValue === 0 && gameState.isMyTurn ? 'まずサイコロを振ります。' : buildMode ? '盤面で配置場所を選んでください。' : '建設・交易・ターン終了を選べます。'}
+        status={`Round ${gameState.round + 1}`}
+        items={[
+          { label: '得点', value: `${myPlayer.score}点`, emphasis: true },
+          { label: 'サイコロ', value: gameState.diceValue || '未' },
+          { label: '資源', value: Object.values(myPlayer.resources).reduce((sum, count) => sum + count, 0) },
+          { label: '次の操作', value: gameState.diceValue === 0 && gameState.isMyTurn ? 'サイコロ' : buildMode ? '配置' : '建設/交易' },
+        ]}
+      />
       <Tabs defaultValue="board" className="flex-1 flex flex-col">
         {/* タブリスト */}
         <TabsList className="flex-shrink-0 overflow-x-auto">
@@ -133,6 +145,6 @@ export const IslandSettlersBoard: React.FC<IslandSettlersBoardProps> = ({
           </TabsContent>
         </div>
       </Tabs>
-    </div>
+    </GameScreen>
   );
 };

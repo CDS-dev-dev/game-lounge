@@ -47,16 +47,6 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
     large: 'w-20 h-28 sm:w-24 sm:h-36 text-base sm:text-lg',
   };
 
-  // カードがない場合は空スロット
-  if (!card) {
-    return (
-      <div
-        className={`${sizeClasses[size]} rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 ${className}`}
-        role="presentation"
-      />
-    );
-  }
-
   // クリック可能かどうか
   const isClickable = onClick && !disabled;
 
@@ -87,6 +77,16 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
           </div>
         </div>
       </button>
+    );
+  }
+
+  // カードがない場合は空スロット
+  if (!card) {
+    return (
+      <div
+        className={`${sizeClasses[size]} rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 ${className}`}
+        role="presentation"
+      />
     );
   }
 

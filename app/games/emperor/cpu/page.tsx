@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { PlaySetupCard, SetupOptionButton } from '@/components/game/PlaySetup';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs';
+import { GameScreen, GameStatePanel, PlayerStatusCard } from '@/components/game/GamePlayUI';
 import {
   createInitialState,
   startSet,
@@ -26,7 +26,6 @@ import {
   CARD_EMOJIS,
   CARD_COLORS,
   SIDE_NAMES,
-  SIDE_COLORS,
 } from '@/lib/games/emperor/constants';
 import { logger } from '@/lib/utils/logger';
 
@@ -125,10 +124,10 @@ export default function EmperorCpuPage() {
   const opponentPlayer = clientState?.opponentPlayer;
 
   return (
-    <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
+    <div className="min-h-screen app-bg board-pattern pt-16 pb-3 px-3 sm:pt-20 sm:px-4">
       <GameHeader title="エンペラーゲーム - CPU対戦" />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-0 py-2 sm:px-4 sm:py-4">
         {phase === 'setup' && (
           <PlaySetupCard
             title="ゲーム設定"
@@ -166,133 +165,93 @@ export default function EmperorCpuPage() {
         )}
 
         {(phase === 'playing' || phase === 'battleResult' || phase === 'setEnd') && clientState && myPlayer && opponentPlayer && (
-          <div className="max-w-4xl mx-auto space-y-4">
-            <Card className="bg-white/95">
-              <CardContent className="py-3">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 rounded text-xs font-bold ${SIDE_COLORS[myPlayer.side]}`}>
-                      {SIDE_NAMES[myPlayer.side]}
-                    </span>
-                    <span className="text-xl font-bold text-slate-900">{myPlayer.score}点</span>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xs text-slate-600">セット {clientState.currentSet}/{clientState.maxSets}</div>
-                    <div className="text-xs text-slate-600">勝負 {clientState.currentBattle}/5</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl font-bold text-slate-900">{opponentPlayer.score}点</span>
-                    <span className={`px-2 py-1 rounded text-xs font-bold ${SIDE_COLORS[opponentPlayer.side]}`}>
-                      {SIDE_NAMES[opponentPlayer.side]}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <GameScreen className="max-w-4xl">
+            <GameStatePanel
+              title={phase === 'playing' ? 'カードを1枚選んで勝負' : phase === 'battleResult' ? '勝負結果' : `セット${clientState.currentSet}終了`}
+              subtitle="皇帝は市民に勝ち、奴隷は皇帝にだけ勝ちます。陣営と残り札を見て選びます。"
+              status={`セット ${clientState.currentSet}/${clientState.maxSets} / 勝負 ${clientState.currentBattle}/5`}
+              items={[
+                { label: 'あなた', value: `${myPlayer.score}点`, emphasis: true },
+                { label: '陣営', value: SIDE_NAMES[myPlayer.side] },
+                { label: 'CPU', value: `${opponentPlayer.score}点` },
+                { label: '残り札', value: `${myPlayer.hand.length}枚` },
+              ]}
+            />
 
-            <Card className="bg-white/95">
-              <Tabs defaultValue="game">
-                <TabsList>
-                  <TabsTrigger value="game">ゲーム</TabsTrigger>
-                  <TabsTrigger value="score">スコア詳細</TabsTrigger>
-                </TabsList>
+            <section className="grid min-h-0 flex-1 gap-3 md:grid-cols-[220px_minmax(0,1fr)]">
+              <aside className="grid gap-2 sm:grid-cols-2 md:grid-cols-1">
+                <PlayerStatusCard
+                  name="あなた"
+                  note={`残り ${myPlayer.hand.length}枚`}
+                  action={SIDE_NAMES[myPlayer.side]}
+                  isActive={phase === 'playing'}
+                />
+                <PlayerStatusCard
+                  name="CPU"
+                  note={`残り ${opponentPlayer.hand.length}枚`}
+                  action={SIDE_NAMES[opponentPlayer.side]}
+                  isActive={false}
+                />
+              </aside>
 
-                <TabsContent value="game" className="space-y-3">
-                  <div className="text-center py-3">
-                    <div className="text-xs text-slate-600 mb-2">CPUのカード</div>
+              <section className="rounded-lg border border-neutral-200 bg-white p-3 shadow-sm">
+                <div className="grid gap-3 sm:grid-cols-[180px_minmax(0,1fr)]">
+                  <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-center">
+                    <div className="mb-2 text-xs font-semibold text-neutral-600">CPUのカード</div>
                     {clientState.cpuCard ? (
-                      <div className={`inline-block px-5 py-3 rounded-lg border-2 ${CARD_COLORS[clientState.cpuCard.type]}`}>
-                        <div className="text-3xl mb-1">{CARD_EMOJIS[clientState.cpuCard.type]}</div>
-                        <div className="text-sm font-bold">{CARD_NAMES[clientState.cpuCard.type]}</div>
+                      <div className={`inline-block rounded-lg border-2 px-5 py-3 ${CARD_COLORS[clientState.cpuCard.type]}`}>
+                        <div className="text-3xl">{CARD_EMOJIS[clientState.cpuCard.type]}</div>
+                        <div className="mt-1 text-sm font-bold">{CARD_NAMES[clientState.cpuCard.type]}</div>
                       </div>
                     ) : (
-                      <div className="inline-block px-5 py-3 rounded-lg border-2 border-dashed border-slate-300 bg-slate-100">
-                        <div className="text-3xl mb-1">?</div>
-                        <div className="text-sm font-bold text-slate-500">未選択</div>
+                      <div className="inline-block rounded-lg border-2 border-dashed border-slate-300 bg-slate-100 px-5 py-3">
+                        <div className="text-3xl">?</div>
+                        <div className="mt-1 text-sm font-bold text-slate-500">未選択</div>
                       </div>
                     )}
                   </div>
 
-                  <div className="py-3">
-                    <div className="text-center mb-2">
-                      <div className="text-xs text-slate-600">あなたの手札</div>
-                    </div>
+                  <div>
+                    <h2 className="mb-2 text-sm font-bold text-neutral-950">あなたの手札</h2>
                     <div className="flex flex-wrap justify-center gap-2">
                       {myPlayer.hand.map((card) => (
                         <button
                           key={card.id}
+                          type="button"
                           onClick={() => handleCardSelect(card.id)}
                           disabled={phase !== 'playing'}
-                          className={`px-4 py-2 rounded-lg border-2 transition-all ${CARD_COLORS[card.type]} ${
-                            phase === 'playing' ? 'hover:scale-105 cursor-pointer' : 'opacity-50 cursor-not-allowed'
+                          className={`min-h-24 min-w-20 rounded-lg border-2 px-3 py-2 transition-all ${CARD_COLORS[card.type]} ${
+                            phase === 'playing' ? 'cursor-pointer hover:scale-105' : 'cursor-not-allowed opacity-50'
                           } ${selectedCardId === card.id ? 'ring-4 ring-blue-500' : ''}`}
                         >
                           <div className="text-3xl">{CARD_EMOJIS[card.type]}</div>
-                          <div className="text-xs font-bold mt-1">{CARD_NAMES[card.type]}</div>
+                          <div className="mt-1 text-xs font-bold">{CARD_NAMES[card.type]}</div>
                         </button>
                       ))}
                     </div>
                   </div>
+                </div>
 
-                  {clientState.lastBattleResult && phase === 'battleResult' && (
-                    <div className="bg-blue-50 border-2 border-blue-500 rounded-lg p-3 text-center">
-                      <div className="text-lg font-bold text-slate-900">
-                        {clientState.lastBattleResult.winner === 'draw' ? '引き分け！' :
-                         clientState.lastBattleResult.winner === 'player' ? 'あなたの勝ち！' : 'CPUの勝ち！'}
-                      </div>
-                      {clientState.lastBattleResult.playerPoints > 0 && (
-                        <div className="text-base text-green-600 font-bold mt-1">
-                          +{clientState.lastBattleResult.playerPoints}点
-                        </div>
-                      )}
-                      {clientState.lastBattleResult.cpuPoints > 0 && (
-                        <div className="text-base text-red-600 font-bold mt-1">
-                          CPU +{clientState.lastBattleResult.cpuPoints}点
-                        </div>
-                      )}
+                {clientState.lastBattleResult && phase === 'battleResult' && (
+                  <div className="mt-3 rounded-lg border-2 border-blue-500 bg-blue-50 p-3 text-center">
+                    <div className="text-lg font-bold text-slate-900">
+                      {clientState.lastBattleResult.winner === 'draw' ? '引き分け' :
+                       clientState.lastBattleResult.winner === 'player' ? 'あなたの勝ち' : 'CPUの勝ち'}
                     </div>
-                  )}
-
-                  {phase === 'setEnd' && (
-                    <div className="text-center py-3">
-                      <div className="text-lg font-bold mb-2 text-slate-900">セット{clientState.currentSet}終了</div>
-                      <Button onClick={handleNextSet} variant="primary" size="lg">次のセットへ</Button>
-                    </div>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="score" className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="text-center p-3 bg-slate-50 rounded-lg">
-                      <div className="text-xs text-slate-600 mb-1">あなた</div>
-                      <div className="text-2xl font-bold text-slate-900 mb-1">{myPlayer.score}点</div>
-                      <div className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${SIDE_COLORS[myPlayer.side]}`}>
-                        {SIDE_NAMES[myPlayer.side]}
-                      </div>
-                      <div className="mt-2 text-xs text-slate-600">残り: {myPlayer.hand.length}枚</div>
-                    </div>
-                    <div className="text-center p-3 bg-slate-50 rounded-lg">
-                      <div className="text-xs text-slate-600 mb-1">CPU</div>
-                      <div className="text-2xl font-bold text-slate-900 mb-1">{opponentPlayer.score}点</div>
-                      <div className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${SIDE_COLORS[opponentPlayer.side]}`}>
-                        {SIDE_NAMES[opponentPlayer.side]}
-                      </div>
-                      <div className="mt-2 text-xs text-slate-600">残り: {opponentPlayer.hand.length}枚</div>
+                    <div className="mt-1 text-sm font-bold text-slate-700">
+                      あなた +{clientState.lastBattleResult.playerPoints} / CPU +{clientState.lastBattleResult.cpuPoints}
                     </div>
                   </div>
-                  <div className="text-center p-3 bg-slate-50 rounded-lg">
-                    <div className="text-xs text-slate-600 mb-1">進行状況</div>
-                    <div className="text-base font-bold text-slate-900">
-                      セット {clientState.currentSet}/{clientState.maxSets} | 勝負 {clientState.currentBattle}/5
-                    </div>
-                    <div className="text-xs text-slate-600 mt-1">
-                      難易度: {difficulty === 'easy' ? 'かんたん' : difficulty === 'medium' ? 'ふつう' : 'むずかしい'}
-                    </div>
+                )}
+
+                {phase === 'setEnd' && (
+                  <div className="mt-3 text-center">
+                    <Button onClick={handleNextSet} variant="primary" size="lg">次のセットへ</Button>
                   </div>
-                </TabsContent>
-              </Tabs>
-            </Card>
-          </div>
+                )}
+              </section>
+            </section>
+          </GameScreen>
         )}
 
         {phase === 'finished' && clientState && myPlayer && opponentPlayer && (

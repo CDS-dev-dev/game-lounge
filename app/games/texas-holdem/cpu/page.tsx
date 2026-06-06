@@ -152,7 +152,7 @@ export default function TexasHoldemCpuPage() {
   };
 
   return (
-    <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
+    <div className="min-h-screen app-bg board-pattern pt-16 pb-3 px-3 sm:pt-20 sm:px-4">
       <GameHeader
         title="テキサスホールデム - CPU対戦"
         showBackToGames
@@ -160,7 +160,7 @@ export default function TexasHoldemCpuPage() {
 
       {/* セットアップ画面 */}
       {phase === 'setup' && (
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto p-2 sm:p-4">
           <PlaySetupCard
             title="ゲーム設定"
             subtitle="CPUテーブルに参加します。人数が増えるほどプリフロップの判断が重くなります。"
@@ -234,7 +234,7 @@ export default function TexasHoldemCpuPage() {
 
       {/* ゲーム画面 */}
       {(phase === 'playing' || phase === 'cpuThinking' || phase === 'roundEnd') && gameState && (
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto p-0 sm:p-2">
           <TexasHoldemBoard
             gameState={toClientState(gameState, PLAYER_ID)}
             onAction={handlePlayerAction}

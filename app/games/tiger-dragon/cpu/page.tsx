@@ -274,10 +274,10 @@ export default function TigerDragonCpuPage() {
   }, []);
 
   return (
-    <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
+    <div className="min-h-screen app-bg board-pattern pt-16 pb-3 px-3 sm:pt-20 sm:px-4">
       <GameHeader title="タイガー&ドラゴン - CPU対戦" />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-0 py-2 sm:px-4 sm:py-4">
         {phase === 'playerSelect' && (
           <PlaySetupCard
             title="プレイヤー人数を選択"
@@ -364,13 +364,13 @@ export default function TigerDragonCpuPage() {
 
               {/* 処理中表示 */}
               {isProcessing && (
-                <div className="max-w-6xl mx-auto mt-4 text-center">
-                  <p className="text-gray-600">処理中...</p>
+                <div className="mx-auto mt-2 max-w-6xl text-center">
+                  <p className="rounded-lg bg-white/90 px-3 py-2 text-sm font-semibold text-neutral-700">処理中...</p>
                 </div>
               )}
 
               {/* コントロールボタン */}
-              <div className="max-w-6xl mx-auto mt-6 flex justify-center gap-4">
+              <div className="mx-auto mt-2 flex max-w-6xl justify-center gap-3">
                 {phase === 'finished' && (
                   <Button onClick={handleRestart} variant="primary" size="lg">
                     もう一度プレイ

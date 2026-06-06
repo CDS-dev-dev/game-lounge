@@ -206,10 +206,10 @@ export default function IslandSettlersCpuPage() {
   };
 
   return (
-    <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
+    <div className="min-h-screen app-bg board-pattern pt-16 pb-3 px-3 sm:pt-20 sm:px-4">
       <GameHeader title="アイランドセトラーズ - CPU対戦" />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-0 py-2 sm:px-4 sm:py-4">
         {phase === 'setup' && (
           <PlaySetupCard
             title="ゲーム設定"
