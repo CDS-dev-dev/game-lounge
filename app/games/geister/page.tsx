@@ -1,13 +1,11 @@
 ﻿'use client';
 
-import Link from 'next/link';
 import Script from 'next/script';
-import { Card, CardContent } from '@/components/ui/Card';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { GameModeSelector } from '@/components/game/GameModeSelector';
-import { TEXT_SIZE, CARD_BG, PADDING } from '@/lib/constants/ui-scale';
+import { TEXT_SIZE } from '@/lib/constants/ui-scale';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
-import { Ghost } from 'lucide-react';
+import { Ghost, ShieldQuestion, Sparkles, Trophy } from 'lucide-react';
 
 export default function GeisterModePage() {
   const onlineReady = isSupabaseConfigured();
@@ -40,21 +38,36 @@ export default function GeisterModePage() {
         icon={<Ghost className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-400" />}
       />
       <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-8 px-4">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-6">
-            <h1 className={`${TEXT_SIZE.heading1} font-bold text-white mb-2`}>ガイスター</h1>
-            <p className={`${TEXT_SIZE.label} text-gray-200`}>プレイモードを選択</p>
-          </div>
+        <div className="mx-auto max-w-4xl">
+          <section className="mb-6 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div>
+              <p className="text-sm font-semibold text-indigo-200">Geister</p>
+              <h1 className={`${TEXT_SIZE.heading1} mt-1 font-bold text-white`}>ガイスター</h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-200 sm:text-base">
+                見えているのは自分の駒だけ。相手の青と赤を読み切る心理戦です。
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-2 rounded-lg border border-white/10 bg-white/10 p-2 text-center text-xs font-semibold text-white">
+              <span className="rounded-md bg-white/10 px-2 py-2"><ShieldQuestion className="mx-auto mb-1 h-4 w-4" />読み合い</span>
+              <span className="rounded-md bg-white/10 px-2 py-2"><Sparkles className="mx-auto mb-1 h-4 w-4" />短期決着</span>
+              <span className="rounded-md bg-white/10 px-2 py-2"><Trophy className="mx-auto mb-1 h-4 w-4" />脱出勝利</span>
+            </div>
+          </section>
 
-          {/* モード選択（共通コンポーネント使用） */}
-          <div className="mb-6">
+          <div className="mb-5">
             <GameModeSelector
               gameName="ガイスター"
               modes={[
                 {
+                  type: 'cpu',
+                  title: 'CPU対戦',
+                  description: '一人で練習',
+                  href: '/games/geister/cpu',
+                  recommended: true,
+                },
+                {
                   type: 'online',
                   title: 'オンライン',
-                  emoji: '🌐',
                   description: onlineReady ? '世界中と対戦' : '準備中',
                   href: '/games/geister/online',
                   disabled: !onlineReady,
@@ -62,36 +75,26 @@ export default function GeisterModePage() {
                 {
                   type: 'local',
                   title: 'ローカル',
-                  emoji: '👥',
                   description: '同じ端末で',
                   href: '/games/geister/local',
-                },
-                {
-                  type: 'cpu',
-                  title: 'CPU対戦',
-                  emoji: '🤖',
-                  description: '一人で練習',
-                  href: '/games/geister/cpu',
                 },
               ]}
             />
           </div>
 
-          {/* ゲーム説明 */}
-          <Card className={CARD_BG}>
-            <CardContent className={PADDING.card}>
-              <p className={`${TEXT_SIZE.label} text-slate-700 mb-3`}>
-                👻と😈を使った心理戦ゲーム。相手の駒の種類は見えません。
-              </p>
-              <Link
-                href="/games/geister/rules"
-                className={`${TEXT_SIZE.label} text-indigo-600 hover:text-indigo-500 underline font-semibold`}
-              >
-                ルールを見る →
-              </Link>
-            </CardContent>
-          </Card>
-
+          <section className="grid gap-3 text-sm text-slate-700 sm:grid-cols-3">
+            <div className="rounded-lg bg-white/95 p-4">
+              <p className="font-bold text-slate-950">青いお化け</p>
+              <p className="mt-1 leading-6">脱出させると勝ち。全部取られると負け。</p>
+            </div>
+            <div className="rounded-lg bg-white/95 p-4">
+              <p className="font-bold text-slate-950">赤い悪魔</p>
+              <p className="mt-1 leading-6">相手に全部取らせると勝ち。</p>
+            </div>
+            <a href="/games/geister/rules" className="rounded-lg bg-white/95 p-4 font-bold text-indigo-700 hover:bg-white">
+              ルールを見る
+            </a>
+          </section>
         </div>
       </div>
     </>

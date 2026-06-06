@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import type { GeisterClientState, Position } from '@/lib/games/geister/types';
 import { BOARD_SIZE, PLAYER1_ESCAPE_POSITIONS, PLAYER2_ESCAPE_POSITIONS } from '@/lib/games/geister/constants';
 import { KeyboardHelpModal } from '@/components/ui/KeyboardHelpModal';
+import { DoorOpen } from 'lucide-react';
 
 interface GeisterBoardProps {
   gameState: GeisterClientState;
@@ -23,14 +24,9 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
   const [focusedCell, setFocusedCell] = useState<Position | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
 
-  // どちらのプレイヤーも常に自分が下側に表示されるようにする
-  // Y座標（行）のみを反転する（SetupBoardと同じロジック）
-  // player1: 内部座標の上が画面の上（Y反転なし）→ 自分は内部Y=0,1なので上に見える → Y反転が必要
-  // player2: 内部座標の下が画面の下（Y反転なし）→ 自分は内部Y=4,5なので下に見える → Y反転不要
+  // Board coordinates stay internal everywhere except render order.
+  // That keeps click/tap selection tied to the exact piece id in the tapped cell.
   const toInternalY = (displayRowIndex: number): number => {
-    // player1の場合：画面上部が内部下部になるよう反転
-    // displayRowIndex 0 → 内部 Y=5（相手陣地）
-    // displayRowIndex 5 → 内部 Y=0（自分陣地を下に表示）
     return gameState.myRole === 'player1'
       ? BOARD_SIZE - 1 - displayRowIndex
       : displayRowIndex;
@@ -58,8 +54,8 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
     return gameState.lastMove.to.x === internalX && gameState.lastMove.to.y === internalY;
   };
 
-  const handleCellClick = (internalX: number, internalY: number) => {
-    const piece = gameState.board[internalY][internalX];
+  const handleCellClick = useCallback((internalX: number, internalY: number) => {
+    const piece = gameState.board[internalY]?.[internalX];
 
     if (piece && piece.owner === gameState.myRole && !piece.captured && !piece.escaped) {
       // 自分の駒をクリック
@@ -68,7 +64,7 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
       // 駒を選択中の状態でセルをクリック（移動先）
       onCellClick?.({ x: internalX, y: internalY });
     }
-  };
+  }, [gameState.board, gameState.myRole, onCellClick, onPieceClick, selectedPieceId]);
 
   // キーボード操作（画面座標で操作、内部座標に変換）
   useEffect(() => {
@@ -126,7 +122,7 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusedCell, gameState.canOperate, selectedPieceId, gameState.myRole]);
+  }, [focusedCell, gameState.canOperate, handleCellClick, gameState.myRole]);
 
   const getPieceDisplay = (piece: NonNullable<GeisterClientState['board'][number][number]>) => {
     if (piece.owner === gameState.myRole) {
@@ -179,12 +175,12 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
       <KeyboardHelpModal shortcuts={keyboardShortcuts} gameName="ガイスター" />
       <div
         ref={boardRef}
-        className="inline-block bg-amber-100 p-2 sm:p-4 rounded-lg shadow-lg"
+        className="inline-block rounded-lg border border-stone-300/80 bg-stone-100 p-2 shadow-xl shadow-black/15 sm:p-3"
         role="grid"
         aria-label="ガイスターの盤面"
         tabIndex={0}
       >
-      <div className="grid gap-0.5 sm:gap-1" style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)` }}>
+      <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${BOARD_SIZE}, 1fr)` }}>
         {Array.from({ length: BOARD_SIZE }).map((_, rowIndex) => {
           // どちらのプレイヤーも自分が下側に来るように描画順序を調整
           // Y座標のみ反転（SetupBoardと統一）
@@ -194,7 +190,7 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
             // X座標は反転しない
             const internalX = colIndex;
 
-            const piece = gameState.board[internalY][internalX];
+            const piece = gameState.board[internalY]?.[internalX];
             const isSelected = piece?.id === selectedPieceId;
             const isEscape = isEscapePosition(internalX, internalY);
             const canMove = isValidMove(internalX, internalY);
@@ -219,29 +215,31 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
                 }}
                 onFocus={() => setFocusedCell({ x: internalX, y: internalY })}
                 tabIndex={isFocused ? 0 : -1}
+                data-position={`${internalX},${internalY}`}
+                data-piece-id={piece?.id ?? ''}
                 className={`
-                  w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 flex items-center justify-center border-2 cursor-pointer transition-all touch-manipulation focus:ring-4 focus:ring-blue-400
-                  ${isEscape ? 'bg-yellow-200 border-yellow-400' : 'bg-amber-50 border-amber-300'}
-                  ${isLastFrom ? 'bg-yellow-100 border-yellow-300' : ''}
+                  relative flex h-12 w-12 items-center justify-center rounded-md border text-center transition-all touch-manipulation focus:outline-none focus:ring-4 focus:ring-teal-300 sm:h-16 sm:w-16 md:h-20 md:w-20
+                  ${isEscape ? 'border-amber-400 bg-amber-100' : 'border-stone-300 bg-stone-50'}
+                  ${isLastFrom ? 'border-yellow-400 bg-yellow-100' : ''}
                   ${isLastTo ? 'ring-2 ring-yellow-500' : ''}
-                  ${isSelected ? 'ring-2 sm:ring-4 ring-indigo-500' : ''}
-                  ${canMove ? 'bg-green-200 ring-2 ring-green-400' : ''}
-                  ${isFocused ? 'ring-2 ring-blue-400' : ''}
-                  ${!isSelected && !canMove && !isLastFrom ? 'hover:bg-amber-100' : ''}
+                  ${isSelected ? 'ring-4 ring-indigo-500' : ''}
+                  ${canMove ? 'border-emerald-400 bg-emerald-100 ring-2 ring-emerald-400' : ''}
+                  ${isFocused ? 'ring-2 ring-teal-400' : ''}
+                  ${piece || canMove ? 'cursor-pointer' : 'cursor-default'}
+                  ${!isSelected && !canMove && !isLastFrom ? 'hover:bg-stone-100' : ''}
                 `}
               >
                 {piece && !piece.captured && !piece.escaped && (
                   <div
-                    className={`text-2xl sm:text-4xl transition-all duration-300 pointer-events-none ${
+                    className={`pointer-events-none grid h-9 w-9 place-items-center rounded-full border text-2xl shadow-sm transition-all duration-200 sm:h-12 sm:w-12 sm:text-3xl md:h-14 md:w-14 md:text-4xl ${
                       piece.owner === gameState.myRole ? 'opacity-100' : 'opacity-80'
-                    } ${isSelected ? 'scale-110' : 'scale-100'} hover:scale-105`}
+                    } ${piece.owner === gameState.myRole ? 'border-white bg-white' : 'border-slate-200 bg-slate-100'} ${isSelected ? 'scale-110' : 'scale-100'}`}
                   >
                     {getPieceDisplay(piece)}
                   </div>
                 )}
-                {/* 脱出口のマーカー */}
                 {isEscape && !piece && (
-                  <div className="text-xl sm:text-2xl pointer-events-none">🚪</div>
+                  <DoorOpen className="pointer-events-none h-5 w-5 text-amber-700 sm:h-7 sm:w-7" aria-hidden="true" />
                 )}
               </div>
             );
@@ -249,12 +247,10 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
         })}
       </div>
 
-      {/* 操作説明 */}
-      <div className="mt-3 sm:mt-4 text-center text-xs sm:text-sm text-slate-600 max-w-md px-2">
-        <p className="font-medium">駒をクリックして選択 → 移動先をクリック</p>
-        <p className="text-[10px] sm:text-xs mt-1 text-slate-500">
-          矢印キー: 移動 | Enter/Space: 選択/移動 | ⌨️ヘルプボタンで詳細
-        </p>
+      <div className="mt-3 grid grid-cols-3 gap-1 text-center text-[11px] font-semibold text-slate-600 sm:text-xs">
+        <span className="rounded-md bg-white px-2 py-1">👻 {gameState.capturedCounts.myGood}</span>
+        <span className="rounded-md bg-white px-2 py-1">😈 {gameState.capturedCounts.myBad}</span>
+        <span className="rounded-md bg-white px-2 py-1">👤 {gameState.opponentPiecesCount.captured}</span>
       </div>
     </div>
     </>

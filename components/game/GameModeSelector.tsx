@@ -8,10 +8,11 @@ import { Bot, ChevronRight, Globe2, Users } from 'lucide-react';
 export interface GameMode {
   type: 'cpu' | 'local' | 'online';
   title: string;
-  emoji: string;
+  emoji?: string;
   description: string;
   href: string;
   disabled?: boolean;
+  recommended?: boolean;
 }
 
 interface GameModeSelectorProps {
@@ -21,6 +22,16 @@ interface GameModeSelectorProps {
 
 export function GameModeSelector({ gameName, modes }: GameModeSelectorProps) {
   const router = useRouter();
+  const modePriority = {
+    cpu: 0,
+    local: 1,
+    online: 2,
+  };
+  const sortedModes = [...modes].sort((a, b) => {
+    if (a.disabled !== b.disabled) return a.disabled ? 1 : -1;
+    if (a.recommended !== b.recommended) return a.recommended ? -1 : 1;
+    return modePriority[a.type] - modePriority[b.type];
+  });
 
   const getModeLabel = (type: string) => {
     switch (type) {
@@ -50,7 +61,10 @@ export function GameModeSelector({ gameName, modes }: GameModeSelectorProps) {
 
   return (
     <div className="mb-4 grid gap-3 sm:mb-5 sm:grid-cols-3">
-      {modes.map((mode) => (
+      {sortedModes.map((mode) => {
+        const recommended = mode.recommended || (!mode.disabled && mode.type === 'cpu');
+
+        return (
         <button
           key={mode.type}
           type="button"
@@ -58,10 +72,19 @@ export function GameModeSelector({ gameName, modes }: GameModeSelectorProps) {
           disabled={mode.disabled}
           aria-label={`${gameName}の${getModeLabel(mode.type)}を開始`}
           aria-disabled={mode.disabled}
-          className={`group flex min-h-[92px] w-full items-center gap-3 rounded-lg border border-white/10 bg-white/95 p-4 text-left shadow-lg transition-transform focus:outline-none focus:ring-4 focus:ring-teal-300 sm:min-h-[156px] sm:flex-col sm:items-start sm:justify-between ${
+          className={`group relative flex min-h-[96px] w-full items-center gap-3 rounded-lg border p-4 text-left shadow-lg transition-transform focus:outline-none focus:ring-4 focus:ring-teal-300 sm:min-h-[164px] sm:flex-col sm:items-start sm:justify-between ${
+            recommended
+              ? 'border-teal-300 bg-white'
+              : 'border-white/10 bg-white/95'
+          } ${
             mode.disabled ? 'cursor-not-allowed opacity-60' : 'hover:-translate-y-0.5 hover:bg-white'
           }`}
         >
+          {recommended && (
+            <span className="absolute right-3 top-3 rounded-md bg-teal-600 px-2 py-0.5 text-[11px] font-bold text-white">
+              おすすめ
+            </span>
+          )}
           <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-neutral-100">
             {getModeIcon(mode.type)}
           </span>
@@ -83,7 +106,7 @@ export function GameModeSelector({ gameName, modes }: GameModeSelectorProps) {
             <ChevronRight className="h-5 w-5 flex-shrink-0 text-neutral-400 transition-transform group-hover:translate-x-0.5 sm:self-end" aria-hidden="true" />
           )}
         </button>
-      ))}
+      )})}
     </div>
   );
 }

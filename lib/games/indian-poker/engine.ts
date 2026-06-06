@@ -53,19 +53,34 @@ export function createInitialState(
     isCPU: false,
   });
 
-  // CPUプレイヤー
-  for (let i = 0; i < cpuCount; i++) {
-    players.push({
-      id: `cpu-${i}`,
-      name: CPU_NAMES[i % CPU_NAMES.length],
-      card: null,
-      chips: INITIAL_CHIPS,
-      currentBet: 0,
-      action: null,
-      isActive: true,
-      isCPU: true,
-      difficulty: cpuDifficulty,
-    });
+  if (cpuCount === 0) {
+    for (let i = 1; i < playerCount; i++) {
+      players.push({
+        id: `player-${i}`,
+        name: `プレイヤー${i + 1}`,
+        card: null,
+        chips: INITIAL_CHIPS,
+        currentBet: 0,
+        action: null,
+        isActive: true,
+        isCPU: false,
+      });
+    }
+  } else {
+    // CPUプレイヤー
+    for (let i = 0; i < cpuCount; i++) {
+      players.push({
+        id: `cpu-${i}`,
+        name: CPU_NAMES[i % CPU_NAMES.length],
+        card: null,
+        chips: INITIAL_CHIPS,
+        currentBet: 0,
+        action: null,
+        isActive: true,
+        isCPU: true,
+        difficulty: cpuDifficulty,
+      });
+    }
   }
 
   return {

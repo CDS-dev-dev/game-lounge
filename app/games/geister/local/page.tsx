@@ -22,6 +22,7 @@ import { formatGameError } from '@/lib/utils/error-handler';
 import { useGameHistory } from '@/lib/hooks/useGameHistory';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/Accordion';
 import { logger } from '@/lib/utils/logger';
+import { RotateCcw, UserRound, UsersRound } from 'lucide-react';
 
 type LocalGamePhase = 'setup-p1' | 'setup-p2-interstitial' | 'setup-p2' | 'playing' | 'turnChange' | 'finished';
 
@@ -257,45 +258,44 @@ export default function GeisterLocalPage() {
         {phase === 'playing' && clientState && (
           <>
             {/* ステータスカード */}
-            <Card className="mb-2 bg-white/95">
-              <CardContent className="py-1.5 sm:py-2 px-2 sm:px-3">
-                <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center text-[10px] sm:text-xs">
-                  {/* Player1/現在プレイヤーの捕獲情報 */}
-                  <div className="flex gap-1 justify-start">
-                    <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">
-                      👻 {clientState.capturedCounts.myGood}
+            <Card className="mb-3 bg-white/95">
+              <CardContent className="px-3 py-3">
+                <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="grid h-10 w-10 place-items-center rounded-lg bg-indigo-100 text-indigo-700">
+                      <UserRound className="h-5 w-5" aria-hidden="true" />
                     </span>
-                    <span className="bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">
-                      😈 {clientState.capturedCounts.myBad}
-                    </span>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500">手番</p>
+                      <p className="text-sm font-bold text-slate-950">Player {currentPlayer === 'player1' ? '1' : '2'}</p>
+                    </div>
                   </div>
 
-                  {/* ターン表示 */}
-                  <div className="text-xs sm:text-sm font-bold text-slate-900 text-center whitespace-nowrap">
-                    P{currentPlayer === 'player1' ? '1' : '2'}
+                  <div className="rounded-lg bg-slate-950 px-4 py-2 text-center text-sm font-bold text-white">
+                    👻 {clientState.capturedCounts.myGood} / 😈 {clientState.capturedCounts.myBad}
                   </div>
 
-                  {/* 相手の捕獲情報 */}
-                  <div className="flex gap-1 justify-end">
-                    <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">
-                      👻 {clientState.capturedCounts.opponentGood}
+                  <div className="flex items-center gap-2 sm:justify-end">
+                    <span className="grid h-10 w-10 place-items-center rounded-lg bg-slate-100 text-slate-700">
+                      <UsersRound className="h-5 w-5" aria-hidden="true" />
                     </span>
-                    <span className="bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap">
-                      😈 {clientState.capturedCounts.opponentBad}
-                    </span>
+                    <div className="sm:text-right">
+                      <p className="text-xs font-semibold text-slate-500">相手の捕獲</p>
+                      <p className="text-sm font-bold text-slate-950">👻 {clientState.capturedCounts.opponentGood} / 😈 {clientState.capturedCounts.opponentBad}</p>
+                    </div>
                   </div>
                 </div>
 
-                {/* 操作ボタン */}
-                <div className="flex gap-1 justify-center mt-1.5">
+                <div className="mt-3 flex justify-center gap-2">
                   {gameHistory.canUndo() && (
                     <Button
                       variant="secondary"
                       onClick={handleUndo}
-                      className="text-[10px] sm:text-xs py-1 px-2"
+                      className="px-3 py-2 text-xs"
                       aria-label="1手戻す"
                     >
-                      ↩️ 待った
+                      <RotateCcw className="inline h-4 w-4" aria-hidden="true" />
+                      待った
                     </Button>
                   )}
                   <Button
@@ -307,9 +307,9 @@ export default function GeisterLocalPage() {
                       setSelectedPiece(null);
                       setValidMoves([]);
                     }}
-                    className="text-[10px] sm:text-xs py-1 px-2"
+                    className="px-3 py-2 text-xs"
                   >
-                    🔄 交代
+                    交代
                   </Button>
                 </div>
               </CardContent>

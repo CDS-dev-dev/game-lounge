@@ -59,6 +59,13 @@ export default function IndianPokerLocalPage() {
   // ゲーム開始
   const handleStartGame = useCallback(() => {
     let newState = createInitialState(GAME_ID, playerCount, `player-0`, 0);
+    newState = {
+      ...newState,
+      players: newState.players.map((player, index) => ({
+        ...player,
+        name: playerNames[index]?.trim() || `プレイヤー${index + 1}`,
+      })),
+    };
     newState = startRound(newState);
 
     setGameState(newState);
@@ -66,7 +73,7 @@ export default function IndianPokerLocalPage() {
     setCurrentPlayerId(firstPlayerId);
     setClientState(toClientState(newState, firstPlayerId));
     setPhase('playing');
-  }, [playerCount]);
+  }, [playerCount, playerNames]);
 
   const handleShowdown = useCallback((state: IndianPokerState) => {
     setPhase('finished');

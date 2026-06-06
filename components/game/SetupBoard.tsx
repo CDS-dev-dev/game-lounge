@@ -281,7 +281,7 @@ export const SetupBoard: React.FC<SetupBoardProps> = ({
 /**
  * ランダム配置生成
  */
-function generateRandomSetup(
+export function generateRandomSetup(
   currentSetup: PieceSetup[],
   role: PlayerRole
 ): PieceSetup[] {
@@ -314,22 +314,26 @@ function generateRandomSetup(
   const newPieces: PieceSetup[] = [];
   let goodAdded = 0;
   let badAdded = 0;
+  const seed = Date.now();
+  let pieceIndex = currentSetup.length;
 
   for (const pos of shuffled) {
     if (goodAdded < needGood) {
       newPieces.push({
-        pieceId: `auto-${role}-${Date.now()}-${goodAdded}`,
+        pieceId: `auto-${role}-${seed}-${pieceIndex}`,
         position: pos,
         type: 'good',
       });
       goodAdded++;
+      pieceIndex++;
     } else if (badAdded < needBad) {
       newPieces.push({
-        pieceId: `auto-${role}-${Date.now()}-${badAdded}`,
+        pieceId: `auto-${role}-${seed}-${pieceIndex}`,
         position: pos,
         type: 'bad',
       });
       badAdded++;
+      pieceIndex++;
     }
   }
 
