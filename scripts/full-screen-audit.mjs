@@ -142,10 +142,22 @@ const cases = [
     steps: [{ text: '3人' }, { text: '普通' }, { text: 'ゲーム開始' }],
   },
   {
+    name: 'island-cpu-after-roll',
+    path: '/games/island-settlers/cpu',
+    kind: 'play',
+    steps: [{ text: '3人' }, { text: '普通' }, { text: 'ゲーム開始' }, { text: 'サイコロ' }],
+  },
+  {
     name: 'island-local-playing',
     path: '/games/island-settlers/local',
     kind: 'play',
     steps: [{ text: 'ゲーム開始' }],
+  },
+  {
+    name: 'island-local-after-roll',
+    path: '/games/island-settlers/local',
+    kind: 'play',
+    steps: [{ text: 'ゲーム開始' }, { text: 'サイコロ' }],
   },
   {
     name: 'geister-cpu-setup',
@@ -251,6 +263,24 @@ async function collectMetrics(page, kind, viewport) {
       const offscreenTargets = buttons
         .map((el) => ({ text: (el.textContent || el.getAttribute('aria-label') || '').trim().slice(0, 80), rect: rectOf(el) }))
         .filter(({ rect }) => rect && (rect.left < -1 || rect.right > window.innerWidth + 1 || rect.top < -1 || rect.bottom > window.innerHeight + 1));
+      const clippedScrollContainers = [...document.querySelectorAll('*')]
+        .filter((el) => {
+          const rect = el.getBoundingClientRect();
+          const style = getComputedStyle(el);
+          if (rect.width < 120 || rect.height < 40) return false;
+          if (style.display === 'none' || style.visibility === 'hidden') return false;
+          if (el.scrollWidth <= el.clientWidth + 8) return false;
+          const text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+          if (!text && el.querySelectorAll('button, a, canvas, [role="grid"]').length === 0) return false;
+          return true;
+        })
+        .map((el) => ({
+          text: (el.textContent || el.getAttribute('aria-label') || el.className || '').toString().replace(/\s+/g, ' ').trim().slice(0, 100),
+          rect: rectOf(el),
+          clientWidth: el.clientWidth,
+          scrollWidth: el.scrollWidth,
+        }))
+        .slice(0, 12);
 
       const action = rectOf(document.querySelector('[data-game-action-area]'));
       const ownHand = rectOf(document.querySelector('[data-own-hand]'));
@@ -270,6 +300,7 @@ async function collectMetrics(page, kind, viewport) {
       if (actionOverlapsBoard) issues.push('action-overlaps-board');
       if (smallTargets.length > 0) issues.push(`small-targets:${smallTargets.length}`);
       if (offscreenTargets.length > 0 && kind !== 'content') issues.push(`offscreen-targets:${offscreenTargets.length}`);
+      if (clippedScrollContainers.length > 0 && kind !== 'content') issues.push(`clipped-scroll-containers:${clippedScrollContainers.length}`);
 
       return {
         kind,
@@ -286,6 +317,7 @@ async function collectMetrics(page, kind, viewport) {
         buttonCount: buttons.length,
         smallTargets: smallTargets.slice(0, 12),
         offscreenTargets: offscreenTargets.slice(0, 12),
+        clippedScrollContainers,
         bodyText,
         issues,
       };

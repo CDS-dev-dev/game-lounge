@@ -7,7 +7,6 @@ import type { IslandSettlersClientState, Position, BuildingType } from '@/lib/ga
 
 interface BoardTabProps {
   gameState: IslandSettlersClientState;
-  onRollDice?: () => void;
   onTileClick: (position: Position) => void;
   buildMode: BuildingType | null;
   roadStart: Position | null;
@@ -39,7 +38,6 @@ const COLOR_LABELS: Record<string, string> = {
 
 export const BoardTab: React.FC<BoardTabProps> = ({
   gameState,
-  onRollDice,
   onTileClick,
   buildMode,
   roadStart,
@@ -48,10 +46,10 @@ export const BoardTab: React.FC<BoardTabProps> = ({
   const currentPlayer = gameState.players[gameState.currentTurn];
 
   return (
-    <div className="grid min-h-0 gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
+    <div className="grid min-h-0 gap-2 lg:grid-cols-[minmax(0,1fr)_220px] lg:gap-3">
       <div className="flex min-h-0 justify-center">
         {/* ゲームボード */}
-        <div className="grid grid-cols-6 gap-1 rounded-lg border border-neutral-900/50 bg-neutral-900/80 p-2 shadow-xl sm:p-3">
+        <div data-game-board className="grid grid-cols-6 gap-1 rounded-lg border border-neutral-900/50 bg-neutral-900/80 p-2 shadow-xl sm:p-3">
           {gameState.board.map((row, y) =>
             row.map((tile, x) => {
               const position = tile.position;
@@ -61,7 +59,7 @@ export const BoardTab: React.FC<BoardTabProps> = ({
                 <div
                   key={`${x}-${y}`}
                   className={`
-                    relative h-11 w-11 rounded-lg border-2 cursor-pointer
+                    relative h-10 w-10 rounded-md border-2 cursor-pointer
                     transition-all hover:scale-105 sm:h-14 sm:w-14 md:h-16 md:w-16
                     ${tile.terrain === 'desert' ? 'bg-yellow-200' : 'bg-green-100'}
                     ${isRoadStart ? 'ring-4 ring-blue-500' : ''}
@@ -119,21 +117,11 @@ export const BoardTab: React.FC<BoardTabProps> = ({
           </div>
         </div>
 
-      {/* サイコロ */}
-      {gameState.isMyTurn && gameState.diceValue === 0 && (
-        <button
-          onClick={onRollDice}
-          className="w-full rounded-lg bg-teal-700 px-6 py-3 font-bold text-white transition-colors hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300"
-          disabled={!gameState.canOperate}
-        >
-          🎲 サイコロを振る
-        </button>
-      )}
-
       {gameState.diceValue > 0 && (
-        <div className="rounded-lg border border-neutral-200 bg-white/95 p-3 text-center shadow-sm">
-          <div className="text-2xl">🎲</div>
-          <div className="text-xl font-bold text-neutral-950">{gameState.diceValue}</div>
+        <div className="rounded-lg border border-teal-200 bg-teal-50 p-3 text-center shadow-sm">
+          <div className="text-xs font-bold text-teal-800">出た目</div>
+          <div className="text-2xl font-bold text-neutral-950">{gameState.diceValue}</div>
+          <p className="mt-1 text-xs font-semibold text-teal-900">次は建設・交易・終了を選択</p>
         </div>
       )}
 
@@ -165,7 +153,7 @@ export const BoardTab: React.FC<BoardTabProps> = ({
 
       {/* 道路の表示 */}
       <div className="rounded-lg bg-white/90 p-2 text-center text-xs font-semibold text-neutral-600">
-        道路: {gameState.roads.filter((r) => r.owner === myPlayer.id).length}本
+        自分の道路: {gameState.roads.filter((r) => r.owner === myPlayer.id).length}本
       </div>
 
       {/* 勝利メッセージ */}

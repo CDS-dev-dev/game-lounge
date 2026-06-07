@@ -97,7 +97,7 @@ export function GameModeSelector({ gameName, modes }: GameModeSelectorProps) {
                 </span>
               )}
             </span>
-            <span className="mt-0.5 block break-keep text-lg font-bold leading-tight text-neutral-950 sm:text-xl">
+            <span className="mt-0.5 block text-lg font-bold leading-tight text-neutral-950 sm:text-xl">
               {mode.title}
             </span>
             <span className="mt-1 block text-sm leading-5 text-neutral-600">{mode.description}</span>

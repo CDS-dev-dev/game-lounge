@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BarChart3, Hammer, Map, Repeat2 } from 'lucide-react';
 import type { IslandSettlersClientState, Position, ResourceType, BuildingType } from '@/lib/games/island-settlers/types';
 import { BUILD_COSTS } from '@/lib/games/island-settlers/constants';
@@ -11,7 +11,7 @@ import { BoardTab } from './BoardTab';
 import { BuildTab } from './BuildTab';
 import { TradeTab } from './TradeTab';
 import { InfoTab } from './InfoTab';
-import { GameScreen, GameStatePanel } from '@/components/game/GamePlayUI';
+import { GameScreen } from '@/components/game/GamePlayUI';
 
 interface IslandSettlersBoardProps {
   gameState: IslandSettlersClientState;
@@ -35,8 +35,38 @@ export const IslandSettlersBoard: React.FC<IslandSettlersBoardProps> = ({
   // 建設モード状態
   const [buildMode, setBuildMode] = useState<BuildingType | null>(null);
   const [roadStart, setRoadStart] = useState<Position | null>(null);
+  const [activeTab, setActiveTab] = useState('board');
 
   const myPlayer = gameState.players[gameState.myPlayerIndex];
+  const canBuildAnything = (['road', 'village', 'town'] as BuildingType[]).some((type) => {
+    const cost = BUILD_COSTS[type];
+    return (
+      myPlayer.resources.wood >= cost.wood &&
+      myPlayer.resources.stone >= cost.stone &&
+      myPlayer.resources.food >= cost.food &&
+      myPlayer.resources.gold >= cost.gold &&
+      myPlayer.buildings[`${type}s` as keyof typeof myPlayer.buildings] > 0
+    );
+  });
+  const nextAction =
+    !gameState.isMyTurn
+      ? '相手の操作待ち'
+      : gameState.diceValue === 0
+        ? 'サイコロを振る'
+        : buildMode
+          ? '盤面で配置場所を選ぶ'
+          : canBuildAnything
+            ? '建設する'
+            : '交易またはターン終了';
+
+  useEffect(() => {
+    if (!gameState.isMyTurn) return;
+    if (gameState.diceValue === 0) {
+      setActiveTab('board');
+    } else if (!buildMode && activeTab === 'board') {
+      setActiveTab(canBuildAnything ? 'build' : 'trade');
+    }
+  }, [activeTab, buildMode, canBuildAnything, gameState.diceValue, gameState.isMyTurn]);
 
   // タイルクリック処理
   const handleTileClick = (position: Position) => {
@@ -78,20 +108,95 @@ export const IslandSettlersBoard: React.FC<IslandSettlersBoardProps> = ({
 
   return (
     <GameScreen>
-      <GameStatePanel
-        title={gameState.isMyTurn ? 'あなたのターンです' : `${gameState.players[gameState.currentTurn].name}のターン`}
-        subtitle={gameState.diceValue === 0 && gameState.isMyTurn ? 'まずサイコロを振ります。' : buildMode ? '盤面で配置場所を選んでください。' : '建設・交易・ターン終了を選べます。'}
-        status={`Round ${gameState.round + 1}`}
-        items={[
-          { label: '得点', value: `${myPlayer.score}点`, emphasis: true },
-          { label: 'サイコロ', value: gameState.diceValue || '未' },
-          { label: '資源', value: Object.values(myPlayer.resources).reduce((sum, count) => sum + count, 0) },
-          { label: '次の操作', value: gameState.diceValue === 0 && gameState.isMyTurn ? 'サイコロ' : buildMode ? '配置' : '建設/交易' },
-        ]}
-      />
-      <Tabs defaultValue="board" className="flex-1 flex flex-col">
+      <section className="rounded-lg border border-neutral-200 bg-white p-2 shadow-sm sm:p-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h2 className="truncate text-base font-bold leading-tight text-neutral-950 sm:text-lg">
+              {gameState.isMyTurn ? 'あなたのターンです' : `${gameState.players[gameState.currentTurn].name}のターン`}
+            </h2>
+            <p className="mt-0.5 text-xs font-semibold text-neutral-600 sm:text-sm">
+              {gameState.diceValue === 0 && gameState.isMyTurn
+                ? 'まずサイコロを振ります'
+                : buildMode
+                  ? '盤面で配置場所を選択'
+                  : '次の操作を選びます'}
+            </p>
+          </div>
+          <div className="shrink-0 rounded-md bg-neutral-100 px-2.5 py-1 text-xs font-bold text-neutral-800 sm:text-sm">
+            R{gameState.round + 1}
+          </div>
+        </div>
+
+        <div className="mt-2 grid grid-cols-4 gap-1.5 sm:gap-2">
+          {[
+            ['得点', `${myPlayer.score}点`],
+            ['サイコロ', gameState.diceValue || '未'],
+            ['資源', Object.values(myPlayer.resources).reduce((sum, count) => sum + count, 0)],
+            ['次', nextAction],
+          ].map(([label, value]) => (
+            <div
+              key={label}
+              className={`min-w-0 rounded-md border px-1.5 py-1 ${
+                label === '次' && gameState.isMyTurn
+                  ? 'border-emerald-300 bg-emerald-50'
+                  : 'border-neutral-200 bg-neutral-50'
+              }`}
+            >
+              <div className="text-[10px] font-bold text-neutral-500 sm:text-[11px]">{label}</div>
+              <div className="truncate text-sm font-bold text-neutral-950 sm:text-base">{value}</div>
+            </div>
+          ))}
+        </div>
+
+        {gameState.isMyTurn ? (
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {gameState.diceValue === 0 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  onRollDice?.();
+                  setActiveTab('build');
+                }}
+                className="min-h-11 rounded-md bg-teal-700 px-2 text-xs font-bold text-white shadow-sm hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300"
+              >
+                  サイコロ
+                </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('build')}
+                  className={`min-h-11 rounded-md px-2 text-xs font-bold shadow-sm focus:outline-none focus:ring-4 focus:ring-teal-300 ${
+                    activeTab === 'build' ? 'bg-teal-700 text-white' : 'bg-neutral-100 text-neutral-900 hover:bg-neutral-200'
+                  }`}
+                >
+                  建設
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('trade')}
+                  className={`min-h-11 rounded-md px-2 text-xs font-bold shadow-sm focus:outline-none focus:ring-4 focus:ring-teal-300 ${
+                    activeTab === 'trade' ? 'bg-teal-700 text-white' : 'bg-neutral-100 text-neutral-900 hover:bg-neutral-200'
+                  }`}
+                >
+                  交易
+                </button>
+                <button
+                  type="button"
+                  onClick={onEndTurn}
+                  className="min-h-11 rounded-md bg-slate-800 px-2 text-xs font-bold text-white shadow-sm hover:bg-slate-900 focus:outline-none focus:ring-4 focus:ring-slate-300"
+                >
+                  終了
+                </button>
+              </>
+            )}
+          </div>
+        ) : null}
+      </section>
+
+      <Tabs defaultValue="board" value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
         {/* タブリスト */}
-        <TabsList className="flex-shrink-0 overflow-x-auto">
+        <TabsList className="grid grid-cols-4 flex-shrink-0 overflow-hidden">
           <TabsTrigger value="board">
             <Map className="h-4 w-4" aria-hidden="true" />
             ボード
@@ -115,7 +220,6 @@ export const IslandSettlersBoard: React.FC<IslandSettlersBoardProps> = ({
           <TabsContent value="board">
             <BoardTab
               gameState={gameState}
-              onRollDice={onRollDice}
               onTileClick={handleTileClick}
               buildMode={buildMode}
               roadStart={roadStart}

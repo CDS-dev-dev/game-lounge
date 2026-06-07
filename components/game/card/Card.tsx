@@ -49,6 +49,9 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
 
   // クリック可能かどうか
   const isClickable = onClick && !disabled;
+  const cornerSuitClass = size === 'small' ? 'text-xs' : 'text-lg sm:text-xl';
+  const centerSuitClass = size === 'small' ? 'text-xl' : 'text-2xl sm:text-4xl';
+  const jokerClass = size === 'small' ? 'text-lg' : 'text-xl sm:text-3xl';
 
   // 裏面表示
   if (faceDown) {
@@ -106,7 +109,7 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
           rounded-lg border-2 border-gray-300
           bg-white
           shadow-md
-          relative
+          relative overflow-hidden
           ${isClickable ? 'cursor-pointer hover:shadow-lg hover:scale-105 transition-transform' : 'cursor-default'}
           ${selected ? 'ring-4 ring-yellow-400' : ''}
           ${disabled ? 'opacity-50' : ''}
@@ -114,31 +117,31 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
         `}
         aria-label={`${suitDisplay}${card.rank}`}
       >
-        <div className={`absolute inset-0 p-1 sm:p-2 flex flex-col justify-between ${colorClass}`}>
+        <div className={`absolute inset-0 flex flex-col justify-between p-1 ${colorClass} ${size === 'small' ? '' : 'sm:p-2'}`}>
           {/* 左上：ランクとスート */}
           <div className="flex flex-col items-center leading-none">
             <span className="font-bold">{card.rank}</span>
-            <span className="text-lg sm:text-xl">{suitDisplay}</span>
+            <span className={cornerSuitClass}>{suitDisplay}</span>
           </div>
 
           {/* 中央：大きなスート（Joker以外） */}
           {card.rank !== 'Joker' && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-2xl sm:text-4xl opacity-60">{suitDisplay}</span>
+              <span className={`${centerSuitClass} opacity-60`}>{suitDisplay}</span>
             </div>
           )}
 
           {/* Jokerの場合 */}
           {card.rank === 'Joker' && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-xl sm:text-3xl">🃏</span>
+              <span className={jokerClass}>🃏</span>
             </div>
           )}
 
           {/* 右下：ランクとスート（逆向き） */}
           <div className="flex flex-col items-center leading-none transform rotate-180">
             <span className="font-bold">{card.rank}</span>
-            <span className="text-lg sm:text-xl">{suitDisplay}</span>
+            <span className={cornerSuitClass}>{suitDisplay}</span>
           </div>
         </div>
       </button>

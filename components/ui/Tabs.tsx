@@ -173,7 +173,7 @@ export const TabsContent: React.FC<TabsContentProps> = ({
       role="tabpanel"
       aria-labelledby={`tab-${value}`}
       tabIndex={0}
-      className={`py-4 sm:py-6 animate-fade-in focus:outline-none ${className}`}
+      className={`py-2 sm:py-4 animate-fade-in focus:outline-none ${className}`}
       style={{
         animation: 'fadeIn 0.2s ease-in',
       }}

@@ -6,15 +6,15 @@ type Tone = 'primary' | 'secondary' | 'danger' | 'warning' | 'ghost';
 
 const toneClasses: Record<Tone, string> = {
   primary:
-    'border-emerald-700 bg-emerald-700 text-white hover:bg-emerald-800 focus:ring-emerald-300',
+    'border-teal-700 bg-teal-700 text-white shadow-sm hover:bg-teal-800 focus:ring-teal-300',
   secondary:
-    'border-slate-700 bg-slate-800 text-white hover:bg-slate-900 focus:ring-slate-300',
+    'border-slate-700 bg-slate-800 text-white shadow-sm hover:bg-slate-900 focus:ring-slate-300',
   danger:
-    'border-red-700 bg-red-700 text-white hover:bg-red-800 focus:ring-red-300',
+    'border-rose-700 bg-rose-700 text-white shadow-sm hover:bg-rose-800 focus:ring-rose-300',
   warning:
-    'border-amber-600 bg-amber-600 text-white hover:bg-amber-700 focus:ring-amber-300',
+    'border-amber-600 bg-amber-600 text-white shadow-sm hover:bg-amber-700 focus:ring-amber-300',
   ghost:
-    'border-neutral-300 bg-white text-neutral-900 hover:bg-neutral-100 focus:ring-neutral-300',
+    'border-neutral-300 bg-white text-neutral-900 shadow-sm hover:bg-neutral-100 focus:ring-neutral-300',
 };
 
 export function GameScreen({
@@ -165,9 +165,9 @@ export function ActionButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`min-h-10 rounded-lg border px-3 py-1.5 text-sm font-bold transition-colors focus:outline-none focus:ring-4 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-11 sm:py-2 sm:text-base ${toneClasses[tone]}`}
+      className={`min-h-11 min-w-0 rounded-md border px-2.5 py-1.5 text-xs font-bold leading-tight transition-colors focus:outline-none focus:ring-4 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-11 sm:px-3 sm:py-2 sm:text-sm ${toneClasses[tone]}`}
     >
-      {children}
+      <span className="block truncate whitespace-nowrap">{children}</span>
     </button>
   );
 }
@@ -189,7 +189,7 @@ export function ActionButtonGroup({
         <h2 className="text-xs font-bold text-neutral-950 sm:text-base">{title}</h2>
         {subtitle ? <div className="text-[11px] font-semibold text-neutral-600 sm:text-sm">{subtitle}</div> : null}
       </div>
-      <div className="grid grid-cols-4 gap-2">{children}</div>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(0,1fr))] gap-2">{children}</div>
     </section>
   );
 }

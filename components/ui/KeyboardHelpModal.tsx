@@ -44,7 +44,7 @@ export const KeyboardHelpModal: React.FC<KeyboardHelpModalProps> = ({
 
   return (
     <>
-      <div className="fixed bottom-4 left-4" style={{ zIndex: Z_INDEX.FLOATING }}>
+      <div className="fixed bottom-4 left-4 hidden sm:block" style={{ zIndex: Z_INDEX.FLOATING }}>
         <Button
           variant="secondary"
           onClick={() => setIsOpen(true)}

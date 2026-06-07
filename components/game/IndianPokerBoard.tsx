@@ -89,15 +89,15 @@ export function IndianPokerBoard({ state, onAction, disabled = false }: IndianPo
         <div className={`mb-2 ${isMyTurn ? 'animate-pulse' : ''}`}>
           <PlayingCard
             card={player.card}
-            faceDown={isMe} // 自分のカードだけ裏向き
-            size="medium"
+            faceDown={isMe}
+            size="small"
             className={isMyTurn ? 'ring-4 ring-yellow-400' : ''}
           />
         </div>
 
         {/* プレイヤー情報 */}
-        <div className="w-full min-w-[120px] rounded-lg border border-white/70 bg-white/95 px-3 py-2 text-center shadow-lg" style={{ borderLeft: `4px solid ${color}` }}>
-          <div className="text-xs sm:text-sm font-bold text-gray-900 mb-1">
+        <div className="w-full rounded-lg border border-white/70 bg-white/95 px-2 py-1.5 text-center shadow-lg sm:px-3 sm:py-2" style={{ borderLeft: `4px solid ${color}` }}>
+          <div className="mb-1 truncate text-xs font-bold text-gray-900 sm:text-sm">
             {player.name}
             {player.isCPU && ' 🤖'}
             {isMe && ' (あなた)'}
@@ -142,18 +142,18 @@ export function IndianPokerBoard({ state, onAction, disabled = false }: IndianPo
         ]}
       />
 
-      <section className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="rounded-lg border border-emerald-900/60 bg-[radial-gradient(circle_at_center,#18724d_0%,#0f5138_52%,#0b3327_100%)] p-3 shadow-2xl">
-          <div className="mb-3 flex items-center justify-between gap-2">
+      <section className="grid min-h-0 flex-1 gap-2 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-3">
+        <div className="overflow-hidden rounded-lg border border-emerald-900/60 bg-[radial-gradient(circle_at_center,#18724d_0%,#0f5138_52%,#0b3327_100%)] p-2 shadow-2xl sm:p-3">
+          <div className="mb-2 flex items-center justify-between gap-2 sm:mb-3">
             <h2 className="text-sm font-bold text-white sm:text-base">見えているカード</h2>
             <span className="rounded-md bg-white/15 px-3 py-1 text-xs font-bold text-white">
               POT {state.pot.toLocaleString()}
             </span>
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {opponents.map((player) => {
               const index = state.players.indexOf(player);
-              return <div key={player.id} className="w-36 shrink-0 sm:w-auto">{renderPlayer(index)}</div>;
+              return <div key={player.id} className="min-w-0">{renderPlayer(index)}</div>;
             })}
           </div>
         </div>

@@ -31,7 +31,7 @@ export const Toast: React.FC<ToastProps> = ({
     return () => clearTimeout(timer);
   }, [duration, onClose]);
 
-  const baseClasses = 'px-3 sm:px-6 py-2 sm:py-4 rounded-lg shadow-lg transition-all duration-300 max-w-md text-sm sm:text-base';
+  const baseClasses = 'px-3 sm:px-5 py-2 rounded-lg shadow-lg transition-all duration-300 max-w-md text-sm sm:text-base';
 
   const typeClasses = {
     success: 'bg-green-600 text-white',
@@ -56,8 +56,8 @@ export const Toast: React.FC<ToastProps> = ({
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
       }`}
     >
-      <div className="flex items-center space-x-3">
-        <span className="text-2xl font-bold" aria-hidden="true">{icons[type]}</span>
+      <div className="flex items-center gap-2 sm:gap-3">
+        <span className="text-xl font-bold sm:text-2xl" aria-hidden="true">{icons[type]}</span>
         <p className="font-semibold">{message}</p>
         <button
           onClick={() => {
@@ -65,7 +65,7 @@ export const Toast: React.FC<ToastProps> = ({
             setTimeout(() => onClose?.(), 300);
           }}
           aria-label="通知を閉じる"
-          className="ml-auto text-white hover:text-gray-200 font-bold text-xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-current rounded"
+          className="ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-xl font-bold text-white hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-current"
         >
           ×
         </button>
@@ -106,7 +106,7 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed bottom-4 right-4 space-y-2 pointer-events-none flex flex-col items-end" style={{ zIndex: Z_INDEX.TOAST }}>
+      <div className="pointer-events-none fixed bottom-3 right-3 flex flex-col items-end space-y-2 sm:bottom-4 sm:right-4" style={{ zIndex: Z_INDEX.TOAST }}>
         {toasts.map((toast) => (
           <div key={toast.id} className="pointer-events-auto">
             <Toast

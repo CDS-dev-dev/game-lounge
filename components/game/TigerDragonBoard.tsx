@@ -144,8 +144,8 @@ export const TigerDragonBoard: React.FC<TigerDragonBoardProps> = ({
             ))}
           </aside>
 
-          <section className="rounded-lg border border-emerald-900/60 bg-[radial-gradient(circle_at_center,#16734c_0%,#0d513a_56%,#092d25_100%)] p-3 shadow-2xl">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <section className="overflow-hidden rounded-lg border border-emerald-900/60 bg-[radial-gradient(circle_at_center,#16734c_0%,#0d513a_56%,#092d25_100%)] p-2 shadow-2xl sm:p-3">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2 sm:mb-3">
               <div
                 className={`rounded-lg border-2 px-3 py-2 text-sm font-bold ${
                   BATTLEFIELD_CARD_COLORS[gameState.battlefieldCard.type]
@@ -198,7 +198,7 @@ export const TigerDragonBoard: React.FC<TigerDragonBoardProps> = ({
             <p className="mt-1 text-xs font-semibold text-neutral-600">
               {gameState.canAttack ? '攻めに使う牌を選択' : gameState.canDefend ? '受けられる牌だけ選択できます' : '相手の番です'}
             </p>
-            <div className="mt-2 flex max-h-[22svh] flex-wrap justify-center gap-2 overflow-y-auto pr-1 sm:max-h-[34svh]">
+            <div className="mt-2 grid max-h-[154px] grid-cols-6 justify-items-center gap-2 overflow-y-auto pb-1 pr-1 sm:flex sm:max-h-[34svh] sm:flex-wrap sm:justify-center">
               {myPlayer?.hand.map((tile) => {
                 const isSelectable =
                   gameState.canAttack ||

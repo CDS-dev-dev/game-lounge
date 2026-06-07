@@ -118,26 +118,32 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
               </span>
             </div>
 
-            <div className="flex min-h-20 items-center justify-center gap-2 overflow-x-auto rounded-lg border border-white/15 bg-black/20 p-2 sm:min-h-32 sm:gap-3 sm:p-3">
+            <div className="grid min-h-20 grid-cols-5 place-items-center gap-1 rounded-lg border border-white/15 bg-black/20 p-2 sm:min-h-32 sm:gap-3 sm:p-3">
               {communityCards.length ? (
                 communityCards.map((card, index) => (
-                  <PlayingCard key={`${card.id}-${index}`} card={toCommonCard(card)} size="medium" />
+                  <React.Fragment key={`${card.id}-${index}`}>
+                    <span className="sm:hidden"><PlayingCard card={toCommonCard(card)} size="small" /></span>
+                    <span className="hidden sm:block"><PlayingCard card={toCommonCard(card)} size="medium" /></span>
+                  </React.Fragment>
                 ))
               ) : (
-                <div className="rounded-md border border-dashed border-white/30 px-4 py-3 text-sm font-semibold text-white/80">
+                <div className="col-span-5 rounded-md border border-dashed border-white/30 px-4 py-3 text-sm font-semibold text-white/80">
                   まだ場札はありません
                 </div>
               )}
               {communityCards.length > 0 &&
                 Array.from({ length: missingCommunityCards }).map((_, index) => (
-                  <PlayingCard key={`empty-${index}`} card={null} size="medium" className="bg-white/70" />
+                  <React.Fragment key={`empty-${index}`}>
+                    <span className="sm:hidden"><PlayingCard card={null} size="small" className="bg-white/70" /></span>
+                    <span className="hidden sm:block"><PlayingCard card={null} size="medium" className="bg-white/70" /></span>
+                  </React.Fragment>
                 ))}
             </div>
           </section>
 
-          <section className="flex min-h-0 gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-3">
+          <section className="grid min-h-0 grid-cols-3 gap-2">
             {opponents.map((player) => (
-              <div key={player.id} className="w-44 shrink-0 sm:w-auto">
+              <div key={player.id} className="min-w-0">
                 <PlayerStatusCard
                   name={player.name}
                   chips={player.chips}
@@ -172,7 +178,7 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
             note={gameState.isMyTurn ? undefined : '相手の手番です'}
             action={gameState.isMyTurn ? 'あなたの番' : '待機'}
           >
-            <div data-own-hand className="flex justify-center gap-2">
+            <div data-own-hand className="flex min-h-20 items-center justify-center gap-2 pb-2 pt-1 sm:min-h-32 sm:pb-0 sm:pt-0">
               {myPlayer?.holeCards ? (
                 <>
                   <span className="sm:hidden"><PlayingCard card={toCommonCard(myPlayer.holeCards[0])} size="small" /></span>

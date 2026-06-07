@@ -124,7 +124,7 @@ export default function GamesPage() {
                   <GameVisualIcon game={visual} label={`${title}のアイコン`} className="h-10 w-10 sm:h-14 sm:w-14" />
                   <span className="min-w-0">
                     <span className="block text-xs font-semibold text-teal-700">{genre}</span>
-                    <span className="mt-0.5 block break-keep text-sm font-bold leading-tight text-neutral-950 sm:mt-1 sm:text-xl">{title}</span>
+                    <span className="mt-0.5 block text-sm font-bold leading-tight text-neutral-950 sm:mt-1 sm:text-xl">{title}</span>
                   </span>
                 </button>
                 <p className="mt-1.5 line-clamp-2 flex-1 text-[11px] leading-4 text-neutral-600 sm:mt-3 sm:text-sm sm:leading-6">{description}</p>
