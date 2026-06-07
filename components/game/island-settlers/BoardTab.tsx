@@ -104,7 +104,7 @@ export const BoardTab: React.FC<BoardTabProps> = ({
         </div>
       </div>
 
-      <aside className="space-y-2">
+      <aside className="hidden space-y-2 lg:block">
         <div className="rounded-lg border border-neutral-200 bg-white/95 p-3 shadow-sm">
           <div className="flex items-center justify-between gap-2">
             <div>

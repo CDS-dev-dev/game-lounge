@@ -10,13 +10,8 @@ import { Modal } from '@/components/ui/Modal';
 import {
   ActionButton,
   ActionButtonGroup,
-  BottomActionArea,
-  DecisionPanel,
-  GameLog,
   GameScreen,
   GameStatePanel,
-  PlaySurface,
-  PlayerStatusCard,
 } from '@/components/game/GamePlayUI';
 
 export interface TexasHoldemBoardProps {
@@ -76,10 +71,6 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
   const isActionAvailable = gameState.isMyTurn && !disabled && gameState.status !== 'showdown';
   const communityCards = gameState.communityCards;
   const missingCommunityCards = Math.max(0, 5 - communityCards.length);
-  const latestActions = gameState.players
-    .filter((player) => player.action)
-    .map((player) => `${player.name}: ${actionLabels[player.action as Exclude<PlayerAction, null>]}`);
-
   const handleRaiseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
     if (!Number.isNaN(value)) {
@@ -92,125 +83,159 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
     setShowRaiseModal(false);
   };
 
-  const decisionTitle = gameState.isMyTurn
+  const nextDecision = gameState.isMyTurn
     ? gameState.callAmount > 0
-      ? '払って参加するか、降りるか'
-      : '無料で見るか、圧力をかけるか'
-    : '相手の判断を待っています';
-  const decisionDetail = gameState.isMyTurn
-    ? gameState.callAmount > 0
-      ? `必要コールは ${gameState.callAmount.toLocaleString()}。手札と場札を見て判断します。`
-      : 'チェックで次へ進むか、レイズでポットを取りに行きます。'
-    : `${currentPlayer?.name || '相手'}がアクション中です。`;
+      ? `コール ${gameState.callAmount.toLocaleString()} で残る / フォールドで降りる`
+      : 'チェックで見る / レイズで圧力をかける'
+    : `${currentPlayer?.name || '相手'}の判断待ち`;
+
+  const renderOpponentSeat = (player: TexasHoldemClientState['players'][number]) => (
+    <div
+      key={player.id}
+      className={`min-w-0 rounded-lg border bg-white/95 p-2 shadow-sm ${
+        gameState.currentTurn === player.position ? 'border-emerald-400 ring-2 ring-emerald-200' : 'border-white/70'
+      } ${!player.isActive ? 'opacity-60' : ''}`}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="truncate text-sm font-bold text-neutral-950">{player.name}</span>
+            {getPositionLabel(player.position, gameState.dealerButton, gameState.players.length) ? (
+              <span className="rounded bg-neutral-900 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                {getPositionLabel(player.position, gameState.dealerButton, gameState.players.length)}
+              </span>
+            ) : null}
+          </div>
+          <div className="mt-1 text-xs font-semibold text-neutral-500">
+            {player.isActive ? '参加中' : 'フォールド'}
+          </div>
+        </div>
+        <span className="shrink-0 rounded-md bg-neutral-100 px-2 py-1 text-xs font-bold text-neutral-800">
+          {player.action ? actionLabels[player.action as Exclude<PlayerAction, null>] : '待機'}
+        </span>
+      </div>
+      <div className="mt-2 grid grid-cols-2 gap-1.5">
+        <div className="rounded-md bg-neutral-50 px-2 py-1">
+          <div className="text-[10px] font-bold text-neutral-500">チップ</div>
+          <div className="text-sm font-bold text-neutral-950">{player.chips.toLocaleString()}</div>
+        </div>
+        <div className="rounded-md bg-neutral-50 px-2 py-1">
+          <div className="text-[10px] font-bold text-neutral-500">ベット</div>
+          <div className="text-sm font-bold text-neutral-950">{player.currentBet.toLocaleString()}</div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
-    <GameScreen>
-      <DecisionPanel
-        title={decisionTitle}
-        detail={decisionDetail}
-        status={phaseLabels[gameState.status]}
-        primary={gameState.isMyTurn ? `次: ${gameState.callAmount > 0 ? 'コール/フォールド' : 'チェック/レイズ'}` : '待機'}
-        metrics={[
-          { label: 'ポット', value: gameState.pot.toLocaleString(), tone: 'hot' },
-          { label: '必要コール', value: gameState.callAmount.toLocaleString(), tone: gameState.isMyTurn ? 'hot' : 'plain' },
-          { label: '現在ベット', value: gameState.currentBet.toLocaleString() },
-          { label: '手持ち', value: (myPlayer?.chips || 0).toLocaleString(), tone: 'cool' },
-        ]}
-      />
-
-      <section className="grid min-h-0 min-w-0 flex-1 gap-2 lg:grid-cols-[minmax(0,1fr)_280px]">
-        <div className="flex min-h-0 min-w-0 flex-col gap-2">
-          <PlaySurface className="sm:p-4">
-            <div className="mb-2 flex items-center justify-between gap-2 sm:mb-3">
-              <h2 className="text-sm font-bold text-white sm:text-base">場のカード</h2>
-              <span className="rounded-md bg-white/15 px-3 py-1 text-xs font-bold text-white">
-                {phaseLabels[gameState.status]}
-              </span>
-            </div>
-
-            <div className="grid min-h-20 grid-cols-5 place-items-center gap-1 rounded-lg border border-white/15 bg-black/20 p-2 sm:min-h-32 sm:gap-3 sm:p-3">
-              {communityCards.length ? (
-                communityCards.map((card, index) => (
-                  <React.Fragment key={`${card.id}-${index}`}>
-                    <span className="sm:hidden"><PlayingCard card={toCommonCard(card)} size="small" /></span>
-                    <span className="hidden sm:block"><PlayingCard card={toCommonCard(card)} size="medium" /></span>
-                  </React.Fragment>
-                ))
-              ) : (
-                <div className="col-span-5 rounded-md border border-dashed border-white/30 px-4 py-3 text-sm font-semibold text-white/80">
-                  まだ場札はありません
-                </div>
-              )}
-              {communityCards.length > 0 &&
-                Array.from({ length: missingCommunityCards }).map((_, index) => (
-                  <React.Fragment key={`empty-${index}`}>
-                    <span className="sm:hidden"><PlayingCard card={null} size="small" className="bg-white/70" /></span>
-                    <span className="hidden sm:block"><PlayingCard card={null} size="medium" className="bg-white/70" /></span>
-                  </React.Fragment>
-                ))}
-            </div>
-          </PlaySurface>
-
-          <section className="grid min-h-0 grid-cols-3 gap-2">
-            {opponents.map((player) => (
-              <div key={player.id} className="min-w-0">
-                <PlayerStatusCard
-                  name={player.name}
-                  chips={player.chips}
-                  bet={player.currentBet}
-                  isActive={gameState.currentTurn === player.position}
-                  isFolded={!player.isActive}
-                  position={getPositionLabel(player.position, gameState.dealerButton, gameState.players.length)}
-                  action={player.action ? actionLabels[player.action as Exclude<PlayerAction, null>] : '待機'}
-                  note={!player.isActive ? '降りています' : gameState.currentTurn === player.position ? '行動中' : '参加中'}
-                >
-                  <div className="hidden justify-center gap-1 sm:flex">
-                    {player.holeCards && player.isActive ? (
-                      <>
-                        <PlayingCard faceDown size="small" />
-                        <PlayingCard faceDown size="small" />
-                      </>
-                    ) : (
-                      <span className="text-xs font-semibold text-neutral-500">カードなし</span>
-                    )}
-                  </div>
-                </PlayerStatusCard>
-              </div>
-            ))}
-          </section>
+    <GameScreen className="max-w-5xl">
+      <section className="grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)_auto] gap-2 rounded-xl border border-emerald-900/60 bg-[radial-gradient(circle_at_center,#176b49_0%,#0c3f2f_58%,#08231e_100%)] p-2 shadow-2xl sm:p-3">
+        <div className="grid grid-cols-4 gap-1.5 rounded-lg bg-black/20 p-1.5 text-white sm:grid-cols-5 sm:gap-2">
+          <div className="rounded-md bg-white/15 px-2 py-1.5">
+            <div className="text-[10px] font-bold text-white/70">判断</div>
+            <div className="truncate text-sm font-bold">{nextDecision}</div>
+          </div>
+          <div className="rounded-md bg-amber-300 px-2 py-1.5 text-neutral-950">
+            <div className="text-[10px] font-bold text-neutral-600">POT</div>
+            <div className="text-lg font-black">{gameState.pot.toLocaleString()}</div>
+          </div>
+          <div className="rounded-md bg-white/15 px-2 py-1.5">
+            <div className="text-[10px] font-bold text-white/70">コール</div>
+            <div className="text-lg font-black">{gameState.callAmount.toLocaleString()}</div>
+          </div>
+          <div className="rounded-md bg-white/15 px-2 py-1.5">
+            <div className="text-[10px] font-bold text-white/70">手持ち</div>
+            <div className="text-lg font-black">{(myPlayer?.chips || 0).toLocaleString()}</div>
+          </div>
+          <div className="hidden rounded-md bg-white/15 px-2 py-1.5 sm:block">
+            <div className="text-[10px] font-bold text-white/70">フェーズ</div>
+            <div className="truncate text-sm font-bold">{phaseLabels[gameState.status]}</div>
+          </div>
         </div>
 
-        <aside className="min-h-0 min-w-0 space-y-2 sm:space-y-3">
-          <PlayerStatusCard
-            name={`${myPlayer?.name || 'あなた'} (YOU)`}
-            isActive={gameState.isMyTurn}
-            isFolded={myPlayer ? !myPlayer.isActive : false}
-            note={gameState.isMyTurn ? undefined : '相手の手番です'}
-            action={gameState.isMyTurn ? 'あなたの番' : '待機'}
-          >
-            <div data-own-hand className="flex min-h-20 items-center justify-center gap-2 pb-2 pt-1 sm:min-h-32 sm:pb-0 sm:pt-0">
-              {myPlayer?.holeCards ? (
-                <>
-                  <span className="sm:hidden"><PlayingCard card={toCommonCard(myPlayer.holeCards[0])} size="small" /></span>
-                  <span className="sm:hidden"><PlayingCard card={toCommonCard(myPlayer.holeCards[1])} size="small" /></span>
-                  <span className="hidden sm:block"><PlayingCard card={toCommonCard(myPlayer.holeCards[0])} size="medium" /></span>
-                  <span className="hidden sm:block"><PlayingCard card={toCommonCard(myPlayer.holeCards[1])} size="medium" /></span>
-                </>
-              ) : (
-                <>
-                  <span className="sm:hidden"><PlayingCard faceDown size="small" /></span>
-                  <span className="sm:hidden"><PlayingCard faceDown size="small" /></span>
-                  <span className="hidden sm:block"><PlayingCard faceDown size="medium" /></span>
-                  <span className="hidden sm:block"><PlayingCard faceDown size="medium" /></span>
-                </>
-              )}
+        <div className="grid min-h-0 gap-2 lg:grid-cols-[minmax(0,1fr)_260px]">
+          <div className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-2">
+            <div className="grid grid-cols-3 gap-2">
+              {opponents.map(renderOpponentSeat)}
             </div>
-          </PlayerStatusCard>
 
-          <div className="hidden sm:block">
-            <GameLog items={latestActions} />
+            <div className="grid place-items-center rounded-xl border border-white/15 bg-black/20 p-2">
+              <div className="mb-2 rounded-full bg-white/15 px-4 py-1 text-xs font-bold text-white">
+                {phaseLabels[gameState.status]}
+              </div>
+              <div className="grid grid-cols-5 place-items-center gap-1 sm:gap-3">
+                {communityCards.length ? (
+                  communityCards.map((card, index) => (
+                    <React.Fragment key={`${card.id}-${index}`}>
+                      <span className="sm:hidden"><PlayingCard card={toCommonCard(card)} size="small" /></span>
+                      <span className="hidden sm:block"><PlayingCard card={toCommonCard(card)} size="medium" /></span>
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <div className="col-span-5 rounded-md border border-dashed border-white/30 px-5 py-4 text-sm font-bold text-white/80">
+                    場札なし
+                  </div>
+                )}
+                {communityCards.length > 0 &&
+                  Array.from({ length: missingCommunityCards }).map((_, index) => (
+                    <React.Fragment key={`empty-${index}`}>
+                      <span className="sm:hidden"><PlayingCard card={null} size="small" className="bg-white/70" /></span>
+                      <span className="hidden sm:block"><PlayingCard card={null} size="medium" className="bg-white/70" /></span>
+                    </React.Fragment>
+                  ))}
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-white/20 bg-white p-2 shadow-sm">
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <h2 className="truncate text-sm font-bold text-neutral-950">{myPlayer?.name || 'あなた'} (YOU)</h2>
+                  <p className="text-xs font-semibold text-neutral-600">{gameState.isMyTurn ? 'あなたの判断です' : '相手の手番です'}</p>
+                </div>
+                <span className="rounded-md bg-neutral-100 px-2 py-1 text-xs font-bold text-neutral-800">
+                  {gameState.isMyTurn ? '手番' : '待機'}
+                </span>
+              </div>
+              <div data-own-hand className="flex min-h-20 items-center justify-center gap-2">
+                {myPlayer?.holeCards ? (
+                  <>
+                    <span className="sm:hidden"><PlayingCard card={toCommonCard(myPlayer.holeCards[0])} size="small" /></span>
+                    <span className="sm:hidden"><PlayingCard card={toCommonCard(myPlayer.holeCards[1])} size="small" /></span>
+                    <span className="hidden sm:block"><PlayingCard card={toCommonCard(myPlayer.holeCards[0])} size="medium" /></span>
+                    <span className="hidden sm:block"><PlayingCard card={toCommonCard(myPlayer.holeCards[1])} size="medium" /></span>
+                  </>
+                ) : (
+                  <>
+                    <span className="sm:hidden"><PlayingCard faceDown size="small" /></span>
+                    <span className="sm:hidden"><PlayingCard faceDown size="small" /></span>
+                    <span className="hidden sm:block"><PlayingCard faceDown size="medium" /></span>
+                    <span className="hidden sm:block"><PlayingCard faceDown size="medium" /></span>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
-        </aside>
+
+          <aside className="grid gap-2 rounded-lg bg-white/95 p-2 shadow-sm lg:grid-rows-[auto_minmax(0,1fr)]">
+            <div>
+              <h2 className="text-sm font-bold text-neutral-950">次にできる操作</h2>
+              <p className="mt-1 text-xs font-semibold text-neutral-600">{nextDecision}</p>
+            </div>
+            {isActionAvailable ? (
+              <ActionButtonGroup title="操作" subtitle={`最小レイズ ${gameState.minRaise.toLocaleString()}`} className="shadow-none">
+                {gameState.canFold ? <ActionButton tone="ghost" onClick={() => onAction('fold')}>フォールド</ActionButton> : null}
+                {gameState.canCheck ? <ActionButton tone="primary" onClick={() => onAction('check')}>チェック</ActionButton> : null}
+                {gameState.canCall ? <ActionButton tone="primary" onClick={() => onAction('call')}>コール {gameState.callAmount.toLocaleString()}</ActionButton> : null}
+                {gameState.canRaise ? <ActionButton tone="warning" onClick={() => setShowRaiseModal(true)}>レイズ</ActionButton> : null}
+                {myPlayer && myPlayer.chips > 0 ? <ActionButton tone="danger" onClick={() => onAction('allin')}>オールイン</ActionButton> : null}
+              </ActionButtonGroup>
+            ) : (
+              <div className="grid min-h-20 place-items-center rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-center text-sm font-bold text-neutral-700">
+                {gameState.status === 'showdown' ? '結果を確認しています' : '相手の行動を待っています'}
+              </div>
+            )}
+          </aside>
+        </div>
       </section>
 
       {gameState.status === 'showdown' && gameState.winners.length > 0 && (
@@ -231,45 +256,6 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
             })}
           </div>
         </section>
-      )}
-
-      {isActionAvailable ? (
-        <BottomActionArea>
-          <ActionButtonGroup
-            title="次にできる操作"
-            subtitle={`コール ${gameState.callAmount.toLocaleString()} / 最小レイズ ${gameState.minRaise.toLocaleString()}`}
-          >
-            {gameState.canFold ? (
-              <ActionButton tone="ghost" onClick={() => onAction('fold')}>
-                フォールド
-              </ActionButton>
-            ) : null}
-            {gameState.canCheck ? (
-              <ActionButton tone="primary" onClick={() => onAction('check')}>
-                チェック
-              </ActionButton>
-            ) : null}
-            {gameState.canCall ? (
-              <ActionButton tone="primary" onClick={() => onAction('call')}>
-                コール {gameState.callAmount.toLocaleString()}
-              </ActionButton>
-            ) : null}
-            {gameState.canRaise ? (
-              <ActionButton tone="warning" onClick={() => setShowRaiseModal(true)}>
-                レイズ
-              </ActionButton>
-            ) : null}
-            {myPlayer && myPlayer.chips > 0 ? (
-              <ActionButton tone="danger" onClick={() => onAction('allin')}>
-                オールイン
-              </ActionButton>
-            ) : null}
-          </ActionButtonGroup>
-        </BottomActionArea>
-      ) : (
-        <div className="rounded-lg border border-neutral-200 bg-white p-3 text-center text-sm font-semibold text-neutral-700 shadow-sm">
-          {gameState.status === 'showdown' ? '結果を確認しています' : '相手の行動を待っています'}
-        </div>
       )}
 
       <Modal

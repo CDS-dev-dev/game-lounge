@@ -3,10 +3,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { BarChart3, Hammer, Map, Repeat2 } from 'lucide-react';
 import type { IslandSettlersClientState, Position, ResourceType, BuildingType } from '@/lib/games/island-settlers/types';
 import { BUILD_COSTS } from '@/lib/games/island-settlers/constants';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs';
 import { BoardTab } from './BoardTab';
 import { BuildTab } from './BuildTab';
 import { TradeTab } from './TradeTab';
@@ -35,7 +33,7 @@ export const IslandSettlersBoard: React.FC<IslandSettlersBoardProps> = ({
   // 建設モード状態
   const [buildMode, setBuildMode] = useState<BuildingType | null>(null);
   const [roadStart, setRoadStart] = useState<Position | null>(null);
-  const [activeTab, setActiveTab] = useState('board');
+  const [activePanel, setActivePanel] = useState<'build' | 'trade' | 'info'>('build');
 
   const myPlayer = gameState.players[gameState.myPlayerIndex];
   const canBuildAnything = (['road', 'village', 'town'] as BuildingType[]).some((type) => {
@@ -62,11 +60,11 @@ export const IslandSettlersBoard: React.FC<IslandSettlersBoardProps> = ({
   useEffect(() => {
     if (!gameState.isMyTurn) return;
     if (gameState.diceValue === 0) {
-      setActiveTab('board');
-    } else if (!buildMode && activeTab === 'board') {
-      setActiveTab(canBuildAnything ? 'build' : 'trade');
+      setActivePanel('build');
+    } else if (!buildMode) {
+      setActivePanel(canBuildAnything ? 'build' : 'trade');
     }
-  }, [activeTab, buildMode, canBuildAnything, gameState.diceValue, gameState.isMyTurn]);
+  }, [buildMode, canBuildAnything, gameState.diceValue, gameState.isMyTurn]);
 
   // タイルクリック処理
   const handleTileClick = (position: Position) => {
@@ -155,7 +153,7 @@ export const IslandSettlersBoard: React.FC<IslandSettlersBoardProps> = ({
                 type="button"
                 onClick={() => {
                   onRollDice?.();
-                  setActiveTab('build');
+                  setActivePanel('build');
                 }}
                 className="min-h-11 rounded-md bg-teal-700 px-2 text-xs font-bold text-white shadow-sm hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300"
               >
@@ -165,18 +163,18 @@ export const IslandSettlersBoard: React.FC<IslandSettlersBoardProps> = ({
               <>
                 <button
                   type="button"
-                  onClick={() => setActiveTab('build')}
+                  onClick={() => setActivePanel('build')}
                   className={`min-h-11 rounded-md px-2 text-xs font-bold shadow-sm focus:outline-none focus:ring-4 focus:ring-teal-300 ${
-                    activeTab === 'build' ? 'bg-teal-700 text-white' : 'bg-neutral-100 text-neutral-900 hover:bg-neutral-200'
+                    activePanel === 'build' ? 'bg-teal-700 text-white' : 'bg-neutral-100 text-neutral-900 hover:bg-neutral-200'
                   }`}
                 >
                   建設
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActiveTab('trade')}
+                  onClick={() => setActivePanel('trade')}
                   className={`min-h-11 rounded-md px-2 text-xs font-bold shadow-sm focus:outline-none focus:ring-4 focus:ring-teal-300 ${
-                    activeTab === 'trade' ? 'bg-teal-700 text-white' : 'bg-neutral-100 text-neutral-900 hover:bg-neutral-200'
+                    activePanel === 'trade' ? 'bg-teal-700 text-white' : 'bg-neutral-100 text-neutral-900 hover:bg-neutral-200'
                   }`}
                 >
                   交易
@@ -194,61 +192,105 @@ export const IslandSettlersBoard: React.FC<IslandSettlersBoardProps> = ({
         ) : null}
       </section>
 
-      <Tabs defaultValue="board" value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-        {/* タブリスト */}
-        <TabsList className="grid grid-cols-4 flex-shrink-0 overflow-hidden">
-          <TabsTrigger value="board">
-            <Map className="h-4 w-4" aria-hidden="true" />
-            ボード
-          </TabsTrigger>
-          <TabsTrigger value="build">
-            <Hammer className="h-4 w-4" aria-hidden="true" />
-            建設
-          </TabsTrigger>
-          <TabsTrigger value="trade">
-            <Repeat2 className="h-4 w-4" aria-hidden="true" />
-            交易
-          </TabsTrigger>
-          <TabsTrigger value="info">
-            <BarChart3 className="h-4 w-4" aria-hidden="true" />
-            情報
-          </TabsTrigger>
-        </TabsList>
-
-        {/* タブコンテンツ */}
-        <div className="flex-1 overflow-y-auto px-2 sm:px-4">
-          <TabsContent value="board">
-            <BoardTab
-              gameState={gameState}
-              onTileClick={handleTileClick}
-              buildMode={buildMode}
-              roadStart={roadStart}
-            />
-          </TabsContent>
-
-          <TabsContent value="build">
-            <BuildTab
-              gameState={gameState}
-              onEndTurn={onEndTurn}
-              buildMode={buildMode}
-              setBuildMode={setBuildMode}
-              cancelBuildMode={cancelBuildMode}
-              canAfford={canAfford}
-            />
-          </TabsContent>
-
-          <TabsContent value="trade">
-            <TradeTab
-              gameState={gameState}
-              onTrade={onTrade}
-            />
-          </TabsContent>
-
-          <TabsContent value="info">
-            <InfoTab gameState={gameState} />
-          </TabsContent>
+      <section className="grid min-h-0 flex-1 gap-2 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="min-h-0 rounded-lg border border-neutral-200 bg-white/95 p-2 shadow-sm">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <h2 className="text-sm font-bold text-neutral-950">開拓ボード</h2>
+            <span className="rounded-md bg-teal-50 px-2 py-1 text-xs font-bold text-teal-900">
+              {buildMode ? '配置場所を選択' : gameState.diceValue > 0 ? '建設/交易/終了' : 'サイコロ待ち'}
+            </span>
+          </div>
+          <BoardTab
+            gameState={gameState}
+            onTileClick={handleTileClick}
+            buildMode={buildMode}
+            roadStart={roadStart}
+          />
         </div>
-      </Tabs>
+
+        <div className="rounded-lg border border-neutral-200 bg-white/95 p-2 shadow-sm lg:hidden">
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-sm font-bold text-neutral-950">すぐ使う操作</h2>
+            <span className="text-xs font-bold text-neutral-500">{nextAction}</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {(['road', 'village', 'town'] as BuildingType[]).map((type) => {
+              const labels: Record<BuildingType, string> = { road: '道路', village: '村', town: '町' };
+              return (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setBuildMode(type)}
+                  disabled={!gameState.isMyTurn || gameState.diceValue === 0 || !canAfford(type)}
+                  className={`min-h-11 rounded-md px-2 text-xs font-bold ${
+                    buildMode === type
+                      ? 'bg-teal-700 text-white'
+                      : 'bg-neutral-100 text-neutral-900 disabled:cursor-not-allowed disabled:opacity-45'
+                  }`}
+                >
+                  {labels[type]}
+                </button>
+              );
+            })}
+          </div>
+          {buildMode ? (
+            <button
+              type="button"
+              onClick={cancelBuildMode}
+              className="mt-2 min-h-10 w-full rounded-md bg-rose-700 px-3 text-xs font-bold text-white"
+            >
+              配置キャンセル
+            </button>
+          ) : null}
+          <div className="mt-2 grid grid-cols-4 gap-1.5 text-center text-xs font-bold">
+            <div className="rounded bg-neutral-50 p-1">木 {myPlayer.resources.wood}</div>
+            <div className="rounded bg-neutral-50 p-1">石 {myPlayer.resources.stone}</div>
+            <div className="rounded bg-neutral-50 p-1">食 {myPlayer.resources.food}</div>
+            <div className="rounded bg-neutral-50 p-1">金 {myPlayer.resources.gold}</div>
+          </div>
+        </div>
+
+        <aside className="hidden min-h-0 rounded-lg border border-neutral-200 bg-white/95 p-2 shadow-sm lg:block">
+          <div className="mb-2 grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => setActivePanel('build')}
+              className={`min-h-10 rounded-md text-xs font-bold ${activePanel === 'build' ? 'bg-teal-700 text-white' : 'bg-neutral-100 text-neutral-900'}`}
+            >
+              建設
+            </button>
+            <button
+              type="button"
+              onClick={() => setActivePanel('trade')}
+              className={`min-h-10 rounded-md text-xs font-bold ${activePanel === 'trade' ? 'bg-teal-700 text-white' : 'bg-neutral-100 text-neutral-900'}`}
+            >
+              交易
+            </button>
+            <button
+              type="button"
+              onClick={() => setActivePanel('info')}
+              className={`min-h-10 rounded-md text-xs font-bold ${activePanel === 'info' ? 'bg-teal-700 text-white' : 'bg-neutral-100 text-neutral-900'}`}
+            >
+              状況
+            </button>
+          </div>
+
+          <div className="max-h-[42svh] overflow-y-auto pr-1 lg:max-h-none">
+            {activePanel === 'build' ? (
+              <BuildTab
+                gameState={gameState}
+                onEndTurn={onEndTurn}
+                buildMode={buildMode}
+                setBuildMode={setBuildMode}
+                cancelBuildMode={cancelBuildMode}
+                canAfford={canAfford}
+              />
+            ) : null}
+            {activePanel === 'trade' ? <TradeTab gameState={gameState} onTrade={onTrade} /> : null}
+            {activePanel === 'info' ? <InfoTab gameState={gameState} /> : null}
+          </div>
+        </aside>
+      </section>
     </GameScreen>
   );
 };
