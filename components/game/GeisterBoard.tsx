@@ -218,7 +218,7 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
                 data-position={`${internalX},${internalY}`}
                 data-piece-id={piece?.id ?? ''}
                 className={`
-                  relative flex h-12 w-12 items-center justify-center rounded-md border text-center transition-all touch-manipulation focus:outline-none focus:ring-4 focus:ring-teal-300 sm:h-16 sm:w-16 md:h-20 md:w-20
+                  relative flex h-12 w-12 items-center justify-center rounded-md border text-center transition-all touch-manipulation focus:outline-none focus:ring-4 focus:ring-teal-300 sm:h-16 sm:w-16 md:h-[72px] md:w-[72px]
                   ${isEscape ? 'border-amber-400 bg-amber-100' : 'border-stone-300 bg-stone-50'}
                   ${isLastFrom ? 'border-yellow-400 bg-yellow-100' : ''}
                   ${isLastTo ? 'ring-2 ring-yellow-500' : ''}
@@ -233,7 +233,7 @@ export const GeisterBoard: React.FC<GeisterBoardProps> = ({
                   <div
                     className={`pointer-events-none grid h-9 w-9 place-items-center rounded-full border text-2xl shadow-sm transition-all duration-200 sm:h-12 sm:w-12 sm:text-3xl md:h-14 md:w-14 md:text-4xl ${
                       piece.owner === gameState.myRole ? 'opacity-100' : 'opacity-80'
-                    } ${piece.owner === gameState.myRole ? 'border-white bg-white' : 'border-slate-200 bg-slate-100'} ${isSelected ? 'scale-110' : 'scale-100'}`}
+                    } ${piece.owner === gameState.myRole ? 'border-white bg-white' : 'border-slate-200 bg-slate-100'} ${isSelected ? 'scale-110' : 'scale-100'} md:h-[52px] md:w-[52px] md:text-3xl`}
                   >
                     {getPieceDisplay(piece)}
                   </div>

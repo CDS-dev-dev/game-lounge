@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { PlaySetupCard, SetupBackLink, SetupOptionButton } from '@/components/game/PlaySetup';
-import { GameStatePanel } from '@/components/game/GamePlayUI';
+import { DecisionPanel } from '@/components/game/GamePlayUI';
 import {
   createInitialState,
   joinBlackPlayer,
@@ -271,20 +271,27 @@ export default function XiangqiCpuPage() {
         {(phase === 'playing' || phase === 'finished' || phase === 'cpuThinking') && clientState && (
           <>
             <div className="mb-2">
-              <GameStatePanel
-                title={gameState && gameState.currentTurn === playerColor ? 'あなたの番です' : 'CPUの番です'}
-                subtitle="駒を選び、緑の移動先をタップします。相手の将/帥を詰めます。"
+              <DecisionPanel
+                title={
+                  gameState && gameState.currentTurn === playerColor
+                    ? selectedPiece
+                      ? '緑の移動先を選ぶ'
+                      : '攻め筋を作る駒を選ぶ'
+                    : 'CPUの応手を待つ'
+                }
+                detail="将/帥を取るゲームです。選択した駒の合法手だけを強調し、盤面で次の一手を決めます。"
                 status={difficulty === 'easy' ? '初級' : difficulty === 'medium' ? '中級' : '上級'}
-                items={[
-                  { label: '捕獲', value: `${Object.values(clientState.myCapturedPieces).reduce((a, b) => a + b, 0)}個`, emphasis: true },
+                primary={selectedPiece ? `${validMoves.length}手` : '駒を選択'}
+                metrics={[
+                  { label: '捕獲', value: `${Object.values(clientState.myCapturedPieces).reduce((a, b) => a + b, 0)}個`, tone: 'hot' },
                   { label: '喪失', value: `${Object.values(clientState.opponentCapturedPieces).reduce((a, b) => a + b, 0)}個` },
-                  { label: '選択', value: selectedPiece ? '選択中' : 'なし' },
-                  { label: '移動先', value: `${validMoves.length}箇所`, emphasis: validMoves.length > 0 },
+                  { label: '選択', value: selectedPiece ? '選択中' : 'なし', tone: selectedPiece ? 'cool' : 'plain' },
+                  { label: '移動先', value: `${validMoves.length}箇所`, tone: validMoves.length > 0 ? 'hot' : 'plain' },
                 ]}
               />
               <div className="mt-2 flex gap-2 justify-center">
                   {/* ルールボタン */}
-                  <RulesModal gameName="中国象棋">
+                  <RulesModal gameName="中国象棋" compact>
                     <div className="space-y-3">
                       <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
                         <p className="font-semibold text-indigo-900 mb-2">🎯 勝利条件</p>

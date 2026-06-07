@@ -19,7 +19,7 @@ import type { Connect4State, Position3D, PlayerRole } from '@/lib/games/connect4
 import { Connect4Board3D } from '@/components/game/Connect4Board3D';
 import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
-import { GameStatePanel } from '@/components/game/GamePlayUI';
+import { DecisionPanel } from '@/components/game/GamePlayUI';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useGameHistory } from '@/lib/hooks/useGameHistory';
 import { TEXT_SIZE } from '@/lib/constants/ui-scale';
@@ -165,21 +165,16 @@ export default function Connect4LocalPage() {
         {phase === 'playing' && (
           <>
             <div className="mb-2">
-              <GameStatePanel
-                title={`Player ${currentPlayer === 'player1' ? '1' : '2'} の番です`}
-                subtitle="青い配置候補を選び、4つ並ぶ3Dラインを作ります。"
+              <DecisionPanel
+                title={`Player ${currentPlayer === 'player1' ? '1' : '2'}: 4ラインに近い候補へ置く`}
+                detail="3Dモデルを回して、縦・横・斜め・層またぎの4連を探します。"
                 status="ローカル対戦"
-                items={[
-                  { label: 'ターン', value: currentPlayer === 'player1' ? 'Player 1' : 'Player 2', emphasis: true },
-                  {
-                    label: 'Player 1',
-                    value: `${clientState.myRole === 'player1' ? clientState.myPiecesCount : clientState.opponentPiecesCount}個`,
-                  },
-                  {
-                    label: 'Player 2',
-                    value: `${clientState.myRole === 'player2' ? clientState.myPiecesCount : clientState.opponentPiecesCount}個`,
-                  },
-                  { label: '目的', value: '4つ揃える' },
+                primary={`${availablePositions.length}候補`}
+                metrics={[
+                  { label: 'ターン', value: currentPlayer === 'player1' ? 'P1' : 'P2', tone: 'hot' },
+                  { label: 'P1', value: `${clientState.myRole === 'player1' ? clientState.myPiecesCount : clientState.opponentPiecesCount}個`, tone: 'cool' },
+                  { label: 'P2', value: `${clientState.myRole === 'player2' ? clientState.myPiecesCount : clientState.opponentPiecesCount}個` },
+                  { label: '目的', value: '4連' },
                 ]}
               />
               <div className="mt-2 flex justify-end">

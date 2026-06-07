@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { PlaySetupCard, SetupOptionButton } from '@/components/game/PlaySetup';
-import { GameScreen, GameStatePanel, PlayerStatusCard } from '@/components/game/GamePlayUI';
+import { DecisionPanel, GameScreen, PlayerStatusCard } from '@/components/game/GamePlayUI';
 import {
   createInitialState,
   startSet,
@@ -169,13 +169,20 @@ export default function EmperorCpuPage() {
 
         {(phase === 'playing' || phase === 'battleResult' || phase === 'setEnd') && clientState && myPlayer && opponentPlayer && (
           <GameScreen className="max-w-4xl">
-            <GameStatePanel
-              title={phase === 'playing' ? 'カードを1枚選んで勝負' : phase === 'battleResult' ? '勝負結果' : `セット${clientState.currentSet}終了`}
-              subtitle={undefined}
-              status={`セット ${clientState.currentSet}/${clientState.maxSets} / 勝負 ${clientState.currentBattle}/5`}
-              items={[
-                { label: 'あなた', value: `${myPlayer.score}点`, emphasis: true },
-                { label: '陣営', value: SIDE_NAMES[myPlayer.side] },
+            <DecisionPanel
+              title={
+                phase === 'playing'
+                  ? `${SIDE_NAMES[myPlayer.side]}側として、勝負カードを1枚切る`
+                  : phase === 'battleResult'
+                    ? '今の勝負結果を確認'
+                    : `セット${clientState.currentSet}終了`
+              }
+              detail={myPlayer.side === 'emperor' ? '皇帝は市民に強く、奴隷に負けます。' : '奴隷は皇帝だけを倒せます。市民には負けます。'}
+              status={`S${clientState.currentSet}/${clientState.maxSets} B${clientState.currentBattle}/5`}
+              primary={selectedCardId ? 'カード選択中' : phase === 'playing' ? '1枚選択' : '結果確認'}
+              metrics={[
+                { label: 'あなた', value: `${myPlayer.score}点`, tone: 'hot' },
+                { label: '陣営', value: SIDE_NAMES[myPlayer.side], tone: 'cool' },
                 { label: 'CPU', value: `${opponentPlayer.score}点` },
                 { label: '残り札', value: `${myPlayer.hand.length}枚` },
               ]}

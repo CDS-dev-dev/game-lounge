@@ -19,13 +19,14 @@ import { GeisterBoard } from '@/components/game/GeisterBoard';
 import { SetupBoard } from '@/components/game/SetupBoard';
 import { RulesSummary } from '@/components/game/RulesSummary';
 import { RulesModal } from '@/components/game/RulesModal';
+import { DecisionPanel } from '@/components/game/GamePlayUI';
 import { useToast } from '@/components/ui/Toast';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useSafeTimeout } from '@/lib/hooks/useSafeTimeout';
 import { useGameHistory } from '@/lib/hooks/useGameHistory';
 import { logger } from '@/lib/utils/logger';
 import { Z_INDEX } from '@/lib/constants/z-index';
-import { Bot, RotateCcw, User } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 
 type CpuGamePhase = 'orderSelect' | 'setup' | 'playing' | 'cpuThinking' | 'finished';
 
@@ -360,36 +361,28 @@ export default function GeisterCpuPage() {
         {/* ゲームプレイ（コンパクト） */}
         {(phase === 'playing' || phase === 'finished' || phase === 'cpuThinking') && clientState && (
           <>
-            <Card className="mb-3 bg-white/95">
-              <CardContent className="px-3 py-3">
-                <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
-                  <div className="flex items-center gap-2">
-                    <span className="grid h-10 w-10 place-items-center rounded-lg bg-indigo-100 text-indigo-700">
-                      <User className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                    <div>
-                      <p className="text-xs font-semibold text-slate-500">あなた</p>
-                      <p className="text-sm font-bold text-slate-950">👻 {clientState.capturedCounts.myGood} / 😈 {clientState.capturedCounts.myBad}</p>
-                    </div>
-                  </div>
-
-                  <div className="rounded-lg bg-slate-950 px-4 py-2 text-center text-sm font-bold text-white">
-                    {phase === 'cpuThinking' ? 'CPU思考中' : gameState.currentTurn === playerRole ? 'あなたの番' : 'CPUの番'}
-                  </div>
-
-                  <div className="flex items-center gap-2 sm:justify-end">
-                    <span className="grid h-10 w-10 place-items-center rounded-lg bg-slate-100 text-slate-700">
-                      <Bot className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                    <div className="sm:text-right">
-                      <p className="text-xs font-semibold text-slate-500">CPU</p>
-                      <p className="text-sm font-bold text-slate-950">👻 {clientState.capturedCounts.opponentGood} / 😈 {clientState.capturedCounts.opponentBad}</p>
-                    </div>
-                  </div>
-                </div>
-
+            <DecisionPanel
+              title={
+                phase === 'cpuThinking'
+                  ? 'CPUが移動を考えています'
+                  : gameState.currentTurn === playerRole
+                    ? selectedPiece
+                      ? '緑の移動先を選ぶ'
+                      : '動かす駒を選ぶ'
+                    : 'CPUの手を見る'
+              }
+              detail="良い駒は脱出を狙い、悪い駒は相手に取らせる。選択中の駒から移動先だけを強調します。"
+              status={gameState.currentTurn === playerRole ? 'あなたの番' : 'CPUの番'}
+              primary={selectedPiece ? `${validMoves.length}手` : '駒を選択'}
+              metrics={[
+                { label: '自分👻', value: clientState.capturedCounts.myGood },
+                { label: '自分😈', value: clientState.capturedCounts.myBad },
+                { label: 'CPU捕獲', value: clientState.opponentPiecesCount.captured, tone: 'cool' },
+                { label: '勝ち筋', value: '脱出/捕獲', tone: 'hot' },
+              ]}
+            >
                 {phase === 'playing' && (
-                  <div className="mt-3 flex justify-center gap-2">
+                  <div className="flex justify-center gap-2">
                     {gameHistory.canUndo() && (
                       <Button
                         variant="secondary"
@@ -401,13 +394,12 @@ export default function GeisterCpuPage() {
                         待った
                       </Button>
                     )}
-                    <RulesModal gameName="ガイスター">
+                    <RulesModal gameName="ガイスター" compact>
                       <RulesSummary />
                     </RulesModal>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+            </DecisionPanel>
 
             <div className="flex justify-center">
               <GeisterBoard

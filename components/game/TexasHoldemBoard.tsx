@@ -11,9 +11,11 @@ import {
   ActionButton,
   ActionButtonGroup,
   BottomActionArea,
+  DecisionPanel,
   GameLog,
   GameScreen,
   GameStatePanel,
+  PlaySurface,
   PlayerStatusCard,
 } from '@/components/game/GamePlayUI';
 
@@ -90,27 +92,35 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
     setShowRaiseModal(false);
   };
 
+  const decisionTitle = gameState.isMyTurn
+    ? gameState.callAmount > 0
+      ? '払って参加するか、降りるか'
+      : '無料で見るか、圧力をかけるか'
+    : '相手の判断を待っています';
+  const decisionDetail = gameState.isMyTurn
+    ? gameState.callAmount > 0
+      ? `必要コールは ${gameState.callAmount.toLocaleString()}。手札と場札を見て判断します。`
+      : 'チェックで次へ進むか、レイズでポットを取りに行きます。'
+    : `${currentPlayer?.name || '相手'}がアクション中です。`;
+
   return (
     <GameScreen>
-      <GameStatePanel
-        title={gameState.isMyTurn ? 'あなたの判断です' : '相手のアクション待ち'}
-        subtitle={
-          gameState.isMyTurn
-            ? undefined
-            : `${currentPlayer?.name || '相手'}が行動しています。`
-        }
+      <DecisionPanel
+        title={decisionTitle}
+        detail={decisionDetail}
         status={phaseLabels[gameState.status]}
-        items={[
-          { label: 'ポット', value: gameState.pot.toLocaleString(), emphasis: true },
-          { label: '必要コール', value: gameState.callAmount.toLocaleString(), emphasis: gameState.isMyTurn },
+        primary={gameState.isMyTurn ? `次: ${gameState.callAmount > 0 ? 'コール/フォールド' : 'チェック/レイズ'}` : '待機'}
+        metrics={[
+          { label: 'ポット', value: gameState.pot.toLocaleString(), tone: 'hot' },
+          { label: '必要コール', value: gameState.callAmount.toLocaleString(), tone: gameState.isMyTurn ? 'hot' : 'plain' },
           { label: '現在ベット', value: gameState.currentBet.toLocaleString() },
-          { label: 'あなたのチップ', value: (myPlayer?.chips || 0).toLocaleString() },
+          { label: '手持ち', value: (myPlayer?.chips || 0).toLocaleString(), tone: 'cool' },
         ]}
       />
 
       <section className="grid min-h-0 min-w-0 flex-1 gap-2 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="flex min-h-0 min-w-0 flex-col gap-2">
-          <section className="min-w-0 rounded-lg border border-emerald-900/50 bg-[radial-gradient(circle_at_center,#11613f_0%,#0b3f2d_65%,#06231d_100%)] p-2 shadow-2xl sm:p-4">
+          <PlaySurface className="sm:p-4">
             <div className="mb-2 flex items-center justify-between gap-2 sm:mb-3">
               <h2 className="text-sm font-bold text-white sm:text-base">場のカード</h2>
               <span className="rounded-md bg-white/15 px-3 py-1 text-xs font-bold text-white">
@@ -139,7 +149,7 @@ export const TexasHoldemBoard: React.FC<TexasHoldemBoardProps> = ({
                   </React.Fragment>
                 ))}
             </div>
-          </section>
+          </PlaySurface>
 
           <section className="grid min-h-0 grid-cols-3 gap-2">
             {opponents.map((player) => (

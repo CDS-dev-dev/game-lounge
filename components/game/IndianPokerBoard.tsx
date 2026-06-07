@@ -11,9 +11,10 @@ import {
   ActionButton,
   ActionButtonGroup,
   BottomActionArea,
+  DecisionPanel,
   GameLog,
   GameScreen,
-  GameStatePanel,
+  PlaySurface,
   PlayerStatusCard,
 } from '@/components/game/GamePlayUI';
 
@@ -36,6 +37,18 @@ export function IndianPokerBoard({ state, onAction, disabled = false }: IndianPo
     check: 'チェック',
     allin: 'オールイン',
   };
+  const visibleRanks = opponents
+    .map((player) => player.card?.rank)
+    .filter(Boolean)
+    .join(' / ');
+  const decisionTitle = state.canOperate
+    ? state.callAmount > 0
+      ? '相手のカードを見て、勝負に残るか'
+      : '無料で様子を見るか、賭けを上げるか'
+    : '相手の判断を待っています';
+  const decisionDetail = state.canOperate
+    ? `見えているカード: ${visibleRanks || 'なし'}。自分のカードは見えません。`
+    : `${currentPlayer?.name || '相手'}が行動中です。`;
 
   // アクションボタンの表示
   const renderActionButtons = () => {
@@ -130,22 +143,23 @@ export function IndianPokerBoard({ state, onAction, disabled = false }: IndianPo
 
   return (
     <GameScreen>
-      <GameStatePanel
-        title={state.canOperate ? 'あなたの判断です' : '相手のアクション待ち'}
-        subtitle={undefined}
-        status={state.status === 'showdown' ? 'ショーダウン' : state.status === 'finished' ? '終了' : `Round ${state.round}`}
-        items={[
-          { label: 'ポット', value: state.pot.toLocaleString(), emphasis: true },
-          { label: '必要コール', value: state.callAmount.toLocaleString(), emphasis: state.canOperate },
-          { label: 'あなたのチップ', value: state.myChips.toLocaleString() },
+      <DecisionPanel
+        title={decisionTitle}
+        detail={decisionDetail}
+        status={state.status === 'showdown' ? 'ショーダウン' : state.status === 'finished' ? '終了' : `R${state.round}`}
+        primary={state.canOperate ? (state.callAmount > 0 ? `コール ${state.callAmount}` : 'チェック可') : '待機'}
+        metrics={[
+          { label: 'ポット', value: state.pot.toLocaleString(), tone: 'hot' },
+          { label: '必要コール', value: state.callAmount.toLocaleString(), tone: state.canOperate ? 'hot' : 'plain' },
+          { label: '手持ち', value: state.myChips.toLocaleString(), tone: 'cool' },
           { label: '手番', value: currentPlayer?.name || '-' },
         ]}
       />
 
       <section className="grid min-h-0 flex-1 gap-2 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-3">
-        <div className="overflow-hidden rounded-lg border border-emerald-900/60 bg-[radial-gradient(circle_at_center,#18724d_0%,#0f5138_52%,#0b3327_100%)] p-2 shadow-2xl sm:p-3">
+        <PlaySurface>
           <div className="mb-2 flex items-center justify-between gap-2 sm:mb-3">
-            <h2 className="text-sm font-bold text-white sm:text-base">見えているカード</h2>
+            <h2 className="text-sm font-bold text-white sm:text-base">判断材料: 相手の見えているカード</h2>
             <span className="rounded-md bg-white/15 px-3 py-1 text-xs font-bold text-white">
               POT {state.pot.toLocaleString()}
             </span>
@@ -156,7 +170,7 @@ export function IndianPokerBoard({ state, onAction, disabled = false }: IndianPo
               return <div key={player.id} className="min-w-0">{renderPlayer(index)}</div>;
             })}
           </div>
-        </div>
+        </PlaySurface>
 
         <aside className="space-y-3">
           <PlayerStatusCard

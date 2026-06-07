@@ -15,8 +15,9 @@ import {
   ActionButton,
   ActionButtonGroup,
   BottomActionArea,
+  DecisionPanel,
   GameScreen,
-  GameStatePanel,
+  PlaySurface,
   PlayerStatusCard,
 } from '@/components/game/GamePlayUI';
 
@@ -110,20 +111,43 @@ export const TigerDragonBoard: React.FC<TigerDragonBoardProps> = ({
         : gameState.attackColumn.attackTile
           ? '受け番'
           : '攻め番';
+  const playableHand = myPlayer?.hand.filter((tile) =>
+    gameState.canAttack || (gameState.canDefend && gameState.defendableTiles.some((t) => t.id === tile.id))
+  ) ?? [];
+  const waitingHand = myPlayer?.hand.filter((tile) => !playableHand.some((playable) => playable.id === tile.id)) ?? [];
+  const decisionTitle = isMyTurn
+    ? gameState.canAttack
+      ? '攻め牌を出して流れを作る'
+      : gameState.canDefend
+        ? '受けられる牌を出すか、パスする'
+        : '次の局面を待つ'
+    : `${currentPlayer?.name || '相手'}の判断待ち`;
+  const decisionDetail = gameState.canDefend
+    ? `${gameState.defendableTiles.length}枚が受け候補です。受けられない牌は選べません。`
+    : gameState.canAttack
+      ? '戦場カードの点数条件を見て、上がりやすい牌を選びます。'
+      : '相手の攻め/受けを見て次の番に備えます。';
 
   return (
     <>
       <KeyboardHelpModal shortcuts={keyboardShortcuts} gameName="タイガー＆ドラゴン" />
       <GameScreen>
-        <GameStatePanel
-          title={isMyTurn ? `${phaseLabel}: あなたの判断です` : `${phaseLabel}: ${currentPlayer?.name || '相手'}の番`}
-          subtitle={undefined}
-          status={`Round ${gameState.currentRound}`}
-          items={[
-            { label: '戦場', value: gameState.battlefieldCard.name, emphasis: true },
-            { label: '目標点', value: `${gameState.targetScore}点` },
-            { label: '選択中', value: selectedTile ? TILE_DISPLAY_NAMES[selectedTile.type] : 'なし' },
-            { label: '受け候補', value: `${gameState.defendableTiles.length}枚`, emphasis: gameState.canDefend },
+        <DecisionPanel
+          title={decisionTitle}
+          detail={decisionDetail}
+          status={`R${gameState.currentRound} / ${phaseLabel}`}
+          primary={
+            selectedTile
+              ? `${TILE_DISPLAY_NAMES[selectedTile.type]} を選択中`
+              : isMyTurn && (gameState.canAttack || gameState.canDefend)
+                ? '牌を選択'
+                : '待機'
+          }
+          metrics={[
+            { label: '戦場', value: gameState.battlefieldCard.name, tone: 'hot' },
+            { label: '目標', value: `${gameState.targetScore}点` },
+            { label: '選択', value: selectedTile ? TILE_DISPLAY_NAMES[selectedTile.type] : 'なし', tone: selectedTile ? 'cool' : 'plain' },
+            { label: '受け候補', value: `${gameState.defendableTiles.length}枚`, tone: gameState.canDefend ? 'hot' : 'plain' },
           ]}
         />
 
@@ -144,7 +168,7 @@ export const TigerDragonBoard: React.FC<TigerDragonBoardProps> = ({
             ))}
           </aside>
 
-          <section className="overflow-hidden rounded-lg border border-emerald-900/60 bg-[radial-gradient(circle_at_center,#16734c_0%,#0d513a_56%,#092d25_100%)] p-2 shadow-2xl sm:p-3">
+          <PlaySurface>
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2 sm:mb-3">
               <div
                 className={`rounded-lg border-2 px-3 py-2 text-sm font-bold ${
@@ -191,7 +215,7 @@ export const TigerDragonBoard: React.FC<TigerDragonBoardProps> = ({
                 </div>
               </div>
             </div>
-          </section>
+          </PlaySurface>
 
           <aside className="rounded-lg border border-neutral-200 bg-white p-2.5 shadow-sm sm:p-3">
             <h2 className="text-sm font-bold text-neutral-950">あなたの手牌</h2>
@@ -199,12 +223,12 @@ export const TigerDragonBoard: React.FC<TigerDragonBoardProps> = ({
               {gameState.canAttack ? '攻めに使う牌を選択' : gameState.canDefend ? '受けられる牌だけ選択できます' : '相手の番です'}
             </p>
             <div className="mt-2 grid max-h-[154px] grid-cols-6 justify-items-center gap-2 overflow-y-auto pb-1 pr-1 sm:flex sm:max-h-[34svh] sm:flex-wrap sm:justify-center">
-              {myPlayer?.hand.map((tile) => {
+              {[...playableHand, ...waitingHand].map((tile) => {
                 const isSelectable =
                   gameState.canAttack ||
                   (gameState.canDefend && gameState.defendableTiles.some((t) => t.id === tile.id));
                 return (
-                  <div key={tile.id}>
+                  <div key={tile.id} className={isSelectable ? '' : 'opacity-35'}>
                     {renderTile(tile, isSelectable, selectedTileId === tile.id)}
                   </div>
                 );

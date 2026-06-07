@@ -16,13 +16,14 @@ import type { GeisterState, PieceSetup, Position, PlayerRole } from '@/lib/games
 import { GeisterBoard } from '@/components/game/GeisterBoard';
 import { SetupBoard } from '@/components/game/SetupBoard';
 import { RulesSummary } from '@/components/game/RulesSummary';
+import { DecisionPanel } from '@/components/game/GamePlayUI';
 import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { formatGameError } from '@/lib/utils/error-handler';
 import { useGameHistory } from '@/lib/hooks/useGameHistory';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/Accordion';
 import { logger } from '@/lib/utils/logger';
-import { RotateCcw, UserRound, UsersRound } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 
 type LocalGamePhase = 'setup-p1' | 'setup-p2-interstitial' | 'setup-p2' | 'playing' | 'turnChange' | 'finished';
 
@@ -257,36 +258,19 @@ export default function GeisterLocalPage() {
         {/* ゲームプレイ（コンパクト） */}
         {phase === 'playing' && clientState && (
           <>
-            {/* ステータスカード */}
-            <Card className="mb-3 bg-white/95">
-              <CardContent className="px-3 py-3">
-                <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
-                  <div className="flex items-center gap-2">
-                    <span className="grid h-10 w-10 place-items-center rounded-lg bg-indigo-100 text-indigo-700">
-                      <UserRound className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                    <div>
-                      <p className="text-xs font-semibold text-slate-500">手番</p>
-                      <p className="text-sm font-bold text-slate-950">Player {currentPlayer === 'player1' ? '1' : '2'}</p>
-                    </div>
-                  </div>
-
-                  <div className="rounded-lg bg-slate-950 px-4 py-2 text-center text-sm font-bold text-white">
-                    👻 {clientState.capturedCounts.myGood} / 😈 {clientState.capturedCounts.myBad}
-                  </div>
-
-                  <div className="flex items-center gap-2 sm:justify-end">
-                    <span className="grid h-10 w-10 place-items-center rounded-lg bg-slate-100 text-slate-700">
-                      <UsersRound className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                    <div className="sm:text-right">
-                      <p className="text-xs font-semibold text-slate-500">相手の捕獲</p>
-                      <p className="text-sm font-bold text-slate-950">👻 {clientState.capturedCounts.opponentGood} / 😈 {clientState.capturedCounts.opponentBad}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-3 flex justify-center gap-2">
+            <DecisionPanel
+              title={selectedPiece ? '緑の移動先を選ぶ' : `Player ${currentPlayer === 'player1' ? '1' : '2'}: 動かす駒を選ぶ`}
+              detail="良い駒は脱出、悪い駒は取らせる。選択した駒の移動先だけを強調します。"
+              status="ローカル対戦"
+              primary={selectedPiece ? `${validMoves.length}手` : '駒を選択'}
+              metrics={[
+                { label: '自分👻', value: clientState.capturedCounts.myGood },
+                { label: '自分😈', value: clientState.capturedCounts.myBad },
+                { label: '相手捕獲', value: clientState.opponentPiecesCount.captured, tone: 'cool' },
+                { label: '勝ち筋', value: '脱出/捕獲', tone: 'hot' },
+              ]}
+            >
+                <div className="flex justify-center gap-2">
                   {gameHistory.canUndo() && (
                     <Button
                       variant="secondary"
@@ -312,8 +296,7 @@ export default function GeisterLocalPage() {
                     交代
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
+            </DecisionPanel>
 
             {/* ルール概要（Accordion化） */}
             <div className="mb-2">

@@ -20,7 +20,7 @@ import { calculateCpuMove } from '@/lib/games/connect4/ai';
 import type { Connect4State, Position3D, Connect4ClientState } from '@/lib/games/connect4/types';
 import { Connect4Board3D } from '@/components/game/Connect4Board3D';
 import { RulesModal } from '@/components/game/RulesModal';
-import { GameStatePanel } from '@/components/game/GamePlayUI';
+import { DecisionPanel } from '@/components/game/GamePlayUI';
 import { useToast } from '@/components/ui/Toast';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { formatGameError } from '@/lib/utils/error-handler';
@@ -274,33 +274,32 @@ export default function Connect4CpuPage() {
         {(phase === 'playing' || phase === 'finished' || phase === 'cpuThinking') && clientState && (
           <>
             <div className="mb-2">
-              <GameStatePanel
-                title={gameState && gameState.currentTurn === (playerOrder === 'first' ? 'player1' : 'player2') ? 'あなたの番です' : 'CPUの番です'}
-                subtitle="青い配置候補を選び、3Dラインを作ります。"
+              <DecisionPanel
+                title={
+                  gameState && gameState.currentTurn === (playerOrder === 'first' ? 'player1' : 'player2')
+                    ? '青い候補から、4ラインに近い場所を置く'
+                    : 'CPUの配置を待つ'
+                }
+                detail="3Dモデルを回して、縦・横・斜め・層またぎの4連を探します。"
                 status={phase === 'cpuThinking' ? 'CPU思考中' : '4つ揃えたら勝ち'}
-                items={[
+                primary={`${availablePositions.length}候補`}
+                metrics={[
                   {
                     label: 'ターン',
                     value: gameState && gameState.currentTurn === (playerOrder === 'first' ? 'player1' : 'player2') ? 'あなた' : 'CPU',
-                    emphasis: true,
+                    tone: 'hot',
                   },
                   {
                     label: '難易度',
                     value: difficulty === 'easy' ? '初級' : difficulty === 'medium' ? '中級' : '上級',
                   },
-                  {
-                    label: 'あなた',
-                    value: `${clientState.myPiecesCount}個`,
-                  },
-                  {
-                    label: 'CPU',
-                    value: `${clientState.opponentPiecesCount}個`,
-                  },
+                  { label: 'あなた', value: `${clientState.myPiecesCount}個`, tone: 'cool' },
+                  { label: 'CPU', value: `${clientState.opponentPiecesCount}個` },
                 ]}
               />
               <div className="mt-2 flex justify-end gap-2">
                     {/* ルールボタン */}
-                    <RulesModal gameName="立体四目並べ">
+                    <RulesModal gameName="立体四目並べ" compact>
                       <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 text-sm">
                         <p className="font-semibold text-indigo-900 mb-2">🎯 勝利条件</p>
                         <p className="text-indigo-800 mb-3">

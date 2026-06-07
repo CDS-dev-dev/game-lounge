@@ -31,6 +31,82 @@ export function GameScreen({
   );
 }
 
+export function DecisionPanel({
+  title,
+  detail,
+  status,
+  primary,
+  metrics = [],
+  children,
+  className = '',
+}: {
+  title: string;
+  detail?: React.ReactNode;
+  status?: React.ReactNode;
+  primary?: React.ReactNode;
+  metrics?: Array<{ label: string; value: React.ReactNode; tone?: 'hot' | 'cool' | 'plain' }>;
+  children?: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={`rounded-lg border border-neutral-200 bg-white p-2.5 shadow-sm sm:p-3 ${className}`}>
+      <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-base font-bold leading-tight text-neutral-950 sm:text-lg">{title}</h2>
+            {status ? (
+              <span className="rounded-md bg-neutral-100 px-2.5 py-1 text-xs font-bold text-neutral-800 sm:text-sm">
+                {status}
+              </span>
+            ) : null}
+          </div>
+          {detail ? <p className="mt-1 text-xs font-semibold text-neutral-600 sm:text-sm">{detail}</p> : null}
+        </div>
+        {primary ? (
+          <div className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm font-bold text-emerald-950">
+            {primary}
+          </div>
+        ) : null}
+      </div>
+
+      {metrics.length ? (
+        <div className="mt-2 grid grid-cols-4 gap-1.5 sm:gap-2">
+          {metrics.map((metric) => (
+            <div
+              key={metric.label}
+              className={`min-w-0 rounded-md border px-1.5 py-1 sm:px-2 sm:py-1.5 ${
+                metric.tone === 'hot'
+                  ? 'border-emerald-300 bg-emerald-50'
+                  : metric.tone === 'cool'
+                    ? 'border-sky-200 bg-sky-50'
+                    : 'border-neutral-200 bg-neutral-50'
+              }`}
+            >
+              <div className="truncate text-[10px] font-bold text-neutral-500 sm:text-[11px]">{metric.label}</div>
+              <div className="truncate text-sm font-bold text-neutral-950 sm:text-base">{metric.value}</div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {children ? <div className="mt-2">{children}</div> : null}
+    </section>
+  );
+}
+
+export function PlaySurface({
+  children,
+  className = '',
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={`min-w-0 overflow-hidden rounded-lg border border-emerald-900/60 bg-[radial-gradient(circle_at_center,#156b49_0%,#0d4935_58%,#092a24_100%)] p-2 shadow-2xl sm:p-3 ${className}`}>
+      {children}
+    </section>
+  );
+}
+
 export function GameStatePanel({
   title,
   subtitle,

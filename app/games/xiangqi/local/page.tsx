@@ -6,7 +6,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { GameStatePanel } from '@/components/game/GamePlayUI';
+import { DecisionPanel } from '@/components/game/GamePlayUI';
 import {
   createInitialState,
   joinBlackPlayer,
@@ -171,15 +171,16 @@ export default function XiangqiLocalPage() {
         {phase === 'playing' && (
           <>
             <div className="mb-2">
-              <GameStatePanel
-                title={`${currentPlayer === 'red' ? '紅（赤）' : '黒'}の番です`}
-                subtitle="駒を選び、緑の移動先をタップします。"
+              <DecisionPanel
+                title={`${currentPlayer === 'red' ? '紅（赤）' : '黒'}: 攻め筋を作る駒を選ぶ`}
+                detail="将/帥を取るゲームです。選択した駒の合法手だけを緑で表示します。"
                 status="ローカル対戦"
-                items={[
-                  { label: '捕獲', value: `${Object.values(clientState.myCapturedPieces).reduce((a, b) => a + b, 0)}個`, emphasis: true },
+                primary={selectedPiece ? `${validMoves.length}手` : '駒を選択'}
+                metrics={[
+                  { label: '捕獲', value: `${Object.values(clientState.myCapturedPieces).reduce((a, b) => a + b, 0)}個`, tone: 'hot' },
                   { label: '喪失', value: `${Object.values(clientState.opponentCapturedPieces).reduce((a, b) => a + b, 0)}個` },
-                  { label: '選択', value: selectedPiece ? '選択中' : 'なし' },
-                  { label: '移動先', value: `${validMoves.length}箇所`, emphasis: validMoves.length > 0 },
+                  { label: '選択', value: selectedPiece ? '選択中' : 'なし', tone: selectedPiece ? 'cool' : 'plain' },
+                  { label: '移動先', value: `${validMoves.length}箇所`, tone: validMoves.length > 0 ? 'hot' : 'plain' },
                 ]}
               />
               <div className="mt-2 flex gap-2 justify-center">

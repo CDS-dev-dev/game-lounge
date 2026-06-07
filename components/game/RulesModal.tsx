@@ -7,9 +7,10 @@ import { Z_INDEX } from '@/lib/constants/z-index';
 interface RulesModalProps {
   gameName: string;
   children: React.ReactNode;
+  compact?: boolean;
 }
 
-export const RulesModal: React.FC<RulesModalProps> = ({ gameName, children }) => {
+export const RulesModal: React.FC<RulesModalProps> = ({ gameName, children, compact = false }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   // ESCキーで閉じる
@@ -36,9 +37,10 @@ export const RulesModal: React.FC<RulesModalProps> = ({ gameName, children }) =>
     <>
       <Button
         variant="secondary"
+        size={compact ? 'sm' : 'md'}
         onClick={() => setIsOpen(true)}
         aria-label={`${gameName}のルールを見る`}
-        className="text-xs sm:text-sm"
+        className={compact ? 'min-h-10 rounded-md px-3 py-2 text-xs sm:text-sm' : 'text-xs sm:text-sm'}
       >
         📖 ルールを見る
       </Button>
