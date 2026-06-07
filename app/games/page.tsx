@@ -99,43 +99,43 @@ export default function GamesPage() {
   return (
     <>
       <GameHeader title="ゲーム選択" showBackToGames={false} />
-      <div className="app-bg board-pattern min-h-screen px-4 pb-8 pt-16 sm:pt-20">
+      <div className="app-bg board-pattern min-h-screen px-3 pb-4 pt-14 sm:px-4 sm:pt-20">
         <div className="mx-auto max-w-6xl">
-          <section className="mb-6 sm:mb-8">
+          <section className="mb-3 sm:mb-6">
             <p className="text-sm font-semibold text-teal-200">Game Lounge</p>
-            <h1 className="mt-1 text-2xl font-bold text-white sm:text-3xl">ゲームを選ぶ</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-200 sm:text-base">
+            <h1 className="mt-1 text-xl font-bold text-white sm:text-3xl">ゲームを選ぶ</h1>
+            <p className="mt-1 max-w-2xl text-xs leading-5 text-gray-200 sm:mt-2 sm:text-base sm:leading-6">
               CPUで軽く始めるか、同じ端末で対戦するか。遊び方から直接入れます。
             </p>
           </section>
 
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
             {visibleGames.map(({ href, title, genre, description, modes, primaryMode, visual }) => (
               <article
                 key={href}
-                className="group flex min-h-[210px] flex-col rounded-lg border border-white/10 bg-white/95 p-4 text-left shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-white"
+                className="group flex min-h-[146px] flex-col rounded-lg border border-white/10 bg-white/95 p-2.5 text-left shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-white sm:min-h-[190px] sm:p-4"
               >
                 <button
                   type="button"
                   onClick={() => router.push(href)}
                   aria-label={`${title}のモード選択を開く`}
-                  className="flex items-start gap-3 text-left focus:outline-none focus:ring-4 focus:ring-teal-300"
+                  className="flex min-h-11 items-start gap-2 text-left focus:outline-none focus:ring-4 focus:ring-teal-300 sm:gap-3"
                 >
-                  <GameVisualIcon game={visual} label={`${title}のアイコン`} className="h-14 w-14" />
+                  <GameVisualIcon game={visual} label={`${title}のアイコン`} className="h-10 w-10 sm:h-14 sm:w-14" />
                   <span className="min-w-0">
                     <span className="block text-xs font-semibold text-teal-700">{genre}</span>
-                    <span className="mt-1 block break-keep text-xl font-bold leading-tight text-neutral-950">{title}</span>
+                    <span className="mt-0.5 block break-keep text-sm font-bold leading-tight text-neutral-950 sm:mt-1 sm:text-xl">{title}</span>
                   </span>
                 </button>
-                <p className="mt-3 flex-1 text-sm leading-6 text-neutral-600">{description}</p>
-                <div className="mt-4 flex flex-wrap gap-1.5">
+                <p className="mt-1.5 line-clamp-2 flex-1 text-[11px] leading-4 text-neutral-600 sm:mt-3 sm:text-sm sm:leading-6">{description}</p>
+                <div className="mt-2 flex flex-wrap gap-1.5 sm:mt-4">
                   {modes.map((mode) => (
                     <button
                       key={mode}
                       type="button"
                       onClick={() => router.push(modeHref(href, mode))}
                       aria-label={`${title}の${mode}を開始`}
-                      className={`inline-flex min-h-[34px] items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-teal-300 ${
+                      className={`inline-flex min-h-10 items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-teal-300 ${
                         mode === primaryMode
                           ? 'bg-neutral-950 text-white hover:bg-neutral-800'
                           : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'

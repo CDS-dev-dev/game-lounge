@@ -186,7 +186,7 @@ export default function Connect4CpuPage() {
         backUrl="/games/connect4"
         backLabel="モード選択"
       />
-      <div className="min-h-screen app-bg board-pattern pt-16 pb-3 px-3 sm:pt-20 sm:px-4">
+      <div className="min-h-screen app-bg board-pattern pt-14 pb-2 px-3 sm:pt-[4.5rem] sm:px-4">
         <div className="max-w-4xl mx-auto">
           {/* ヘッダー */}
           {phase !== 'playing' && phase !== 'cpuThinking' && phase !== 'finished' && (

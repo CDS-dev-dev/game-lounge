@@ -33,20 +33,20 @@ export default function Home() {
   ];
 
   return (
-    <div className="app-bg board-pattern min-h-[calc(100vh-64px)] px-4 py-6 sm:py-10">
-      <div className="mx-auto grid min-h-[calc(100vh-112px)] max-w-6xl items-center gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+    <div className="app-bg board-pattern min-h-[calc(100vh-64px)] px-3 py-3 sm:px-4 sm:py-6">
+      <div className="mx-auto grid min-h-[calc(100vh-88px)] max-w-6xl items-center gap-3 lg:grid-cols-[0.9fr_1.1fr] lg:gap-6">
         <section className="text-left">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-teal-300/30 bg-teal-300/10 px-3 py-1 text-sm font-semibold text-teal-100">
+          <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-teal-300/30 bg-teal-300/10 px-3 py-1 text-xs font-semibold text-teal-100 sm:mb-4 sm:text-sm">
             <Swords className="h-4 w-4" aria-hidden="true" />
             すぐ遊べるボードゲーム
           </div>
           <h1 className={`${TEXT_SIZE.hero} max-w-2xl font-bold text-white`}>
             ゲームラウンジ
           </h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-gray-100 sm:text-xl">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-100 sm:mt-4 sm:text-xl sm:leading-8">
             一人でも、同じ端末でも。今すぐ1局を始められるオンラインボードゲーム集です。
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-4 flex flex-col gap-2 sm:mt-8 sm:flex-row sm:gap-3">
             <Link href="/games">
               <Button
                 variant="primary"
@@ -65,20 +65,20 @@ export default function Home() {
               ガイスターCPU
             </Link>
           </div>
-          <p className="mt-8 text-sm text-gray-300">v0.2.1</p>
+          <p className="mt-2 text-xs text-gray-300 sm:mt-4 sm:text-sm">v0.2.1</p>
         </section>
 
-        <section aria-label="おすすめゲーム" className="grid gap-3">
+        <section aria-label="おすすめゲーム" className="grid gap-2 sm:gap-3">
           {featuredGames.map(({ href, primaryHref, title, label, cta, visual }) => (
             <div
               key={href}
-              className="grid min-h-[124px] gap-3 rounded-lg border border-white/10 bg-white/95 p-4 shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-white sm:grid-cols-[1fr_auto]"
+              className="grid min-h-[82px] gap-1.5 rounded-lg border border-white/10 bg-white/95 p-2.5 shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-white sm:min-h-[108px] sm:grid-cols-[1fr_auto] sm:gap-3 sm:p-3"
             >
               <Link href={href} className="group flex min-w-0 items-center gap-4 text-left">
-                <GameVisualIcon game={visual} label={`${title}のアイコン`} className="h-16 w-16" />
+                <GameVisualIcon game={visual} label={`${title}のアイコン`} className="h-11 w-11 sm:h-14 sm:w-14" />
                 <span className="min-w-0">
                   <span className="block text-sm font-semibold text-teal-700">{label}</span>
-                  <span className="mt-1 block text-xl font-bold text-neutral-950">{title}</span>
+                  <span className="mt-0.5 block text-lg font-bold text-neutral-950 sm:mt-1 sm:text-xl">{title}</span>
                   <span className="mt-1 block text-sm text-neutral-600 group-hover:text-neutral-800">モード選択</span>
                 </span>
               </Link>

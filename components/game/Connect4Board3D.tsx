@@ -304,7 +304,7 @@ export const Connect4Board3D: React.FC<Connect4Board3DProps> = (props) => {
             <Connect4Board {...props} />
           </div>
         ) : (
-          <div className="relative h-[calc(100svh-20rem)] min-h-[300px] w-full overflow-hidden rounded-lg border border-white/10 bg-slate-950 shadow-2xl sm:h-[calc(100svh-16rem)] sm:min-h-[460px]">
+          <div className="relative h-[calc(100svh-27rem)] min-h-[190px] w-full overflow-hidden rounded-lg border border-white/10 bg-slate-950 shadow-2xl sm:h-[calc(100svh-22rem)] sm:min-h-[260px]">
             <Canvas>
               <PerspectiveCamera makeDefault position={[6, 6, 6]} fov={50} />
 
@@ -338,7 +338,7 @@ export const Connect4Board3D: React.FC<Connect4Board3DProps> = (props) => {
             </Canvas>
 
             {/* 操作説明オーバーレイ */}
-            <div className="pointer-events-none absolute bottom-3 left-1/2 w-[calc(100%-24px)] max-w-lg -translate-x-1/2 rounded-lg bg-black/65 px-3 py-2 text-center text-xs text-white backdrop-blur-sm sm:text-sm">
+            <div className="pointer-events-none absolute bottom-2 left-1/2 w-[calc(100%-16px)] max-w-lg -translate-x-1/2 rounded-lg bg-black/65 px-2 py-1.5 text-center text-[11px] text-white backdrop-blur-sm sm:text-xs">
               ドラッグで回転 / ホイールでズーム / 青い玉をクリック
             </div>
           </div>

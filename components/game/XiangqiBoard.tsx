@@ -146,7 +146,7 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
       {/* ボード */}
       <div
         ref={boardRef}
-        className="inline-block bg-amber-100 p-2 sm:p-4 md:p-6 rounded-lg shadow-2xl border-2 sm:border-4 border-amber-800"
+        className="inline-block bg-amber-100 p-1.5 sm:p-3 rounded-lg shadow-2xl border-2 border-amber-800"
         role="grid"
         aria-label="中国象棋の盤面"
         tabIndex={0}
@@ -170,7 +170,7 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
             return (
               <div key={row} className="flex items-center">
                 {/* 行番号（左） */}
-                <div className="w-4 sm:w-6 text-center text-[10px] sm:text-xs font-semibold text-amber-900">
+                <div className="w-3.5 sm:w-5 text-center text-[9px] sm:text-[10px] font-semibold text-amber-900">
                   {row + 1}
                 </div>
 
@@ -193,7 +193,7 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
                       onFocus={() => setFocusedCell(pos)}
                       tabIndex={isFocused ? 0 : -1}
                       className={`
-                        w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center relative
+                        h-7 w-7 sm:h-9 sm:w-9 md:h-9 md:w-9 flex items-center justify-center relative
                         cursor-pointer transition-all duration-150 focus:ring-4 focus:ring-blue-400
                         ${selected ? 'bg-yellow-200' : ''}
                         ${valid ? 'bg-green-100' : ''}
@@ -216,8 +216,8 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
                       {piece && (
                         <div
                           className={`
-                            w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center
-                            font-bold text-sm sm:text-base md:text-lg border-2 shadow-md
+                            h-6 w-6 sm:h-8 sm:w-8 md:h-8 md:w-8 rounded-full flex items-center justify-center
+                            font-bold text-xs sm:text-sm md:text-base border-2 shadow-md
                             ${piece.owner === 'red' ? 'bg-red-500 border-red-700 text-white' : 'bg-slate-800 border-slate-900 text-white'}
                             ${selected ? 'ring-2 sm:ring-4 ring-yellow-400' : ''}
                             hover:scale-110 transition-transform
@@ -236,7 +236,7 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
                 })}
 
                 {/* 行番号（右） */}
-                <div className="w-4 sm:w-6 text-center text-[10px] sm:text-xs font-semibold text-amber-900">
+                <div className="w-3.5 sm:w-5 text-center text-[9px] sm:text-[10px] font-semibold text-amber-900">
                   {row + 1}
                 </div>
               </div>
@@ -256,13 +256,13 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
 
         {/* 列ラベル */}
         <div className="flex items-center mt-1 sm:mt-2">
-          <div className="w-4 sm:w-6"></div>
+          <div className="w-3.5 sm:w-5"></div>
           {colLabels.map((label) => (
-            <div key={label} className="w-8 sm:w-10 md:w-12 text-center text-[10px] sm:text-xs font-semibold text-amber-900">
+            <div key={label} className="w-7 text-center text-[9px] font-semibold text-amber-900 sm:w-9 sm:text-[10px]">
               {label}
             </div>
           ))}
-          <div className="w-4 sm:w-6"></div>
+          <div className="w-3.5 sm:w-5"></div>
         </div>
 
         {/* 自分陣地ラベル */}
@@ -279,9 +279,8 @@ export const XiangqiBoard: React.FC<XiangqiBoardProps> = ({
       </div>
 
       {/* 操作説明 */}
-      <div className="mt-3 sm:mt-4 text-center text-xs sm:text-sm text-slate-600 max-w-md px-2">
+      <div className="mt-1 text-center text-[10px] text-slate-600 max-w-md px-2 sm:text-xs">
         <p className="font-medium">駒をクリックして選択 → 移動先をクリック</p>
-        <p className="text-[10px] sm:text-xs mt-1 text-slate-500">矢印キー: 移動 | Enter/Space: 選択/移動</p>
       </div>
     </div>
   );

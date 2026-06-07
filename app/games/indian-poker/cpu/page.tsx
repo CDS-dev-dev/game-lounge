@@ -1,7 +1,6 @@
 ﻿'use client';
 
 import { useState, useCallback } from 'react';
-import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { PlaySetupCard, SetupBackLink, SetupHint, SetupOptionButton } from '@/components/game/PlaySetup';
@@ -234,18 +233,13 @@ export default function IndianPokerCpuPage() {
               onAction={phase === 'playing' ? handlePlayerAction : undefined}
             />
 
-            {/* コントロールボタン */}
-            <div className="max-w-4xl mx-auto mt-6 flex justify-center gap-4">
-              {phase === 'finished' && (
+            {phase === 'finished' && (
+              <div className="max-w-4xl mx-auto mt-3 flex justify-center gap-3">
                 <Button onClick={handleRestart} variant="primary" size="lg">
                   もう一度プレイ
                 </Button>
-              )}
-
-              <Button variant="secondary" size="lg" asChild>
-                <Link href="/games/indian-poker">モード選択に戻る</Link>
-              </Button>
-            </div>
+              </div>
+            )}
           </div>
         )}
       </main>

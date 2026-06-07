@@ -88,9 +88,9 @@ export default function IndianPokerModePage() {
               </p>
               <Link
                 href="/games/indian-poker/rules"
-                className={`${TEXT_SIZE.label} text-indigo-600 hover:text-indigo-500 underline font-semibold`}
+                className="inline-flex min-h-11 items-center justify-center rounded-md bg-slate-900 px-4 text-xs font-bold text-white hover:bg-slate-800"
               >
-                ルールを見る →
+                ルールを見る
               </Link>
             </CardContent>
           </Card>

@@ -1,7 +1,6 @@
 ﻿'use client';
 
 import { useState, useCallback } from 'react';
-import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { PlaySetupCard, SetupBackLink, SetupOptionButton } from '@/components/game/PlaySetup';
@@ -209,10 +208,10 @@ export default function TigerDragonLocalPage() {
   }, []);
 
   return (
-    <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
+    <div className="min-h-screen app-bg board-pattern pt-14 pb-3 px-3 sm:pt-[4.5rem] sm:px-4">
       <GameHeader title="タイガー&ドラゴン - ローカル対戦" />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-0 py-2 sm:px-4 sm:py-4">
         {phase === 'setup' && (
           <PlaySetupCard
             title="ゲーム設定"
@@ -307,18 +306,13 @@ export default function TigerDragonLocalPage() {
                 </div>
               )}
 
-              {/* コントロールボタン */}
-              <div className="max-w-6xl mx-auto mt-6 flex justify-center gap-4">
-                {phase === 'finished' && (
+              {phase === 'finished' && (
+                <div className="max-w-6xl mx-auto mt-3 flex justify-center gap-3">
                   <Button onClick={handleRestart} variant="primary" size="lg">
                     もう一度プレイ
                   </Button>
-                )}
-
-                <Button variant="secondary" size="lg" asChild>
-                  <Link href="/games/tiger-dragon">モード選択に戻る</Link>
-                </Button>
-              </div>
+                </div>
+              )}
             </div>
           )}
       </main>

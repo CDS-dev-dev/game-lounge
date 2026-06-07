@@ -58,10 +58,10 @@ interface PlaySetupCardProps {
 
 export function PlaySetupCard({ title, subtitle, children, className = '' }: PlaySetupCardProps) {
   return (
-    <section className={`mx-auto w-full max-w-2xl rounded-lg border border-white/10 bg-white/95 p-4 shadow-xl sm:p-6 ${className}`}>
-      <div className="mb-5 border-b border-neutral-200 pb-4">
-        <h2 className="text-xl font-bold leading-tight text-neutral-950 sm:text-2xl">{title}</h2>
-        {subtitle && <p className="mt-1 text-sm leading-6 text-neutral-600">{subtitle}</p>}
+    <section className={`mx-auto w-full max-w-2xl rounded-lg border border-white/10 bg-white/95 p-3 shadow-xl sm:p-5 ${className}`}>
+      <div className="mb-3 border-b border-neutral-200 pb-3 sm:mb-4">
+        <h2 className="text-lg font-bold leading-tight text-neutral-950 sm:text-2xl">{title}</h2>
+        {subtitle && <p className="mt-1 text-xs leading-5 text-neutral-600 sm:text-sm">{subtitle}</p>}
       </div>
       {children}
     </section>
@@ -93,18 +93,18 @@ export function SetupOptionButton({
     <button
       type="button"
       onClick={onClick}
-      className={`group flex min-h-[92px] w-full items-start gap-3 rounded-lg border p-4 text-left shadow-sm transition-all focus:outline-none focus:ring-4 focus:ring-teal-300 ${
+      className={`group flex min-h-[80px] w-full items-start gap-2.5 rounded-lg border p-3 text-left shadow-sm transition-all focus:outline-none focus:ring-4 focus:ring-teal-300 sm:min-h-[88px] sm:p-4 ${
         selected ? styles.selected : styles.idle
       } ${className}`}
     >
       <span className={`mt-1 h-3 w-3 flex-shrink-0 rounded-full ${selected ? 'bg-white' : styles.swatch}`} aria-hidden="true" />
       <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-2 text-base font-bold leading-tight">
+          <span className="flex items-center gap-2 text-sm font-bold leading-tight sm:text-base">
           {title}
           {selected && <Check className="h-4 w-4 flex-shrink-0" aria-hidden="true" />}
         </span>
         {description && (
-          <span className={`mt-1 block text-sm leading-5 ${selected ? 'text-white/75' : 'text-neutral-600'}`}>
+          <span className={`mt-1 block text-xs leading-5 sm:text-sm ${selected ? 'text-white/75' : 'text-neutral-600'}`}>
             {description}
           </span>
         )}
@@ -130,7 +130,7 @@ export function SetupHint({ children, tone = 'info' }: SetupHintProps) {
       : 'border-teal-200 bg-teal-50 text-teal-950';
 
   return (
-    <div className={`rounded-lg border px-4 py-3 text-sm leading-6 ${classes}`}>
+    <div className={`rounded-lg border px-3 py-2 text-xs leading-5 sm:px-4 sm:py-3 sm:text-sm ${classes}`}>
       {children}
     </div>
   );
@@ -140,7 +140,7 @@ export function SetupBackLink({ href, children }: { href: string; children: Reac
   return (
     <Link
       href={href}
-      className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-semibold text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-950 focus:outline-none focus:ring-4 focus:ring-teal-300"
+      className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-semibold text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-950 focus:outline-none focus:ring-4 focus:ring-teal-300"
     >
       <ChevronLeft className="h-4 w-4" aria-hidden="true" />
       {children}

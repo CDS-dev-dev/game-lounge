@@ -1,112 +1,76 @@
-﻿// テキサスホールデム メインページ（モード選択）
-
 import Link from 'next/link';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
+import { Card, CardContent } from '@/components/ui/Card';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { GameModeSelector } from '@/components/game/GameModeSelector';
-import { TEXT_SIZE, CARD_BG, PADDING } from '@/lib/constants/ui-scale';
 import { Spade } from 'lucide-react';
 
 export const metadata = {
   title: 'テキサスホールデム | Game Lounge',
-  description: 'テキサスホールデムポーカーをプレイ。CPU対戦、ローカル対戦、オンライン対戦が可能です。',
+  description: 'テキサスホールデムポーカーをプレイ。CPU対戦で練習できます。',
 };
 
 export default function TexasHoldemPage() {
   return (
-    <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-8 px-4">
+    <div className="min-h-screen app-bg board-pattern px-3 pb-4 pt-14 sm:px-4 sm:pt-20">
       <GameHeader
         title="テキサスホールデム"
         showBackToGames
-        icon={<Spade className="w-5 h-5 sm:w-6 sm:h-6 text-slate-200" />}
+        icon={<Spade className="h-5 w-5 text-slate-200 sm:h-6 sm:w-6" />}
       />
 
-      <div className="container mx-auto p-4">
-        <div className="max-w-3xl mx-auto space-y-6">
-          <div className="text-center mb-4 sm:mb-6">
-            <h1 className={`${TEXT_SIZE.heading1} font-bold text-white mb-1 sm:mb-2`}>テキサスホールデム</h1>
-            <p className={`${TEXT_SIZE.label} text-gray-200`}>プレイモードを選択</p>
-          </div>
-
-          {/* モード選択 */}
-          <GameModeSelector
-            gameName="テキサスホールデム"
-            modes={[
-              {
-                type: 'cpu',
-                title: 'CPU対戦',
-                emoji: '🤖',
-                description: 'コンピューター相手に練習',
-                href: '/games/texas-holdem/cpu',
-              },
-              {
-                type: 'local',
-                title: 'ローカル対戦',
-                emoji: '👥',
-                description: '準備中',
-                href: '/games/texas-holdem/local',
-                disabled: true,
-              },
-              {
-                type: 'online',
-                title: 'オンライン対戦',
-                emoji: '🌐',
-                description: '準備中',
-                href: '/games/texas-holdem/online',
-                disabled: true,
-              },
-            ]}
-          />
-
-          {/* ゲーム説明 */}
-          <Card className={CARD_BG}>
-            <CardHeader>
-              <h2 className={`${TEXT_SIZE.heading2} font-bold`}>テキサスホールデムとは？</h2>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className={`${TEXT_SIZE.body} text-gray-700`}>
-                世界で最も人気のあるポーカーの一種。プレイヤーは2枚の手札と5枚の共有カードで最強の役を作ります。
-              </p>
-
-              <div>
-                <h3 className={`${TEXT_SIZE.body} font-semibold mb-2`}>基本ルール</h3>
-                <ul className={`list-disc list-inside space-y-1 ${TEXT_SIZE.label} text-gray-700`}>
-                  <li>各プレイヤーに2枚の手札が配られます</li>
-                  <li>共有カードが順次公開されます（フロップ3枚、ターン1枚、リバー1枚）</li>
-                  <li>各ラウンドでベットアクション（フォールド、チェック、コール、レイズ）を選択</li>
-                  <li>最後に残ったプレイヤーまたは最強の役を持つプレイヤーが勝利</li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className={`${TEXT_SIZE.body} font-semibold mb-2`}>役の強さ（弱→強）</h3>
-                <ol className={`list-decimal list-inside space-y-1 ${TEXT_SIZE.label} text-gray-700`}>
-                  <li>ハイカード</li>
-                  <li>ワンペア</li>
-                  <li>ツーペア</li>
-                  <li>スリーカード</li>
-                  <li>ストレート</li>
-                  <li>フラッシュ</li>
-                  <li>フルハウス</li>
-                  <li>フォーカード</li>
-                  <li>ストレートフラッシュ</li>
-                  <li>ロイヤルフラッシュ</li>
-                </ol>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 戻るボタン */}
-          <div className="text-center">
-            <Link
-              href="/"
-              className="inline-block px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors"
-            >
-              ゲーム一覧に戻る
-            </Link>
-          </div>
+      <main className="mx-auto max-w-3xl">
+        <div className="mb-3 text-center sm:mb-5">
+          <h1 className="text-xl font-bold text-white sm:text-3xl">テキサスホールデム</h1>
+          <p className="mt-1 text-xs font-semibold text-gray-200 sm:text-sm">手札、ポット、必要コール額を見ながら次の一手を選びます。</p>
         </div>
-      </div>
+
+        <GameModeSelector
+          gameName="テキサスホールデム"
+          modes={[
+            {
+              type: 'cpu',
+              title: 'CPU対戦',
+              description: 'まずはここから',
+              href: '/games/texas-holdem/cpu',
+            },
+            {
+              type: 'local',
+              title: 'ローカル対戦',
+              description: '準備中',
+              href: '/games/texas-holdem/local',
+              disabled: true,
+            },
+            {
+              type: 'online',
+              title: 'オンライン対戦',
+              description: '準備中',
+              href: '/games/texas-holdem/online',
+              disabled: true,
+            },
+          ]}
+        />
+
+        <Card className="border-white/10 bg-white/95">
+          <CardContent className="p-3 sm:p-4">
+            <div className="grid gap-2 text-sm text-slate-700 sm:grid-cols-3">
+              <div className="rounded-md bg-slate-50 p-2">
+                <div className="font-bold text-slate-950">見る情報</div>
+                <p className="mt-1 text-xs leading-5">ポット、必要コール額、自分のチップ。</p>
+              </div>
+              <div className="rounded-md bg-slate-50 p-2">
+                <div className="font-bold text-slate-950">主操作</div>
+                <p className="mt-1 text-xs leading-5">Fold / Call / Raise / All-in。</p>
+              </div>
+              <Link
+                href="/games/texas-holdem/rules"
+                className="inline-flex min-h-11 items-center justify-center rounded-md bg-slate-900 px-3 text-xs font-bold text-white hover:bg-slate-800"
+              >
+                ルールを見る
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
     </div>
   );
 }

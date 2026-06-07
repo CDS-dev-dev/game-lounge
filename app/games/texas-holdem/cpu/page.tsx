@@ -222,10 +222,11 @@ export default function TexasHoldemCpuPage() {
                 ゲーム開始
               </Button>
 
-              <Link href="/games/texas-holdem">
-                <Button variant="secondary" className="w-full">
-                  戻る
-                </Button>
+              <Link
+                href="/games/texas-holdem"
+                className="inline-flex min-h-[48px] w-full items-center justify-center rounded-lg bg-gray-200 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                戻る
               </Link>
             </div>
           </PlaySetupCard>
@@ -284,10 +285,11 @@ export default function TexasHoldemCpuPage() {
                 もう一度プレイ
               </Button>
 
-              <Link href="/games/texas-holdem">
-                <Button variant="secondary" className="w-full">
-                  メニューに戻る
-                </Button>
+              <Link
+                href="/games/texas-holdem"
+                className="inline-flex min-h-[48px] w-full items-center justify-center rounded-lg bg-gray-200 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                メニューに戻る
               </Link>
             </CardContent>
           </Card>

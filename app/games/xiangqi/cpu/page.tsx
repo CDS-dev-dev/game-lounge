@@ -184,7 +184,7 @@ export default function XiangqiCpuPage() {
         backUrl="/games/xiangqi"
         backLabel="モード選択"
       />
-      <div className="min-h-screen app-bg board-pattern pt-16 pb-3 px-3 sm:pt-20 sm:px-4">
+      <div className="min-h-screen app-bg board-pattern pt-14 pb-2 px-3 sm:pt-[4.5rem] sm:px-4">
         <div className="max-w-5xl mx-auto">
           {/* ヘッダー */}
           <div className="text-center mb-4 sm:mb-6 md:mb-8">

@@ -25,7 +25,7 @@ export function GameScreen({
   className?: string;
 }) {
   return (
-    <div className={`mx-auto flex min-h-[calc(100svh-5rem)] w-full max-w-6xl flex-col gap-2 overflow-x-hidden px-2 pb-3 sm:gap-3 sm:px-4 ${className}`}>
+    <div className={`mx-auto flex min-h-0 w-full max-w-6xl flex-col gap-2 overflow-x-hidden px-2 pb-2 sm:gap-3 sm:px-4 ${className}`}>
       {children}
     </div>
   );
@@ -165,7 +165,7 @@ export function ActionButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`min-h-10 rounded-lg border px-3 py-1.5 text-sm font-bold transition-colors focus:outline-none focus:ring-4 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-12 sm:py-2 sm:text-base ${toneClasses[tone]}`}
+      className={`min-h-10 rounded-lg border px-3 py-1.5 text-sm font-bold transition-colors focus:outline-none focus:ring-4 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-11 sm:py-2 sm:text-base ${toneClasses[tone]}`}
     >
       {children}
     </button>
@@ -184,12 +184,12 @@ export function ActionButtonGroup({
   className?: string;
 }) {
   return (
-    <section className={`rounded-lg border border-neutral-200 bg-white p-2 shadow-xl sm:p-3 ${className}`}>
+    <section className={`rounded-lg border border-neutral-200 bg-white p-2 shadow-xl sm:p-2.5 ${className}`}>
       <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2 sm:mb-2">
         <h2 className="text-xs font-bold text-neutral-950 sm:text-base">{title}</h2>
         {subtitle ? <div className="text-[11px] font-semibold text-neutral-600 sm:text-sm">{subtitle}</div> : null}
       </div>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">{children}</div>
+      <div className="grid grid-cols-4 gap-2">{children}</div>
     </section>
   );
 }

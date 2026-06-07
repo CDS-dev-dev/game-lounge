@@ -157,8 +157,11 @@ export default function EmperorCpuPage() {
               <Button onClick={handleStartGame} variant="primary" className="w-full">
                 ゲーム開始
               </Button>
-              <Link href="/games/emperor">
-                <Button variant="secondary" className="w-full">戻る</Button>
+              <Link
+                href="/games/emperor"
+                className="inline-flex min-h-[48px] w-full items-center justify-center rounded-lg bg-gray-200 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                戻る
               </Link>
             </div>
           </PlaySetupCard>
@@ -168,7 +171,7 @@ export default function EmperorCpuPage() {
           <GameScreen className="max-w-4xl">
             <GameStatePanel
               title={phase === 'playing' ? 'カードを1枚選んで勝負' : phase === 'battleResult' ? '勝負結果' : `セット${clientState.currentSet}終了`}
-              subtitle="皇帝は市民に勝ち、奴隷は皇帝にだけ勝ちます。陣営と残り札を見て選びます。"
+              subtitle={undefined}
               status={`セット ${clientState.currentSet}/${clientState.maxSets} / 勝負 ${clientState.currentBattle}/5`}
               items={[
                 { label: 'あなた', value: `${myPlayer.score}点`, emphasis: true },
@@ -178,7 +181,7 @@ export default function EmperorCpuPage() {
               ]}
             />
 
-            <section className="grid min-h-0 flex-1 gap-3 md:grid-cols-[220px_minmax(0,1fr)]">
+            <section className="grid min-h-0 flex-1 gap-2 md:grid-cols-[220px_minmax(0,1fr)]">
               <aside className="grid gap-2 sm:grid-cols-2 md:grid-cols-1">
                 <PlayerStatusCard
                   name="あなた"
@@ -194,18 +197,18 @@ export default function EmperorCpuPage() {
                 />
               </aside>
 
-              <section className="rounded-lg border border-neutral-200 bg-white p-3 shadow-sm">
-                <div className="grid gap-3 sm:grid-cols-[180px_minmax(0,1fr)]">
-                  <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-center">
+              <section className="rounded-lg border border-neutral-200 bg-white p-2 shadow-sm sm:p-3">
+                <div className="grid gap-2 sm:grid-cols-[160px_minmax(0,1fr)]">
+                  <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-2 text-center sm:p-3">
                     <div className="mb-2 text-xs font-semibold text-neutral-600">CPUのカード</div>
                     {clientState.cpuCard ? (
-                      <div className={`inline-block rounded-lg border-2 px-5 py-3 ${CARD_COLORS[clientState.cpuCard.type]}`}>
-                        <div className="text-3xl">{CARD_EMOJIS[clientState.cpuCard.type]}</div>
+                      <div className={`inline-block rounded-lg border-2 px-4 py-2 ${CARD_COLORS[clientState.cpuCard.type]}`}>
+                        <div className="text-2xl sm:text-3xl">{CARD_EMOJIS[clientState.cpuCard.type]}</div>
                         <div className="mt-1 text-sm font-bold">{CARD_NAMES[clientState.cpuCard.type]}</div>
                       </div>
                     ) : (
-                      <div className="inline-block rounded-lg border-2 border-dashed border-slate-300 bg-slate-100 px-5 py-3">
-                        <div className="text-3xl">?</div>
+                      <div className="inline-block rounded-lg border-2 border-dashed border-slate-300 bg-slate-100 px-4 py-2">
+                        <div className="text-2xl sm:text-3xl">?</div>
                         <div className="mt-1 text-sm font-bold text-slate-500">未選択</div>
                       </div>
                     )}
@@ -220,11 +223,11 @@ export default function EmperorCpuPage() {
                           type="button"
                           onClick={() => handleCardSelect(card.id)}
                           disabled={phase !== 'playing'}
-                          className={`min-h-24 min-w-20 rounded-lg border-2 px-3 py-2 transition-all ${CARD_COLORS[card.type]} ${
+                          className={`min-h-20 min-w-[72px] rounded-lg border-2 px-2.5 py-1.5 transition-all sm:min-h-24 sm:min-w-20 sm:px-3 sm:py-2 ${CARD_COLORS[card.type]} ${
                             phase === 'playing' ? 'cursor-pointer hover:scale-105' : 'cursor-not-allowed opacity-50'
                           } ${selectedCardId === card.id ? 'ring-4 ring-blue-500' : ''}`}
                         >
-                          <div className="text-3xl">{CARD_EMOJIS[card.type]}</div>
+                          <div className="text-2xl sm:text-3xl">{CARD_EMOJIS[card.type]}</div>
                           <div className="mt-1 text-xs font-bold">{CARD_NAMES[card.type]}</div>
                         </button>
                       ))}
@@ -281,8 +284,11 @@ export default function EmperorCpuPage() {
                   </div>
                 </div>
                 <Button onClick={handleReset} variant="primary" className="w-full">もう一度プレイ</Button>
-                <Link href="/games/emperor">
-                  <Button variant="secondary" className="w-full">メニューに戻る</Button>
+                <Link
+                  href="/games/emperor"
+                  className="inline-flex min-h-[48px] w-full items-center justify-center rounded-lg bg-gray-200 px-6 py-3 font-semibold text-gray-800 transition-colors hover:bg-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  メニューに戻る
                 </Link>
               </CardContent>
             </Card>

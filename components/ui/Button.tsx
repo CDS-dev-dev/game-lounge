@@ -28,7 +28,7 @@ export const Button: React.FC<ButtonProps> = ({
   'aria-label': ariaLabel,
   asChild = false,
 }) => {
-  const baseClasses = `font-semibold rounded-lg transition-colors duration-200 ${FOCUS_RING} disabled:cursor-not-allowed ${MIN_TAP_AREA}`;
+  const baseClasses = `inline-flex items-center justify-center font-semibold rounded-lg transition-colors duration-200 ${FOCUS_RING} disabled:cursor-not-allowed ${MIN_TAP_AREA}`;
 
   const variantClasses = {
     primary: 'bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-gray-400 disabled:hover:bg-gray-400',

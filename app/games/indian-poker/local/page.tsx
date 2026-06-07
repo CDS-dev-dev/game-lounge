@@ -1,7 +1,6 @@
 ﻿'use client';
 
 import { useState, useCallback } from 'react';
-import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { GameHeader } from '@/components/layout/GameHeader';
 import { PlaySetupCard, SetupBackLink, SetupHint, SetupOptionButton } from '@/components/game/PlaySetup';
@@ -137,10 +136,10 @@ export default function IndianPokerLocalPage() {
   }, []);
 
   return (
-    <div className="min-h-screen app-bg board-pattern pt-16 sm:pt-20 pb-4 sm:pb-8 px-3 sm:px-4">
+    <div className="min-h-screen app-bg board-pattern pt-14 pb-3 px-3 sm:pt-[4.5rem] sm:px-4">
       <GameHeader title="インディアンポーカー - ローカル対戦" />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-0 py-2 sm:px-4 sm:py-4">
         {phase === 'playerSelect' && (
           <PlaySetupCard
             title="プレイヤー人数を選択"
@@ -205,9 +204,8 @@ export default function IndianPokerLocalPage() {
           <div>
             {/* 現在のプレイヤー表示 */}
             {phase === 'playing' && (
-              <div className="max-w-4xl mx-auto mb-4 rounded-lg border border-teal-200 bg-white/95 p-3 text-center shadow-lg">
-                <p className="text-lg font-bold text-neutral-950">{clientState.players[clientState.myIndex].name}のターン</p>
-                <p className="text-sm text-neutral-600">自分のカードは見ないで、相手のカードとベットから判断します</p>
+              <div className="mx-auto mb-1 max-w-4xl rounded-lg border border-teal-200 bg-white/95 px-3 py-1.5 text-center shadow-lg">
+                <p className="text-sm font-bold text-neutral-950">{clientState.players[clientState.myIndex].name}のターン</p>
               </div>
             )}
 
@@ -217,18 +215,13 @@ export default function IndianPokerLocalPage() {
               onAction={phase === 'playing' ? handlePlayerAction : undefined}
             />
 
-            {/* コントロールボタン */}
-            <div className="max-w-4xl mx-auto mt-6 flex justify-center gap-4">
-              {phase === 'finished' && (
+            {phase === 'finished' && (
+              <div className="max-w-4xl mx-auto mt-3 flex justify-center gap-3">
                 <Button onClick={handleRestart} variant="primary" size="lg">
                   もう一度プレイ
                 </Button>
-              )}
-
-              <Button variant="secondary" size="lg" asChild>
-                <Link href="/games/indian-poker">モード選択に戻る</Link>
-              </Button>
-            </div>
+              </div>
+            )}
           </div>
         )}
       </main>

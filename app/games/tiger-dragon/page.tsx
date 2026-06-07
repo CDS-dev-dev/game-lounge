@@ -1,6 +1,5 @@
 ﻿'use client';
 
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/Card';
 import { GameHeader } from '@/components/layout/GameHeader';
@@ -9,8 +8,6 @@ import { TEXT_SIZE, CARD_BG, PADDING } from '@/lib/constants/ui-scale';
 import { Flame } from 'lucide-react';
 
 export default function TigerDragonGamePage() {
-  const router = useRouter();
-
   return (
     <>
       <GameHeader
@@ -80,23 +77,13 @@ export default function TigerDragonGamePage() {
               <div className="mt-2 text-center">
                 <Link
                   href="/games/tiger-dragon/rules"
-                  className={`${TEXT_SIZE.label} text-indigo-600 hover:text-indigo-800 underline`}
+                  className="inline-flex min-h-11 items-center justify-center rounded-md bg-slate-900 px-4 text-xs font-bold text-white hover:bg-slate-800"
                 >
                   詳しいルールを見る
                 </Link>
               </div>
             </CardContent>
           </Card>
-
-          {/* 戻るボタン */}
-          <div className="mt-3 sm:mt-4 text-center">
-            <Link
-              href="/games"
-              className="text-xs sm:text-sm text-gray-300 hover:text-white underline"
-            >
-              ← ゲーム選択に戻る
-            </Link>
-          </div>
         </div>
       </div>
     </>
